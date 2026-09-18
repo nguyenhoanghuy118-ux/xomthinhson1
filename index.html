@@ -68,8 +68,9 @@
             </button>
         </div>
 
-        <!-- GRID FEATURES -->
+        <!-- LƯỚI TÍNH NĂNG CHÍNH -->
         <div class="grid grid-cols-2 gap-3.5 p-4">
+            <!-- LOA PHƯỜNG -->
             <div onclick="openModal('modal-announcements')" class="bg-blue-50/80 border border-blue-100 p-4 rounded-2xl flex flex-col items-center text-center cursor-pointer hover:bg-blue-100 transition active:scale-95">
                 <div class="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center mb-2 shadow-md shadow-blue-200">
                     <i class="fas fa-bullhorn text-xl"></i>
@@ -78,28 +79,45 @@
                 <p id="badge-ann-count" class="text-[10px] text-blue-600 font-semibold mt-0.5">0 tin tức</p>
             </div>
 
-            <div onclick="openModal('modal-finances')" class="bg-emerald-50/80 border border-emerald-100 p-4 rounded-2xl flex flex-col items-center text-center cursor-pointer hover:bg-emerald-100 transition active:scale-95">
-                <div class="bg-emerald-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center mb-2 shadow-md shadow-emerald-200">
-                    <i class="fas fa-wallet text-xl"></i>
+            <!-- TẠM TRÚ TẠM VẮNG -->
+            <div onclick="openModal('modal-tamtru-tamvang')" class="bg-indigo-50/80 border border-indigo-100 p-4 rounded-2xl flex flex-col items-center text-center cursor-pointer hover:bg-indigo-100 transition active:scale-95">
+                <div class="bg-indigo-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center mb-2 shadow-md shadow-indigo-200">
+                    <i class="fas fa-passport text-xl"></i>
                 </div>
-                <h3 class="font-bold text-slate-800 text-xs">Sổ Thu Chi</h3>
-                <p class="text-[10px] text-emerald-600 font-semibold mt-0.5">Minh bạch thu quỹ</p>
+                <h3 class="font-bold text-slate-800 text-xs">Tạm Trú / Tạm Vắng</h3>
+                <p class="text-[10px] text-indigo-600 font-semibold mt-0.5">Khai báo online</p>
             </div>
 
+            <!-- GÓP Ý & PHẢN ÁNH -->
             <div onclick="openModal('modal-feedback')" class="bg-amber-50/80 border border-amber-100 p-4 rounded-2xl flex flex-col items-center text-center cursor-pointer hover:bg-amber-100 transition active:scale-95">
                 <div class="bg-amber-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center mb-2 shadow-md shadow-amber-200">
                     <i class="fas fa-camera text-xl"></i>
                 </div>
                 <h3 class="font-bold text-slate-800 text-xs">Góp Ý & Phản Ánh</h3>
-                <p class="text-[10px] text-amber-600 font-semibold mt-0.5">Gửi ảnh & vị trí GPS</p>
+                <p class="text-[10px] text-amber-600 font-semibold mt-0.5">Gửi ảnh & GPS</p>
             </div>
 
+            <!-- HỒ SƠ HỘ DÂN -->
             <div onclick="openModal('modal-profile')" class="bg-purple-50/80 border border-purple-100 p-4 rounded-2xl flex flex-col items-center text-center cursor-pointer hover:bg-purple-100 transition active:scale-95">
                 <div class="bg-purple-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center mb-2 shadow-md shadow-purple-200">
                     <i class="fas fa-id-card text-xl"></i>
                 </div>
                 <h3 class="font-bold text-slate-800 text-xs">Hồ Sơ Hộ Dân</h3>
                 <p class="text-[10px] text-purple-600 font-semibold mt-0.5">Thông tin nhân khẩu</p>
+            </div>
+
+            <!-- SỔ THU CHI (CHỈ HIỂN THỊ KHI XÓM TRƯỞNG BẬT) -->
+            <div id="card-finances" onclick="openModal('modal-finances')" class="hidden col-span-2 bg-emerald-50/80 border border-emerald-100 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-emerald-100 transition active:scale-95">
+                <div class="flex items-center gap-3">
+                    <div class="bg-emerald-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fas fa-wallet text-lg"></i>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-slate-800 text-xs">Sổ Thu Chi Quỹ Xóm</h3>
+                        <p class="text-[10px] text-emerald-600 font-semibold">Minh bạch ngân sách (Được Xóm trưởng công khai)</p>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-emerald-500 text-xs"></i>
             </div>
         </div>
 
@@ -120,6 +138,10 @@
                 <i class="fas fa-house text-lg mb-0.5"></i>
                 <span class="text-[10px] font-bold">Trang chủ</span>
             </button>
+            <button onclick="openModal('modal-tamtru-tamvang')" class="flex flex-col items-center text-slate-400 hover:text-emerald-600">
+                <i class="fas fa-passport text-lg mb-0.5"></i>
+                <span class="text-[10px] font-bold">Tạm trú/vắng</span>
+            </button>
             <button onclick="openModal('modal-feedback')" class="flex flex-col items-center text-slate-400 hover:text-emerald-600">
                 <i class="fas fa-paper-plane text-lg mb-0.5"></i>
                 <span class="text-[10px] font-bold">Phản ánh</span>
@@ -130,6 +152,8 @@
             </button>
         </div>
     </div>
+
+    <!-- 3. CÁC MODALS -->
 
     <!-- MODAL 1: LOA PHƯỜNG -->
     <div id="modal-announcements" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
@@ -142,7 +166,75 @@
         </div>
     </div>
 
-    <!-- MODAL 2: THU CHI QUỸ XÓM -->
+    <!-- MODAL 2: TẠM TRÚ / TẠM VẮNG -->
+    <div id="modal-tamtru-tamvang" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="bg-indigo-600 text-white p-4 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fas fa-passport"></i> Khai Báo Tạm Trú / Tạm Vắng</h3>
+                <button onclick="closeModal('modal-tamtru-tamvang')" class="text-white/80 hover:text-white text-base"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="p-4 overflow-y-auto space-y-4 flex-1">
+                <form onsubmit="submitTamtruTamvang(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Hình thức khai báo *</label>
+                        <select id="tttv-type" onchange="toggleTTTVFields()" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="Tạm trú">1. Tạm trú (Người nơi khác đến xómở)</option>
+                            <option value="Tạm vắng">2. Tạm vắng (Dân trong xóm đi nơi khác)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Họ và tên *</label>
+                            <input type="text" id="tttv-name" required placeholder="Nguyễn Văn A" class="w-full border rounded-xl px-3 py-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Số CCCD / Định danh *</label>
+                            <input type="text" id="tttv-cccd" required placeholder="0400..." class="w-full border rounded-xl px-3 py-2 text-xs">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Số điện thoại *</label>
+                            <input type="text" id="tttv-phone" required placeholder="0987..." class="w-full border rounded-xl px-3 py-2 text-xs">
+                        </div>
+                        <div>
+                            <label id="lbl-tttv-location" class="block text-xs font-semibold text-slate-600 mb-1">Địa chỉ tạm trú tại Xóm 3 *</label>
+                            <input type="text" id="tttv-location" required placeholder="Nhà số 12, Ngõ 4" class="w-full border rounded-xl px-3 py-2 text-xs">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Từ ngày *</label>
+                            <input type="date" id="tttv-start" required class="w-full border rounded-xl px-3 py-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Đến ngày *</label>
+                            <input type="date" id="tttv-end" required class="w-full border rounded-xl px-3 py-2 text-xs">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Lý do khai báo *</label>
+                        <textarea id="tttv-reason" required rows="2" placeholder="VD: Đi làm công ty, Học tập, Thăm thân nhân..." class="w-full border rounded-xl p-2.5 text-xs"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs shadow-md transition">
+                        Nộp Hồ Sơ Khai Báo
+                    </button>
+                </form>
+
+                <hr class="border-slate-200">
+                <h4 class="font-bold text-[11px] text-slate-500 uppercase">Lịch sử khai báo của gia đình</h4>
+                <div id="my-tttv-list" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: SỔ THU CHI -->
     <div id="modal-finances" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
             <div class="bg-emerald-600 text-white p-4 flex justify-between items-center shrink-0">
@@ -157,7 +249,7 @@
         </div>
     </div>
 
-    <!-- MODAL 3: GỬI PHẢN ÁNH (ĐÃ BỔ SUNG GỬI ẢNH VÀ ĐỊNH VỊ GPS) -->
+    <!-- MODAL 4: GỬI PHẢN ÁNH -->
     <div id="modal-feedback" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
             <div class="bg-amber-600 text-white p-4 flex justify-between items-center shrink-0">
@@ -171,7 +263,6 @@
                         <textarea id="feedback-content" required rows="3" placeholder="Nhập sự cố (hỏng đèn đường, rác thải, tiếng ồn...)" class="w-full border border-slate-300 rounded-xl p-3 text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
                     </div>
 
-                    <!-- THÊM CHỤP / TẢI ẢNH ĐÍNH KÈM -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Hình ảnh thực tế đính kèm</label>
                         <input type="file" id="feedback-image" accept="image/*" onchange="handleImageSelect(event)" class="hidden">
@@ -180,14 +271,12 @@
                             <span id="upload-img-label">Chụp hoặc Chọn ảnh đính kèm</span>
                         </label>
                         
-                        <!-- XEM TRƯỚC ẢNH -->
                         <div id="image-preview-container" class="hidden mt-2 relative">
                             <img id="image-preview" class="w-full h-36 object-cover rounded-xl border border-slate-200">
                             <button type="button" onclick="removeSelectedImage()" class="absolute top-2 right-2 bg-red-600 text-white w-6 h-6 rounded-full text-xs font-bold shadow-md"><i class="fas fa-times"></i></button>
                         </div>
                     </div>
 
-                    <!-- THÊM ĐỊNH VỊ VỊ TRÍ GPS -->
                     <div>
                         <button type="button" onclick="getLocation()" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 py-2.5 px-3 rounded-xl flex items-center justify-between transition">
                             <span class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
@@ -209,7 +298,7 @@
         </div>
     </div>
 
-    <!-- MODAL 4: HỒ SƠ HỘ DÂN -->
+    <!-- MODAL 5: HỒ SƠ HỘ DÂN -->
     <div id="modal-profile" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl">
             <div class="bg-purple-600 text-white p-4 flex justify-between items-center">
@@ -260,7 +349,7 @@
         firebase.initializeApp(firebaseConfig);
         const dbRef = firebase.database().ref('xomso_data');
 
-        let dbData = { residents: {}, announcements: {}, finances: {}, feedbacks: {} };
+        let dbData = { residents: {}, announcements: {}, finances: {}, feedbacks: {}, tamtru_tamvang: {}, settings: {} };
         let currentResident = null;
         let imageBase64 = "";
         let currentLocation = null;
@@ -273,6 +362,8 @@
                 if (!dbData.announcements) dbData.announcements = {};
                 if (!dbData.finances) dbData.finances = {};
                 if (!dbData.feedbacks) dbData.feedbacks = {};
+                if (!dbData.tamtru_tamvang) dbData.tamtru_tamvang = {};
+                if (!dbData.settings) dbData.settings = {};
             }
             checkAutoLogin();
             renderAppViews();
@@ -319,7 +410,44 @@
             location.reload();
         }
 
-        // XỬ LÝ CHỌN VÀ NÉN ẢNH
+        // CHUYỂN ĐỔI FORM TẠM TRÚ / TẠM VẮNG
+        function toggleTTTVFields() {
+            const type = document.getElementById('tttv-type').value;
+            const lbl = document.getElementById('lbl-tttv-location');
+            if (type === 'Tạm vắng') {
+                lbl.innerText = 'Nơi đến tạm vắng (Địa chỉ mới) *';
+                document.getElementById('tttv-location').placeholder = 'VD: Quận 1, TP. Hồ Chí Minh';
+            } else {
+                lbl.innerText = 'Địa chỉ tạm trú tại Xóm 3 *';
+                document.getElementById('tttv-location').placeholder = 'VD: Nhà số 12, Ngõ 4';
+            }
+        }
+
+        function submitTamtruTamvang(e) {
+            e.preventDefault();
+            if (!currentResident) return;
+
+            const newTTTV = {
+                type: document.getElementById('tttv-type').value,
+                name: document.getElementById('tttv-name').value,
+                cccd: document.getElementById('tttv-cccd').value,
+                phone: document.getElementById('tttv-phone').value,
+                location: document.getElementById('tttv-location').value,
+                startDate: document.getElementById('tttv-start').value,
+                endDate: document.getElementById('tttv-end').value,
+                reason: document.getElementById('tttv-reason').value,
+                houseCode: currentResident.code,
+                status: 'Chờ duyệt',
+                time: new Date().toLocaleDateString('vi-VN')
+            };
+
+            dbRef.child('tamtru_tamvang').push(newTTTV);
+            e.target.reset();
+            alert("Đã nộp hồ sơ khai báo! Ban cán sự xóm sẽ kiểm tra và phê duyệt.");
+            closeModal('modal-tamtru-tamvang');
+        }
+
+        // XỬ LÝ NÉN ẢNH
         function handleImageSelect(e) {
             const file = e.target.files[0];
             if (file) {
@@ -359,7 +487,7 @@
             document.getElementById('upload-img-label').innerText = "Chụp hoặc Chọn ảnh đính kèm";
         }
 
-        // XỬ LÝ ĐỊNH VỊ GPS
+        // GPS
         function getLocation() {
             const status = document.getElementById('location-status');
             if ("geolocation" in navigator) {
@@ -377,17 +505,14 @@
                         status.className = 'text-[11px] font-bold text-emerald-600';
                     },
                     (err) => {
-                        status.innerText = "❌ Lỗi: Bật GPS vị trí";
+                        status.innerText = "❌ Lỗi GPS";
                         status.className = 'text-[11px] font-bold text-red-500';
                     },
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
-            } else {
-                status.innerText = "❌ Máy không hỗ trợ GPS";
             }
         }
 
-        // GỬI PHẢN ÁNH KÈM ẢNH & GPS
         function submitFeedback(e) {
             e.preventDefault();
             if (!currentResident) return;
@@ -404,21 +529,19 @@
             };
 
             dbRef.child('feedbacks').push(newFb);
-
-            // Reset form
             document.getElementById('feedback-content').value = '';
             removeSelectedImage();
             document.getElementById('location-status').innerText = 'Chưa lấy vị trí';
             document.getElementById('location-status').className = 'text-[11px] text-slate-400 font-medium';
             currentLocation = null;
 
-            alert("Đã gửi phản ánh kèm hình ảnh/vị trí tới Xóm trưởng!");
+            alert("Đã gửi phản ánh tới Xóm trưởng!");
             closeModal('modal-feedback');
         }
 
         function triggerSOSAlert() {
             if (!currentResident) return;
-            if (confirm("XÁC NHẬN BÁO ĐỘNG SOS KHẨN CẤP ĐẾN BAN CÁN SỰ XÓM TRƯỜNG?")) {
+            if (confirm("XÁC NHẬN BÁO ĐỘNG SOS KHẨN CẤP ĐẾN BAN CÁN SỰ XÓM TRƯỞNG?")) {
                 const sosFeedback = {
                     name: `🚨 SOS: ${currentResident.name}`,
                     houseNo: currentResident.code,
@@ -439,6 +562,16 @@
             document.getElementById('user-greeting').innerText = `Chào bác ${currentResident.name},`;
             document.getElementById('user-subtext').innerText = `Hộ ${currentResident.code} - ${currentResident.address || 'Xóm 3, Đô Lương'}`;
 
+            // 1. KIỂM TRA BẬT / TẮT SỔ THU CHI TỪ XÓM TRƯỞNG
+            const isFinancesPublic = dbData.settings && dbData.settings.showFinances === true;
+            const cardFinances = document.getElementById('card-finances');
+            if (isFinancesPublic) {
+                cardFinances.classList.remove('hidden');
+            } else {
+                cardFinances.classList.add('hidden');
+            }
+
+            // 2. Loa phường
             const annList = Object.entries(dbData.announcements || {}).map(([key, val]) => ({ _key: key, ...val })).reverse();
             document.getElementById('badge-ann-count').innerText = `${annList.length} tin tức`;
 
@@ -466,11 +599,12 @@
                     <h4 class="font-bold text-xs text-slate-800">${a.title}</h4>
                     <p class="text-xs text-slate-600 leading-relaxed">${a.content}</p>
                     <button onclick="speakText('${a.title}. ${a.content}')" class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition">
-                        <i class="fas fa-volume-high"></i> Đọc thông báo cho cụ nghe
+                        <i class="fas fa-volume-high"></i> Đọc thông báo
                     </button>
                 </div>
             `).join('');
 
+            // 3. Sổ Thu Chi
             const finList = Object.values(dbData.finances || {}).reverse();
             const totalFund = Object.values(dbData.finances || {}).reduce((sum, item) => item.type === 'Thu' ? sum + Number(item.amount) : sum - Number(item.amount), 0);
             document.getElementById('resident-fund-total').innerText = totalFund.toLocaleString('vi-VN') + ' đ';
@@ -487,7 +621,22 @@
                 </div>
             `).join('');
 
-            // HIỂN THỊ LỊCH SỬ PHẢN ÁNH KÈM ẢNH & ĐỊNH VỊ GPS
+            // 4. Lịch sử Tạm trú / Tạm vắng
+            const allTTTV = Object.values(dbData.tamtru_tamvang || {}).reverse();
+            const myTTTV = allTTTV.filter(t => t.houseCode === currentResident.code || t.cccd === currentResident.cccd);
+            
+            document.getElementById('my-tttv-list').innerHTML = myTTTV.length ? myTTTV.map(t => `
+                <div class="p-3 rounded-xl border border-slate-100 bg-slate-50 text-xs space-y-1">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold ${t.type === 'Tạm trú' ? 'text-indigo-600' : 'text-amber-600'}">${t.type}: ${t.name}</span>
+                        <span class="px-2 py-0.5 rounded text-[9px] font-bold ${t.status === 'Chờ duyệt' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">${t.status}</span>
+                    </div>
+                    <p class="text-slate-600">📍 ${t.location} (${t.startDate} ➔ ${t.endDate})</p>
+                    <p class="text-slate-400 text-[10px]">Lý do: ${t.reason}</p>
+                </div>
+            `).join('') : '<p class="text-xs text-slate-400 text-center py-2">Chưa có lịch sử khai báo</p>';
+
+            // 5. Phản ánh
             const allFbList = Object.values(dbData.feedbacks || {}).reverse();
             const myFbList = allFbList.filter(f => f.name && (f.name.includes(currentResident.name) || (f.houseNo && f.houseNo.includes(currentResident.code))));
             
@@ -498,16 +647,8 @@
                         <span class="text-[10px] text-slate-400">${f.time || ''}</span>
                     </div>
                     <p class="text-slate-700 font-medium">${f.content}</p>
-                    
                     ${f.image ? `<img src="${f.image}" class="w-full h-32 object-cover rounded-xl border border-slate-200 mt-1">` : ''}
-                    
-                    ${f.location ? `
-                        <div class="mt-1">
-                            <a href="${f.location.mapsUrl}" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg hover:underline">
-                                <i class="fas fa-location-dot text-red-500"></i> Xem vị trí GPS sự cố trên Google Maps
-                            </a>
-                        </div>
-                    ` : ''}
+                    ${f.location ? `<a href="${f.location.mapsUrl}" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg hover:underline"><i class="fas fa-location-dot text-red-500"></i> Mở GPS trên Google Maps</a>` : ''}
                 </div>
             `).join('') : '<p class="text-xs text-slate-400 text-center py-2">Gia đình chưa gửi phản ánh nào</p>';
 
