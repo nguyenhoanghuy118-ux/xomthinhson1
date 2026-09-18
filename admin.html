@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Xóm Số - Thịnh sơn 1</title>
+    <title>Hệ Thống Quản Lý Xóm Số Thịnh sơn 1- Đô Lương</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -12,6 +12,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
+    <!-- SHEETJS XUẤT EXCEL -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
         .active-menu { background-color: #10b981 !important; color: #ffffff !important; }
@@ -19,7 +22,7 @@
 </head>
 <body class="text-slate-800 antialiased flex h-screen overflow-hidden">
 
-    <!-- MÀN HÌNH ĐĂNG NHẬP -->
+    <!-- 1. MÀN HÌNH ĐĂNG NHẬP ADMIN -->
     <div id="admin-login-overlay" class="fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl text-center">
             <div class="bg-emerald-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
@@ -47,7 +50,7 @@
         </div>
     </div>
 
-    <!-- SIDEBAR -->
+    <!-- 2. SIDEBAR BÊN TRÁI -->
     <aside class="w-64 bg-[#1e293b] text-slate-300 flex flex-col justify-between shrink-0">
         <div class="p-4 space-y-6">
             <div class="flex items-center gap-3 px-2">
@@ -56,7 +59,7 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-white text-base leading-tight uppercase tracking-wider">XÓM SỐ</h1>
-                    <p class="text-[11px] text-slate-400">Ban quản lý Xóm Thịnh sơn 1</p>
+                    <p class="text-[11px] text-slate-400">Ban quản lý Xóm 3</p>
                 </div>
             </div>
 
@@ -103,7 +106,7 @@
         </div>
     </aside>
 
-    <!-- MAIN DASHBOARD -->
+    <!-- 3. MAIN CONTENT -->
     <main class="flex-1 overflow-y-auto p-6 space-y-6">
         <div class="flex justify-between items-center">
             <h2 id="main-view-title" class="text-xl font-bold text-slate-800">Bảng Điều Khiển Trung Tâm</h2>
@@ -115,6 +118,7 @@
             </div>
         </div>
 
+        <!-- MÀN HÌNH TỔNG QUAN -->
         <div id="view-overview" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="bg-white p-4 rounded-2xl border-l-4 border-blue-500 shadow-sm flex items-center justify-between">
@@ -200,7 +204,7 @@
                             <thead class="text-slate-400 uppercase text-[10px] border-b border-slate-100">
                                 <tr>
                                     <th class="pb-2.5 font-semibold">Hộ Dân</th>
-                                    <th class="pb-2.5 font-semibold">Nội Dung</th>
+                                    <th class="pb-2.5 font-semibold">Nội Dung / Ảnh / Vị trí</th>
                                     <th class="pb-2.5 font-semibold">Thời Gian</th>
                                     <th class="pb-2.5 font-semibold">Trạng Thái</th>
                                     <th class="pb-2.5 font-semibold text-right">Hành Động</th>
@@ -213,13 +217,32 @@
             </div>
         </div>
 
+        <!-- MÀN HÌNH QUẢN LÝ NHÂN KHẨU (CÓ TÌM KIẾM, XUẤT EXCEL & GHI CHÚ) -->
         <div id="view-residents" class="hidden space-y-4 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-            <div class="flex justify-between items-center">
-                <h3 class="font-bold text-slate-800 text-sm"><i class="fas fa-users text-purple-600 mr-2"></i> Danh Sách Hộ Dân & Khai Báo Tạm Trú</h3>
-                <button onclick="openModal('modal-add-resident')" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition">
-                    <i class="fas fa-plus mr-1"></i> Thêm Hộ Dân
-                </button>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <i class="fas fa-users text-purple-600"></i> Danh Sách Hộ Dân & Tạm Trú
+                </h3>
+                
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- NÚT XUẤT EXCEL -->
+                    <button onclick="exportResidentsToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition shadow-sm">
+                        <i class="fas fa-file-excel text-sm"></i> Xuất Excel
+                    </button>
+                    <!-- NÚT THÊM HỘ DÂN -->
+                    <button onclick="openModal('modal-add-resident')" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-sm">
+                        <i class="fas fa-plus mr-1"></i> Thêm Hộ Dân
+                    </button>
+                </div>
             </div>
+
+            <!-- THANH TÌM KIẾM HỘ DÂN -->
+            <div class="relative">
+                <i class="fas fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                <input type="text" id="search-resident-input" onkeyup="filterResidents()" placeholder="Tìm kiếm theo Tên chủ hộ, Mã hộ, CCCD, SĐT, Địa chỉ, Ghi chú..." 
+                       class="w-full border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none">
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-50 text-slate-500 font-semibold uppercase">
@@ -230,6 +253,7 @@
                             <th class="p-3">Nhân Khẩu</th>
                             <th class="p-3">SĐT</th>
                             <th class="p-3">Trạng Thái</th>
+                            <th class="p-3">Ghi Chú</th>
                             <th class="p-3 text-right">Thao Tác</th>
                         </tr>
                     </thead>
@@ -238,6 +262,7 @@
             </div>
         </div>
 
+        <!-- MÀN HÌNH SỔ THU CHI -->
         <div id="view-finances" class="hidden space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-3">
@@ -278,11 +303,13 @@
             </div>
         </div>
 
+        <!-- MÀN HÌNH BẢN TIN LOA PHƯỜNG -->
         <div id="view-announcements" class="hidden bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
             <h3 class="font-bold text-slate-800 text-sm">Lịch Sử Thông Báo Loa Phường</h3>
             <div id="announcements-list" class="space-y-3"></div>
         </div>
 
+        <!-- MÀN HÌNH HÒM THƯ & SOS -->
         <div id="view-sos" class="hidden bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
             <h3 class="font-bold text-slate-800 text-sm">Tất Cả Phản Ánh & Tín Hiệu Khẩn Cấp từ Dân</h3>
             <div class="overflow-x-auto">
@@ -290,7 +317,7 @@
                     <thead class="bg-slate-50 text-slate-500 font-semibold uppercase">
                         <tr>
                             <th class="p-3">Hộ Dân</th>
-                            <th class="p-3">Nội Dung Phản Ánh</th>
+                            <th class="p-3">Nội Dung Phản Ánh / Ảnh / Vị trí</th>
                             <th class="p-3">Thời Gian</th>
                             <th class="p-3">Trạng Thái</th>
                             <th class="p-3 text-right">Thao Tác</th>
@@ -302,7 +329,9 @@
         </div>
     </main>
 
-    <!-- MODALS -->
+    <!-- 4. MODALS -->
+
+    <!-- MODAL PHÂN QUYỀN CÁN BỘ -->
     <div id="modal-manage-users" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-xl rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -348,6 +377,7 @@
         </div>
     </div>
 
+    <!-- MODAL THÊM HỘ DÂN (ĐÃ BỔ SUNG Ô NHẬP GHI CHÚ) -->
     <div id="modal-add-resident" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-2">
@@ -365,6 +395,13 @@
                     <div><label class="text-xs text-slate-500">Số Nhân Khẩu</label><input type="number" id="res-members" value="4" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
                 </div>
                 <div><label class="text-xs text-slate-500">Nhà Số / Địa Chỉ</label><input type="text" id="res-address" placeholder="Nhà số 12, Xóm 3" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+                
+                <!-- BỔ SUNG FIELD GHI CHÚ -->
+                <div>
+                    <label class="text-xs text-slate-500">Ghi chú (Hoàn cảnh gia đình, chính sách...)</label>
+                    <textarea id="res-note" rows="2" placeholder="VD: Gia đình thương binh, Hộ nghèo, Con đang đi nghĩa vụ..." class="w-full border rounded-xl p-2.5 text-xs mt-1 focus:ring-2 focus:ring-purple-500 focus:outline-none"></textarea>
+                </div>
+
                 <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-xs transition">Lưu Hộ Dân</button>
             </form>
         </div>
@@ -388,11 +425,12 @@
         
         let dbData = { residents: {}, finances: {}, announcements: {}, feedbacks: {}, admin_users: {} };
         let currentAdmin = null;
+        let residentSearchQuery = "";
 
         const DEFAULT_SUPER_ADMIN = {
             username: 'huynh',
             pass: 'xomthinhson1@37',
-            name: 'Bác Nam',
+            name: 'Bác Huy',
             role: 'Xóm trưởng',
             isSuper: true,
             permissions: ['residents', 'announcements', 'finances', 'sos']
@@ -464,6 +502,86 @@
             renderDashboard();
         });
 
+        // HÀM TÌM KIẾM HỘ DÂN
+        function filterResidents() {
+            residentSearchQuery = document.getElementById('search-resident-input').value.toLowerCase().trim();
+            renderResidentsTable();
+        }
+
+        // HÀM XUẤT FILE EXCEL DANH SÁCH HỘ DÂN
+        function exportResidentsToExcel() {
+            const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
+            if (resList.length === 0) {
+                alert("Chưa có dữ liệu hộ dân để xuất file!");
+                return;
+            }
+
+            const excelData = resList.map((r, index) => ({
+                "STT": index + 1,
+                "Mã Hộ": r.code || 'DL-X3',
+                "Họ và Tên Chủ Hộ": r.name || '',
+                "Số CCCD": r.cccd || '',
+                "Số Điện Thoại": r.phone || '',
+                "Số Nhân Khẩu": r.members || 1,
+                "Địa Chỉ Nhà": r.address || 'Xóm 3, Đô Lương',
+                "Trạng Thái Khai Báo": r.isTamtru ? (r.tamtruApproved ? "Tạm trú (Đã duyệt)" : "Tạm trú (Chờ duyệt)") : "Thường trú",
+                "Ghi Chú": r.note || ''
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachHoDan");
+
+            // Tự động căn chỉnh độ rộng cột
+            worksheet['!cols'] = [
+                { wch: 5 },  // STT
+                { wch: 12 }, // Mã hộ
+                { wch: 25 }, // Tên
+                { wch: 16 }, // CCCD
+                { wch: 14 }, // SĐT
+                { wch: 12 }, // Nhân khẩu
+                { wch: 25 }, // Địa chỉ
+                { wch: 20 }, // Trạng thái
+                { wch: 30 }  // Ghi chú
+            ];
+
+            XLSX.writeFile(workbook, `Danh_Sach_Ho_Dan_Xom_So_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.xlsx`);
+        }
+
+        function renderResidentsTable() {
+            const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
+            
+            // Lọc dữ liệu theo Search Query
+            const filtered = resList.filter(r => {
+                const q = residentSearchQuery;
+                return (r.name || '').toLowerCase().includes(q) ||
+                       (r.code || '').toLowerCase().includes(q) ||
+                       (r.cccd || '').toLowerCase().includes(q) ||
+                       (r.phone || '').toLowerCase().includes(q) ||
+                       (r.address || '').toLowerCase().includes(q) ||
+                       (r.note || '').toLowerCase().includes(q);
+            });
+
+            const canManageResidents = currentAdmin && (currentAdmin.isSuper || (currentAdmin.permissions && currentAdmin.permissions.includes('residents')));
+
+            document.getElementById('full-residents-tbody').innerHTML = filtered.map(r => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3 font-bold text-purple-600">${r.code || 'DL-X3'}</td>
+                    <td class="p-3 font-semibold text-slate-800">${r.name}<br><span class="text-[10px] text-slate-400 font-normal">${r.address || ''}</span></td>
+                    <td class="p-3 font-mono text-slate-600">${r.cccd || '---'}</td>
+                    <td class="p-3">${r.members || 1} người</td>
+                    <td class="p-3 text-slate-500">${r.phone || '---'}</td>
+                    <td class="p-3">
+                        ${r.isTamtru ? (r.tamtruApproved ? '<span class="text-emerald-600 font-semibold">Tạm trú (Đã duyệt)</span>' : `<button onclick="approveTamtru('${r._key}')" class="bg-amber-500 text-white px-2 py-1 rounded text-[10px] font-bold">Duyệt tạm trú</button>`) : '<span class="text-slate-500">Thường trú</span>'}
+                    </td>
+                    <td class="p-3 text-slate-600 max-w-xs text-[11px]">${r.note || '<span class="text-slate-300 italic">Không có</span>'}</td>
+                    <td class="p-3 text-right">
+                        ${canManageResidents ? `<button onclick="deleteResident('${r._key}')" class="text-red-500 hover:text-red-700 font-bold"><i class="fas fa-trash"></i></button>` : '<span class="text-slate-300">-</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
         function renderDashboard() {
             const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
             const finList = Object.entries(dbData.finances || {}).map(([key, val]) => ({ _key: key, ...val }));
@@ -482,12 +600,17 @@
             document.getElementById('stat-feedbacks-count').innerText = pendingSOS;
             document.getElementById('badge-sos-count').innerText = pendingSOS;
 
+            // Render Phản ánh kèm Ảnh & Vị trí GPS ở Tổng quan
             const overviewFbList = fbList.slice(0, 5);
             document.getElementById('feedbacks-overview-tbody').innerHTML = overviewFbList.map(f => `
                 <tr>
                     <td class="py-3 font-semibold text-slate-800">${f.name || 'Người dân'}<br><span class="text-[10px] text-slate-400 font-normal">(${f.houseNo || 'Xóm 3'})</span></td>
-                    <td class="py-3 text-slate-600 max-w-xs truncate">${f.content}</td>
-                    <td class="py-3 text-slate-400">${f.time || 'Vừa xong'}</td>
+                    <td class="py-3 text-slate-600 max-w-xs">
+                        <p class="font-medium">${f.content}</p>
+                        ${f.image ? `<img src="${f.image}" class="w-16 h-12 object-cover rounded-lg border border-slate-200 mt-1 cursor-pointer" onclick="window.open('${f.image}')" title="Nhấp để xem ảnh phóng to">` : ''}
+                        ${f.location ? `<a href="${f.location.mapsUrl}" target="_blank" class="text-[10px] text-blue-600 underline font-semibold flex items-center gap-1 mt-1"><i class="fas fa-location-dot text-red-500"></i> Xem vị trí GPS sự cố</a>` : ''}
+                    </td>
+                    <td class="py-3 text-slate-400 text-[11px]">${f.time || 'Vừa xong'}</td>
                     <td class="py-3">
                         <span class="font-semibold text-[10px] px-2 py-0.5 rounded-full ${f.status === 'Chờ xử lý' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">
                             ${f.status}
@@ -495,17 +618,22 @@
                     </td>
                     <td class="py-3 text-right">
                         ${f.status === 'Chờ xử lý' ? 
-                            `<button onclick="resolveFeedback('${f._key}')" class="text-emerald-600 font-semibold hover:underline"><i class="fas fa-reply mr-1"></i>Xử lý</button>` : 
+                            `<button onclick="resolveFeedback('${f._key}')" class="text-emerald-600 font-semibold hover:underline"><i class="fas fa-reply mr-1"></i>Đã xử lý</button>` : 
                             `<span class="text-slate-400"><i class="fas fa-check mr-1"></i>Đã xong</span>`}
                     </td>
                 </tr>
             `).join('');
 
+            // Render danh sách Hòm thư & SOS khẩn cấp đầy đủ
             document.getElementById('full-sos-tbody').innerHTML = fbList.map(f => `
                 <tr>
                     <td class="p-3 font-semibold text-slate-800">${f.name || 'Người dân'}<br><span class="text-[10px] text-slate-400 font-normal">(${f.houseNo || 'Xóm 3'})</span></td>
-                    <td class="p-3 text-slate-600">${f.content}</td>
-                    <td class="p-3 text-slate-400">${f.time || 'Vừa xong'}</td>
+                    <td class="p-3 text-slate-600">
+                        <p class="font-medium">${f.content}</p>
+                        ${f.image ? `<img src="${f.image}" class="w-20 h-16 object-cover rounded-lg border border-slate-200 mt-1 cursor-pointer" onclick="window.open('${f.image}')" title="Xem ảnh">` : ''}
+                        ${f.location ? `<a href="${f.location.mapsUrl}" target="_blank" class="text-[10px] text-blue-600 underline font-semibold flex items-center gap-1 mt-1"><i class="fas fa-location-dot text-red-500"></i> Mở Google Maps định vị</a>` : ''}
+                    </td>
+                    <td class="p-3 text-slate-400 text-[11px]">${f.time || 'Vừa xong'}</td>
                     <td class="p-3">
                         <span class="font-semibold text-[10px] px-2 py-0.5 rounded-full ${f.status === 'Chờ xử lý' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">
                             ${f.status}
@@ -519,22 +647,10 @@
                 </tr>
             `).join('');
 
-            document.getElementById('full-residents-tbody').innerHTML = resList.map(r => `
-                <tr class="hover:bg-slate-50">
-                    <td class="p-3 font-bold text-purple-600">${r.code || 'DL-X3'}</td>
-                    <td class="p-3 font-semibold text-slate-800">${r.name}<br><span class="text-[10px] text-slate-400">${r.address || ''}</span></td>
-                    <td class="p-3 font-mono text-slate-600">${r.cccd || '---'}</td>
-                    <td class="p-3">${r.members || 1} người</td>
-                    <td class="p-3 text-slate-500">${r.phone || '---'}</td>
-                    <td class="p-3">
-                        ${r.isTamtru ? (r.tamtruApproved ? '<span class="text-emerald-600 font-semibold">Tạm trú (Đã duyệt)</span>' : `<button onclick="approveTamtru('${r._key}')" class="bg-amber-500 text-white px-2 py-1 rounded text-[10px] font-bold">Duyệt tạm trú</button>`) : '<span class="text-slate-500">Thường trú</span>'}
-                    </td>
-                    <td class="p-3 text-right">
-                        <button onclick="deleteResident('${r._key}')" class="text-red-500 hover:text-red-700 font-bold"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
+            // Render Bảng Hộ Dân
+            renderResidentsTable();
 
+            // Render Bảng Thu Chi
             document.getElementById('full-finances-tbody').innerHTML = finList.map(f => `
                 <tr class="hover:bg-slate-50">
                     <td class="p-2.5 text-slate-400">${f.date || '---'}</td>
@@ -546,6 +662,7 @@
                 </tr>
             `).join('');
 
+            // Render Danh sách Loa Phường
             document.getElementById('announcements-list').innerHTML = annList.map(a => `
                 <div class="p-3 rounded-xl border ${a.urgent ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'} space-y-1">
                     <div class="flex justify-between items-center">
@@ -556,6 +673,7 @@
                 </div>
             `).join('');
 
+            // Render Cán bộ
             const adminList = Object.entries(dbData.admin_users || {}).map(([key, val]) => ({ _key: key, ...val }));
             document.getElementById('admin-users-tbody').innerHTML = adminList.map(u => `
                 <tr>
@@ -594,6 +712,7 @@
             alert("Đã lưu khoản thu/chi!");
         }
 
+        // TẠO HỘ DÂN CÓ FIELD GHI CHÚ
         function handleCreateResident(e) {
             e.preventDefault();
             const newRes = {
@@ -603,11 +722,13 @@
                 phone: document.getElementById('res-phone').value,
                 members: Number(document.getElementById('res-members').value),
                 address: document.getElementById('res-address').value || 'Xóm 3, Đô Lương',
+                note: document.getElementById('res-note').value.trim(),
                 isTamtru: false
             };
             dbRef.child('residents').push(newRes);
             closeModal('modal-add-resident');
             e.target.reset();
+            alert("Đã lưu hộ dân mới!");
         }
 
         function handleCreateAdminUser(e) {
