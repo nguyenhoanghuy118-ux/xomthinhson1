@@ -209,13 +209,25 @@
             </div>
         </div>
 
-        <!-- VIEW 2: QUẢN LÝ NHÂN KHẨU -->
+        <!-- VIEW 2: QUẢN LÝ NHÂN KHẨU (CÓ THÊM TÍNH NĂNG NHẬP/XUẤT EXCEL) -->
         <div id="view-residents" class="hidden space-y-4 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-slate-100">
                 <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-users text-purple-600"></i> Danh Sách Hộ Dân & Tạm Trú</h3>
+                
                 <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="exportResidentsToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition"><i class="fas fa-file-excel"></i> Xuất Excel</button>
-                    <button onclick="openModal('modal-add-resident')" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition"><i class="fas fa-plus mr-1"></i> Thêm Hộ Dân</button>
+                    <button onclick="downloadResidentExcelTemplate()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 flex items-center gap-1.5 transition">
+                        <i class="fas fa-file-arrow-down text-slate-500"></i> File Mẫu Excel
+                    </button>
+                    <input type="file" id="excel-import-input" accept=".xlsx, .xls" onchange="handleExcelImport(event)" class="hidden">
+                    <button onclick="document.getElementById('excel-import-input').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
+                        <i class="fas fa-file-import"></i> Nhập Excel
+                    </button>
+                    <button onclick="exportResidentsToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
+                        <i class="fas fa-file-excel"></i> Xuất Excel
+                    </button>
+                    <button onclick="openModal('modal-add-resident')" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition">
+                        <i class="fas fa-plus mr-1"></i> Thêm Hộ Dân
+                    </button>
                 </div>
             </div>
 
@@ -652,7 +664,7 @@
             if (confirm("Xóa thông báo này?")) dbRef.child('announcements').child(key).remove();
         }
 
-        // PHẦN QUẢN LÝ NHÂN KHẨU
+        // PHẦN QUẢN LÝ NHÂN KHẨU & NHẬP EXCEL
         function filterResidents() {
             residentSearchQuery = (document.getElementById('search-resident-input').value || '').toLowerCase().trim();
             renderResidentsTable();
@@ -709,6 +721,105 @@
 
         function deleteResident(key) { if (confirm("Xóa hộ dân này?")) dbRef.child('residents').child(key).remove(); }
 
+        // 1. TẢI FILE EXCEL MẪU
+        function downloadResidentExcelTemplate() {
+            const sampleData = [
+                {
+                    "Mã Hộ": "DL-TS1-0001",
+                    "Họ và Tên Chủ Hộ": "Nguyễn Văn A",
+                    "Số CCCD": "040092001234",
+                    "Số Điện Thoại": "0987654321",
+                    "Số Nhân Khẩu": 4,
+                    "Địa Chỉ": "Nhà số 12, Xóm Thịnh Sơn 1",
+                    "Ghi Chú": "Hộ gia đình văn hóa"
+                },
+                {
+                    "Mã Hộ": "DL-TS1-0002",
+                    "Họ và Tên Chủ Hộ": "Trần Thị B",
+                    "Số CCCD": "040195005678",
+                    "Số Điện Thoại": "0912345678",
+                    "Số Nhân Khẩu": 3,
+                    "Địa Chỉ": "Nhà số 15, Xóm Thịnh Sơn 1",
+                    "Ghi Chú": "Hộ nghèo"
+                }
+            ];
+
+            const worksheet = XLSX.utils.json_to_sheet(sampleData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Mau_Nhap_Ho_Dan");
+            XLSX.writeFile(workbook, "Mau_Nhap_Danh_Sach_Ho_Dan.xlsx");
+        }
+
+        // 2. NHẬP FILE EXCEL VÀO HỆ THỐNG
+        function handleExcelImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+                    if (!jsonRows || jsonRows.length === 0) {
+                        alert("File Excel trống hoặc không đúng định dạng!");
+                        return;
+                    }
+
+                    let addedCount = 0;
+                    const updates = {};
+
+                    jsonRows.forEach((row, index) => {
+                        const name = (row["Họ và Tên Chủ Hộ"] || row["Họ và Tên"] || row["Chủ Hộ"] || row["Name"] || "").toString().trim();
+                        const code = (row["Mã Hộ"] || row["Code"] || `DL-TS1-${1000 + index}`).toString().trim();
+                        const cccd = (row["Số CCCD"] || row["CCCD"] || "").toString().trim();
+                        const phone = (row["Số Điện Thoại"] || row["SĐT"] || row["Phone"] || "").toString().trim();
+                        const members = Number(row["Số Nhân Khẩu"] || row["Nhân Khẩu"] || row["Members"] || 1);
+                        const address = (row["Địa Chỉ"] || row["Address"] || "Xóm Thịnh Sơn 1, Đô Lương").toString().trim();
+                        const note = (row["Ghi Chú"] || row["Note"] || "").toString().trim();
+
+                        if (name || code) {
+                            const newKey = dbRef.child('residents').push().key;
+                            updates[`residents/${newKey}`] = {
+                                name: name || "Chưa cập nhật tên",
+                                code: code,
+                                cccd: cccd,
+                                phone: phone,
+                                members: isNaN(members) ? 1 : members,
+                                address: address,
+                                note: note
+                            };
+                            addedCount++;
+                        }
+                    });
+
+                    if (addedCount > 0) {
+                        dbRef.update(updates, (error) => {
+                            if (error) {
+                                alert("Lỗi khi tải dữ liệu lên server: " + error.message);
+                            } else {
+                                alert(`🎉 Đã nhập thành công ${addedCount} hộ dân từ file Excel!`);
+                            }
+                        });
+                    } else {
+                        alert("Không tìm thấy dòng dữ liệu hợp lệ trong file Excel!");
+                    }
+
+                } catch (err) {
+                    console.error("Lỗi đọc file Excel:", err);
+                    alert("Lỗi khi đọc file Excel. Vui lòng kiểm tra lại định dạng file!");
+                } finally {
+                    event.target.value = "";
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 3. XUẤT FILE EXCEL DANH SÁCH HỘ DÂN
         function exportResidentsToExcel() {
             const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
             if (resList.length === 0) return alert("Chưa có dữ liệu hộ dân!");
@@ -801,7 +912,6 @@
         function deleteCampaign(key) {
             if (confirm("Xóa đợt thu này? Toàn bộ lịch sử nộp tiền đợt này sẽ bị xóa khỏi hệ thống.")) {
                 dbRef.child('campaigns').child(key).remove();
-                // Dọn dẹp phiếu nộp tiền thuộc đợt này
                 const payments = Object.entries(dbData.payments || {});
                 payments.forEach(([pKey, pVal]) => {
                     if (pVal && pVal.campaignKey === key) dbRef.child('payments').child(pKey).remove();
@@ -859,7 +969,6 @@
             const payments = Object.values(dbData.payments || {});
             const paidCodes = payments.filter(p => p.campaignKey === campaignKey).map(p => p.houseCode);
             
-            // Lọc ra các hộ CHƯA NỘP
             const unpaidCodes = assignedCodes.filter(code => !paidCodes.includes(code));
             const residentsList = Object.values(dbData.residents || {});
 
@@ -1049,7 +1158,7 @@
                 // 4. Render Bảng Nhân khẩu
                 renderResidentsTable();
 
-                // 5. Render Đợt thu quỹ VÀ HIỂN THỊ CHI TIẾT TỪNG HỘ ĐÃ NỘP / CHƯA NỘP
+                // 5. Render Đợt thu quỹ
                 const residentsMap = {};
                 resList.forEach(r => residentsMap[r.code] = r.name);
 
