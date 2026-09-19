@@ -17,6 +17,8 @@
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
         .active-menu { background-color: #10b981 !important; color: #ffffff !important; }
         .tab-active { border-bottom: 3px solid #10b981; color: #059669; font-weight: 700; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="text-slate-800 antialiased flex h-screen overflow-hidden">
@@ -240,7 +242,7 @@
             </div>
         </div>
 
-        <!-- VIEW 3: THU - CHI QUỸ XÓM -->
+        <!-- VIEW 3: THU - CHI QUY XÓM -->
         <div id="view-finances" class="hidden space-y-6">
             
             <!-- CARD THỐNG KÊ TỔNG QUAN THU CHI -->
@@ -265,7 +267,7 @@
 
             <!-- TAB THANH CHUYỂN ĐỔI THU VÀ CHI -->
             <div class="flex border-b border-slate-200 gap-6 text-sm">
-                <button onclick="switchFinTab('thu')" id="tab-btn-thu" class="pb-3 tab-active flex items-center gap-2"><i class="fas fa-hand-holding-dollar"></i> Quản Lý Khoản Thu & Nộp Tiền</button>
+                <button onclick="switchFinTab('thu')" id="tab-btn-thu" class="pb-3 tab-active flex items-center gap-2"><i class="fas fa-hand-holding-dollar"></i> Quản Lý Khoản Thu & Nộp Tiền Từng Hộ</button>
                 <button onclick="switchFinTab('chi')" id="tab-btn-chi" class="pb-3 text-slate-500 font-semibold flex items-center gap-2"><i class="fas fa-file-invoice-dollar"></i> Quản Lý Mẫu Phiếu Chi</button>
             </div>
 
@@ -309,8 +311,8 @@
 
                 <div class="lg:col-span-2 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
                     <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-slate-800 text-sm">Danh Sách Các Đợt Thu Quỹ Xóm</h3>
-                        <button onclick="openModal('modal-record-payment')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm"><i class="fas fa-check mr-1"></i> Ghi Nhận Nộp Tiền</button>
+                        <h3 class="font-bold text-slate-800 text-sm">Danh Sách Đợt Thu & Ghi Nhận Nộp Tiền</h3>
+                        <button onclick="openRecordPaymentModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1.5"><i class="fas fa-hand-holding-dollar"></i> Chọn Hộ Nộp Tiền Nhanh</button>
                     </div>
 
                     <div id="collection-campaigns-list" class="space-y-4"></div>
@@ -404,30 +406,30 @@
 
     <!-- 4. MODALS POPUP -->
 
-    <!-- MODAL GHI NHẬN NỘP TIỀN QUỸ -->
+    <!-- MODAL GHI NHẬN NỘP TIỀN QUỸ THEO TỪNG HỘ -->
     <div id="modal-record-payment" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-slate-800 text-sm">Ghi Nhận Đóng Tiền Hộ Dân</h3>
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-cash-register text-emerald-600"></i> Ghi Nhận Nộp Tiền Theo Hộ</h3>
                 <button onclick="closeModal('modal-record-payment')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
             </div>
             <form onsubmit="handleRecordPaymentSubmit(event)" class="space-y-3">
                 <div>
-                    <label class="text-xs text-slate-500">Chọn Đợt Thu *</label>
-                    <select id="pay-campaign-select" required class="w-full border rounded-xl px-3 py-2 text-xs mt-1 font-bold"></select>
+                    <label class="text-xs font-semibold text-slate-600">1. Chọn Đợt Thu *</label>
+                    <select id="pay-campaign-select" onchange="updatePayHouseDropdown()" required class="w-full border rounded-xl px-3 py-2 text-xs mt-1 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500"></select>
                 </div>
                 <div>
-                    <label class="text-xs text-slate-500">Chọn Hộ Dân Nộp Tiền *</label>
-                    <select id="pay-house-select" required class="w-full border rounded-xl px-3 py-2 text-xs mt-1 font-bold text-blue-700"></select>
+                    <label class="text-xs font-semibold text-slate-600">2. Chọn Hộ Dân Nộp Tiền (Chỉ hiện các hộ chưa nộp) *</label>
+                    <select id="pay-house-select" required class="w-full border rounded-xl px-3 py-2 text-xs mt-1 font-bold text-blue-700 focus:ring-2 focus:ring-emerald-500"></select>
                 </div>
                 <div>
-                    <label class="text-xs text-slate-500">Hình Thức Thanh Toán *</label>
-                    <select id="pay-method-select" required class="w-full border rounded-xl px-3 py-2 text-xs mt-1 font-bold text-emerald-700">
-                        <option value="Tiền mặt">💵 Tiền mặt</option>
-                        <option value="Chuyển khoản">💳 Chuyển khoản qua ngân hàng</option>
+                    <label class="text-xs font-semibold text-slate-600">3. Hình Thức Thanh Toán *</label>
+                    <select id="pay-method-select" required class="w-full border rounded-xl px-3 py-2 text-xs mt-1 font-bold text-emerald-700 focus:ring-2 focus:ring-emerald-500">
+                        <option value="Tiền mặt">💵 Tiền mặt (Thu trực tiếp)</option>
+                        <option value="Chuyển khoản">💳 Chuyển khoản ngân hàng</option>
                     </select>
                 </div>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs transition">Xác Nhận Đã Nộp Tiền</button>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">Xác Nhận Đã Thu Tiền Hộ Này</button>
             </form>
         </div>
     </div>
@@ -696,7 +698,7 @@
                 cccd: document.getElementById('res-cccd').value.trim(),
                 phone: document.getElementById('res-phone').value.trim(),
                 members: Number(document.getElementById('res-members').value) || 1,
-                address: document.getElementById('res-address').value.trim() || 'Xóm 3, Đô Lương',
+                address: document.getElementById('res-address').value.trim() || 'Xóm Thịnh Sơn 1, Đô Lương',
                 note: document.getElementById('res-note').value.trim()
             };
             dbRef.child('residents').push(newRes);
@@ -713,12 +715,12 @@
 
             const excelData = resList.map((r, index) => ({
                 "STT": index + 1,
-                "Mã Hộ": r.code || 'DL-X3',
+                "Mã Hộ": r.code || 'DL-TS1',
                 "Họ và Tên Chủ Hộ": r.name || '',
                 "Số CCCD": r.cccd || '',
                 "Số Điện Thoại": r.phone || '',
                 "Số Nhân Khẩu": r.members || 1,
-                "Địa Chỉ": r.address || 'Xóm 3, Đô Lương',
+                "Địa Chỉ": r.address || 'Xóm Thịnh Sơn 1, Đô Lương',
                 "Ghi Chú": r.note || ''
             }));
 
@@ -797,7 +799,14 @@
         }
 
         function deleteCampaign(key) {
-            if (confirm("Xóa đợt thu này?")) dbRef.child('campaigns').child(key).remove();
+            if (confirm("Xóa đợt thu này? Toàn bộ lịch sử nộp tiền đợt này sẽ bị xóa khỏi hệ thống.")) {
+                dbRef.child('campaigns').child(key).remove();
+                // Dọn dẹp phiếu nộp tiền thuộc đợt này
+                const payments = Object.entries(dbData.payments || {});
+                payments.forEach(([pKey, pVal]) => {
+                    if (pVal && pVal.campaignKey === key) dbRef.child('payments').child(pKey).remove();
+                });
+            }
         }
 
         // TẠO PHIẾU CHI
@@ -822,14 +831,63 @@
             if (confirm("Xóa phiếu chi này?")) dbRef.child('expenses').child(key).remove();
         }
 
-        // GHI NHẬN NỘP TIỀN
+        // LOGIC NỘP TIỀN THEO TỪNG HỘ VÀ HỦY GHI NHẬN NỘP
+        function openRecordPaymentModal(preselectedCampaignKey = null, preselectedHouseCode = null) {
+            const campaigns = Object.entries(dbData.campaigns || {}).map(([k, v]) => ({ _key: k, ...v }));
+            if (campaigns.length === 0) return alert("Chưa có đợt thu nào được tạo!");
+
+            const selectCamp = document.getElementById('pay-campaign-select');
+            selectCamp.innerHTML = campaigns.map(c => `<option value="${c._key}">${c.title} (${Number(c.amount).toLocaleString('vi-VN')} đ/hộ)</option>`).join('');
+
+            if (preselectedCampaignKey) selectCamp.value = preselectedCampaignKey;
+            
+            updatePayHouseDropdown(preselectedHouseCode);
+            openModal('modal-record-payment');
+        }
+
+        function updatePayHouseDropdown(targetHouseCode = null) {
+            const campaignKey = document.getElementById('pay-campaign-select').value;
+            const campaign = dbData.campaigns ? dbData.campaigns[campaignKey] : null;
+            const selectHouse = document.getElementById('pay-house-select');
+
+            if (!campaign) {
+                selectHouse.innerHTML = `<option value="">Không có hộ nào</option>`;
+                return;
+            }
+
+            const assignedCodes = campaign.assignedHouses || [];
+            const payments = Object.values(dbData.payments || {});
+            const paidCodes = payments.filter(p => p.campaignKey === campaignKey).map(p => p.houseCode);
+            
+            // Lọc ra các hộ CHƯA NỘP
+            const unpaidCodes = assignedCodes.filter(code => !paidCodes.includes(code));
+            const residentsList = Object.values(dbData.residents || {});
+
+            if (unpaidCodes.length === 0) {
+                selectHouse.innerHTML = `<option value="">🎉 Tất cả các hộ đã nộp đủ!</option>`;
+                return;
+            }
+
+            selectHouse.innerHTML = unpaidCodes.map(code => {
+                const res = residentsList.find(r => r.code === code);
+                const nameStr = res ? res.name : 'Chưa cập nhật tên';
+                return `<option value="${code}">${code} - ${nameStr}</option>`;
+            }).join('');
+
+            if (targetHouseCode && unpaidCodes.includes(targetHouseCode)) {
+                selectHouse.value = targetHouseCode;
+            }
+        }
+
         function handleRecordPaymentSubmit(e) {
             e.preventDefault();
             const campaignKey = document.getElementById('pay-campaign-select').value;
             const houseCode = document.getElementById('pay-house-select').value;
             const method = document.getElementById('pay-method-select').value;
-            const campaign = dbData.campaigns ? dbData.campaigns[campaignKey] : null;
 
+            if (!houseCode) return alert("Vui lòng chọn một hộ dân hợp lệ!");
+
+            const campaign = dbData.campaigns ? dbData.campaigns[campaignKey] : null;
             if (!campaign) return alert("Đợt thu không tồn tại!");
 
             const newPayment = {
@@ -843,7 +901,18 @@
 
             dbRef.child('payments').push(newPayment);
             closeModal('modal-record-payment');
-            alert(`Đã ghi nhận hộ ${houseCode} nộp tiền thành công!`);
+            alert(`✅ Đã ghi nhận hộ [${houseCode}] nộp tiền thành công!`);
+        }
+
+        function cancelHousePayment(campaignKey, houseCode) {
+            if (confirm(`Xác nhận HỦY ghi nhận nộp tiền của hộ [${houseCode}]? Hộ này sẽ trở về trạng thái CHƯA NỘP.`)) {
+                const paymentsEntries = Object.entries(dbData.payments || {});
+                const foundEntry = paymentsEntries.find(([k, p]) => p && p.campaignKey === campaignKey && p.houseCode === houseCode);
+                if (foundEntry) {
+                    dbRef.child('payments').child(foundEntry[0]).remove();
+                    alert("Đã hoàn tác trạng thái nộp tiền!");
+                }
+            }
         }
 
         // DUYỆT CÁC MỤC
@@ -914,7 +983,7 @@
                 document.getElementById('stat-feedbacks-count').innerText = pendingSOS;
                 document.getElementById('badge-sos-count').innerText = pendingSOS;
 
-                // Nút công tắc
+                // Nút công tắc Bật/Tắt Sổ Thu Chi
                 const isFinPublic = dbData.settings && dbData.settings.showFinances === true;
                 const btnToggle = document.getElementById('btn-toggle-finances');
                 if (btnToggle) {
@@ -940,7 +1009,7 @@
                     </tr>
                 `).join('') : '<tr><td colspan="7" class="p-4 text-center text-slate-400">Không có hồ sơ tạm trú/vắng mới</td></tr>';
 
-                // 3. Render Phản ánh ở Tổng quan & SOS
+                // 3. Render Phản ánh
                 const overviewFbList = fbList.slice(0, 5);
                 const fbHTML = overviewFbList.map(f => `
                     <tr>
@@ -980,38 +1049,64 @@
                 // 4. Render Bảng Nhân khẩu
                 renderResidentsTable();
 
-                // 5. Render Đợt thu quỹ
+                // 5. Render Đợt thu quỹ VÀ HIỂN THỊ CHI TIẾT TỪNG HỘ ĐÃ NỘP / CHƯA NỘP
+                const residentsMap = {};
+                resList.forEach(r => residentsMap[r.code] = r.name);
+
                 document.getElementById('collection-campaigns-list').innerHTML = campaigns.map(c => {
                     const campaignPayments = payments.filter(p => p.campaignKey === c._key);
                     const paidHouseCodes = campaignPayments.map(p => p.houseCode);
                     const assigned = c.assignedHouses || [];
-                    const paidCount = assigned.filter(code => paidHouseCodes.includes(code)).length;
+                    const unpaidHouses = assigned.filter(code => !paidHouseCodes.includes(code));
+                    const paidCount = assigned.length - unpaidHouses.length;
 
                     return `
                         <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 space-y-3">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md">${c.scope === 'ALL' ? 'Tất cả các hộ' : 'Tùy chọn'}</span>
+                                    <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md">${c.scope === 'ALL' ? 'Tất cả các hộ' : 'Tùy chọn hộ'}</span>
                                     <h4 class="font-bold text-slate-800 text-sm mt-1">${c.title}</h4>
-                                    <p class="text-xs text-slate-500">Mức nộp: <b class="text-emerald-600">${Number(c.amount).toLocaleString('vi-VN')} đ</b> / hộ | Hạn: <b class="text-red-500">${c.deadline}</b></p>
+                                    <p class="text-xs text-slate-500">Mức đóng: <b class="text-emerald-600">${Number(c.amount).toLocaleString('vi-VN')} đ</b> / hộ | Hạn: <b class="text-red-500">${c.deadline}</b></p>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs font-bold bg-white px-3 py-1 rounded-xl border border-slate-200">Đã nộp: ${paidCount}/${assigned.length} hộ</span>
-                                    <button onclick="deleteCampaign('${c._key}')" class="text-red-500 hover:text-red-700 font-bold px-2"><i class="fas fa-trash"></i></button>
+                                    <span class="text-xs font-bold bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">Tiến độ: ${paidCount}/${assigned.length} hộ</span>
+                                    <button onclick="deleteCampaign('${c._key}')" class="text-red-500 hover:text-red-700 font-bold px-2 text-xs" title="Xóa đợt thu"><i class="fas fa-trash"></i></button>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-200">
-                                <div>
-                                    <p class="font-bold text-red-600 mb-1">⚠️ Chưa nộp (${assigned.length - paidCount}):</p>
-                                    <div class="max-h-24 overflow-y-auto space-y-1 text-[11px]">
-                                        ${assigned.filter(code => !paidHouseCodes.includes(code)).map(code => `<span class="inline-block bg-red-50 text-red-700 px-2 py-0.5 rounded border border-red-100 mr-1 mb-1">${code}</span>`).join('') || '<span class="text-emerald-600 font-bold">Đã nộp đủ!</span>'}
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-200">
+                                <!-- CỘT CHƯA NỘP -->
+                                <div class="bg-red-50/70 p-3 rounded-xl border border-red-100">
+                                    <p class="font-bold text-red-600 mb-2 flex justify-between items-center">
+                                        <span>⚠️ Chưa nộp (${unpaidHouses.length} hộ):</span>
+                                    </p>
+                                    <div class="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+                                        ${unpaidHouses.map(code => `
+                                            <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-red-100 shadow-2xs">
+                                                <span class="font-medium text-slate-800"><b>${code}</b> -${residentsMap[code] || 'Chủ hộ'}</span>
+                                                <button onclick="openRecordPaymentModal('${c._key}', '${code}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded text-[10px] transition shrink-0 ml-1">
+                                                    💵 Nộp tiền
+                                                </button>
+                                            </div>
+                                        `).join('') || '<p class="text-emerald-600 font-bold text-center py-1">🎉 100% các hộ đã hoàn thành!</p>'}
                                     </div>
                                 </div>
-                                <div>
-                                    <p class="font-bold text-emerald-600 mb-1">✅ Đã nộp (${paidCount}):</p>
-                                    <div class="max-h-24 overflow-y-auto space-y-1 text-[11px]">
-                                        ${campaignPayments.map(p => `<span class="inline-block bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100 mr-1 mb-1">${p.houseCode} (${p.method === 'Tiền mặt' ? '💵' : '💳'})</span>`).join('')}
+
+                                <!-- CỘT ĐÃ NỘP -->
+                                <div class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-100">
+                                    <p class="font-bold text-emerald-700 mb-2">✅ Đã nộp (${paidCount} hộ):</p>
+                                    <div class="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+                                        ${campaignPayments.map(p => `
+                                            <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
+                                                <div class="text-[11px]">
+                                                    <span class="font-bold text-slate-800">${p.houseCode}</span> -${residentsMap[p.houseCode] || ''}
+                                                    <span class="text-[9px] text-slate-400 block">${p.method === 'Tiền mặt' ? '💵 Tiền mặt' : '💳 Chuyển khoản'} \vert{} ${p.date || ''}</span>
+                                                </div>
+                                                <button onclick="cancelHousePayment('${c._key}', '${p.houseCode}')" title="Hủy ghi nhận nộp tiền" class="text-slate-400 hover:text-red-500 font-bold text-xs p-1 ml-1">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                            </div>
+                                        `).join('') || '<p class="text-slate-400 text-center py-1">Chưa có hộ nào nộp</p>'}
                                     </div>
                                 </div>
                             </div>
@@ -1062,10 +1157,6 @@
                         <td class="p-2 text-right"><button onclick="deleteAdminUser('${u._key}')" class="text-red-500 font-bold"><i class="fas fa-trash"></i></button></td>
                     </tr>
                 `).join('') || '<tr><td colspan="4" class="p-2 text-slate-400 text-center">Chưa có cán bộ phụ thuộc</td></tr>';
-
-                // Modal Selects
-                document.getElementById('pay-campaign-select').innerHTML = campaigns.map(c => `<option value="${c._key}">${c.title} (${Number(c.amount).toLocaleString('vi-VN')} đ)</option>`).join('');
-                document.getElementById('pay-house-select').innerHTML = Object.values(dbData.residents || {}).map(r => `<option value="${r.code}">${r.code} - ${r.name}</option>`).join('');
 
             } catch (err) {
                 console.error("Lỗi Render Dashboard Admin:", err);
