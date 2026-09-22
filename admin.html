@@ -63,7 +63,7 @@
                     <i class="fas fa-chart-pie w-5 text-center"></i><span>Tổng quan</span>
                 </button>
                 <button onclick="switchView('residents')" id="nav-residents" class="w-full hover:bg-slate-800 hover:text-white rounded-xl px-3.5 py-2.5 flex items-center gap-3 text-slate-400 transition">
-                    <i class="fas fa-users-gear w-5 text-center"></i><span>Quản lý Nhân khẩu</span>
+                    <i class="fas fa-users-gear w-5 text-center"></i><span>Quản lý Nhân khẩu & Ruộng</span>
                 </button>
                 <button onclick="switchView('finances')" id="nav-finances" class="w-full hover:bg-slate-800 hover:text-white rounded-xl px-3.5 py-2.5 flex items-center gap-3 text-slate-400 transition">
                     <i class="fas fa-wallet w-5 text-center"></i><span>Sổ Thu - Chi Quỹ</span>
@@ -212,10 +212,13 @@
             </div>
         </div>
 
-        <!-- VIEW 2: QUẢN LÝ NHÂN KHẨU -->
+        <!-- VIEW 2: QUẢN LÝ NHÂN KHẨU & DIỆN TÍCH RUỘNG -->
         <div id="view-residents" class="hidden space-y-4 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-slate-100">
-                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-users text-purple-600"></i> Danh Sách Hộ Dân & Tạm Trú</h3>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-users text-purple-600"></i> Danh Sách Hộ Dân & Diện Tích Ruộng</h3>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Quản lý nhân khẩu và căn cứ tính phí thủy lợi mùa vụ (1 sào Trung Bộ = 500m²)</p>
+                </div>
                 
                 <div class="flex flex-wrap items-center gap-2">
                     <button onclick="downloadResidentExcelTemplate()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 flex items-center gap-1.5 transition">
@@ -236,7 +239,7 @@
 
             <div class="relative">
                 <i class="fas fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
-                <input type="text" id="search-resident-input" onkeyup="filterResidents()" placeholder="Tìm kiếm theo Tên chủ hộ, Mã hộ, CCCD, SĐT, Địa chỉ, Ghi chú..." class="w-full border rounded-xl pl-9 pr-4 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                <input type="text" id="search-resident-input" onkeyup="filterResidents()" placeholder="Tìm kiếm theo Tên chủ hộ, Mã hộ, CCCD, SĐT, Địa chỉ, Diện tích ruộng..." class="w-full border rounded-xl pl-9 pr-4 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none">
             </div>
 
             <div class="overflow-x-auto">
@@ -247,6 +250,7 @@
                             <th class="p-3">Chủ Hộ / Địa Chỉ</th>
                             <th class="p-3">Số CCCD</th>
                             <th class="p-3">Nhân Khẩu</th>
+                            <th class="p-3">Diện Tích Ruộng (m²)</th>
                             <th class="p-3">SĐT</th>
                             <th class="p-3">Ghi Chú</th>
                             <th class="p-3 text-right">Thao Tác</th>
@@ -314,25 +318,37 @@
                     <form onsubmit="handleCreateCollection(event)" class="space-y-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Tên Khoản Thu *</label>
-                            <input type="text" id="thu-title" required placeholder="VD: Quỹ vệ sinh, Tiền điện đường..." class="w-full border rounded-xl px-3 py-2 text-xs">
+                            <input type="text" id="thu-title" required placeholder="VD: Quỹ vệ sinh, Tiền thủy lợi Vụ Xuân..." class="w-full border rounded-xl px-3 py-2 text-xs">
                         </div>
 
                         <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Phạm Vi & Cách Tính Tiền *</label>
+                            <select id="thu-scope" onchange="toggleScopeSelect()" class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-emerald-700">
+                                <option value="ALL">Bắt buộc tất cả các hộ trong xóm (Mức cố định)</option>
+                                <option value="THUY_LOI">🌾 Thu Thủy Lợi (Tự động tính theo diện tích ruộng)</option>
+                                <option value="CUSTOM">Tùy đối tượng (Chọn danh sách hộ)</option>
+                            </select>
+                        </div>
+
+                        <!-- KHU VỰC THU TIỀN CỐ ĐỊNH -->
+                        <div id="scope-fixed-container">
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Số Tiền / Hộ (VNĐ) *</label>
-                            <input type="number" id="thu-amount" required placeholder="VD: 50000" class="w-full border rounded-xl px-3 py-2 text-xs">
+                            <input type="number" id="thu-amount" placeholder="VD: 50000" class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
+                        </div>
+
+                        <!-- KHU VỰC THU TIỀN THỦY LỢI THEO DIỆN TÍCH RUỘNG -->
+                        <div id="scope-thuyloi-container" class="hidden space-y-2 border p-3 rounded-xl bg-amber-50/70 border-amber-200">
+                            <label class="block text-xs font-bold text-amber-800">Đơn giá Thu Thủy Lợi / 1 Sào (500m²) *</label>
+                            <div class="relative">
+                                <input type="number" id="thu-unit-price" placeholder="VD: 50000" class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-amber-900 border-amber-300">
+                                <span class="absolute right-3 top-2 text-xs text-amber-600 font-bold">VNĐ / sào</span>
+                            </div>
+                            <p class="text-[11px] text-amber-700 leading-snug">💡 <i>Hệ thống tự động lọc các hộ có diện tích ruộng > 0m² và tự tính: (Diện tích / 500) × Đơn giá.</i></p>
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Hạn Hoàn Thành *</label>
                             <input type="date" id="thu-deadline" required class="w-full border rounded-xl px-3 py-2 text-xs">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Phạm Vi Áp Dụng *</label>
-                            <select id="thu-scope" onchange="toggleScopeSelect()" class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-emerald-700">
-                                <option value="ALL">Bắt buộc tất cả các hộ trong xóm</option>
-                                <option value="CUSTOM">Tùy đối tượng (Chọn danh sách hộ)</option>
-                            </select>
                         </div>
 
                         <div id="scope-custom-container" class="hidden space-y-2 border p-3 rounded-xl bg-slate-50">
@@ -368,6 +384,7 @@
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Hạng Mục Chi *</label>
                                 <select id="chi-category" class="w-full border rounded-xl px-3 py-2 text-xs font-semibold">
                                     <option value="Đường xóm & Điện">Đường xóm & Điện</option>
+                                    <option value="Thủy lợi & Kênh mương">Thủy lợi & Kênh mương</option>
                                     <option value="Lễ hội & Sự kiện">Lễ hội & Sự kiện</option>
                                     <option value="Khuyến học & Quà">Khuyến học & Quà</option>
                                     <option value="Sửa chữa & Mua sắm">Sửa chữa & Mua sắm</option>
@@ -480,6 +497,57 @@
 
     <!-- 4. MODALS POPUP -->
 
+    <!-- MODAL THÊM HỘ DÂN -->
+    <div id="modal-add-resident" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-slate-800 text-sm">Thêm Hộ Dân Mới</h3>
+                <button onclick="closeModal('modal-add-resident')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="handleCreateResident(event)" class="space-y-3">
+                <div><label class="text-xs text-slate-500 font-semibold">Tên Chủ Hộ *</label><input type="text" id="res-name" required placeholder="Nguyễn Văn A" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><label class="text-xs text-slate-500 font-semibold">Mã Hộ *</label><input type="text" id="res-code" required placeholder="DL-X3-001" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1 font-bold text-purple-700"></div>
+                    <div><label class="text-xs text-slate-500 font-semibold">Số CCCD Chủ Hộ *</label><input type="text" id="res-cccd" required placeholder="040092xxxxxx" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div><label class="text-xs text-slate-500 font-semibold">Số ĐT</label><input type="text" id="res-phone" placeholder="0987..." class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+                    <div><label class="text-xs text-slate-500 font-semibold">Nhân Khẩu</label><input type="number" id="res-members" value="4" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+                    <div><label class="text-xs text-emerald-700 font-bold">Ruộng (m²)</label><input type="number" id="res-land" value="0" placeholder="1000" class="w-full border border-emerald-300 rounded-xl px-3 py-1.5 text-xs mt-1 font-bold text-emerald-800"></div>
+                </div>
+                <div><label class="text-xs text-slate-500 font-semibold">Nhà Số / Địa Chỉ</label><input type="text" id="res-address" placeholder="Nhà số 12, Xóm 3" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+                <div><label class="text-xs text-slate-500 font-semibold">Ghi chú</label><textarea id="res-note" rows="2" placeholder="Gia đình thương binh, Hộ nghèo..." class="w-full border rounded-xl p-2.5 text-xs mt-1"></textarea></div>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-xs transition">Lưu Hộ Dân</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CHỈNH SỬA HỘ DÂN -->
+    <div id="modal-edit-resident" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-user-pen text-purple-600"></i> Chỉnh Sửa Thông Tin Hộ Dân</h3>
+                <button onclick="closeModal('modal-edit-resident')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="handleUpdateResidentSubmit(event)" class="space-y-3">
+                <input type="hidden" id="edit-res-key">
+                <div><label class="text-xs text-slate-500 font-semibold">Tên Chủ Hộ *</label><input type="text" id="edit-res-name" required placeholder="Nguyễn Văn A" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><label class="text-xs text-slate-500 font-semibold">Mã Hộ *</label><input type="text" id="edit-res-code" required placeholder="DL-X3-001" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1 font-bold text-purple-700"></div>
+                    <div><label class="text-xs text-slate-500 font-semibold">Số CCCD Chủ Hộ *</label><input type="text" id="edit-res-cccd" required placeholder="040092xxxxxx" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1 font-mono"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div><label class="text-xs text-slate-500 font-semibold">Số ĐT</label><input type="text" id="edit-res-phone" placeholder="0987..." class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+                    <div><label class="text-xs text-slate-500 font-semibold">Nhân Khẩu</label><input type="number" id="edit-res-members" value="1" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+                    <div><label class="text-xs text-emerald-700 font-bold">Ruộng (m²)</label><input type="number" id="edit-res-land" value="0" placeholder="1000" class="w-full border border-emerald-300 rounded-xl px-3 py-1.5 text-xs mt-1 font-bold text-emerald-800"></div>
+                </div>
+                <div><label class="text-xs text-slate-500 font-semibold">Nhà Số / Địa Chỉ</label><input type="text" id="edit-res-address" placeholder="Nhà số 12, Xóm 3" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+                <div><label class="text-xs text-slate-500 font-semibold">Ghi chú</label><textarea id="edit-res-note" rows="2" placeholder="Gia đình thương binh, Hộ nghèo..." class="w-full border rounded-xl p-2.5 text-xs mt-1"></textarea></div>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-xs transition">Lưu Cập Nhật Hộ Dân</button>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL CHỈNH SỬA PHẢN ÁNH & PHÂN CÔNG NGƯỜI XỬ LÝ -->
     <div id="modal-edit-feedback" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4">
@@ -489,7 +557,6 @@
             </div>
             <form onsubmit="handleUpdateFeedbackSubmit(event)" class="space-y-3">
                 <input type="hidden" id="edit-fb-key">
-                
                 <div>
                     <label class="text-xs font-semibold text-slate-600 mb-1 block">Người gửi / SĐT</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -497,17 +564,14 @@
                         <input type="text" id="edit-fb-phone" class="border rounded-xl px-3 py-1.5 text-xs font-bold text-blue-700">
                     </div>
                 </div>
-
                 <div>
                     <label class="text-xs font-semibold text-slate-600 mb-1 block">Nội dung phản ánh *</label>
                     <textarea id="edit-fb-content" required rows="3" class="w-full border rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
-
                 <div>
                     <label class="text-xs font-bold text-emerald-700 mb-1 block">Cán bộ / Người chịu trách nhiệm xử lý sự cố *</label>
                     <input type="text" id="edit-fb-person" required placeholder="VD: Nguyễn Văn A (Cán bộ điện), Bác Nam (Xóm trưởng)..." class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500">
                 </div>
-
                 <div>
                     <label class="text-xs font-semibold text-slate-600 mb-1 block">Trạng thái xử lý *</label>
                     <select id="edit-fb-status" class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
@@ -515,7 +579,6 @@
                         <option value="Đã xử lý">✅ Đã xử lý xong</option>
                     </select>
                 </div>
-
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">Cập Nhật Thông Tin Phản Ánh</button>
             </form>
         </div>
@@ -556,7 +619,6 @@
                 <h3 class="font-bold text-slate-800 text-base"><i class="fas fa-user-gear text-emerald-600 mr-2"></i> Phân Quyền Cán Bộ Xóm</h3>
                 <button onclick="closeModal('modal-manage-users')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
             </div>
-
             <form onsubmit="handleCreateAdminUser(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                 <h4 class="font-bold text-xs text-slate-700 uppercase">Thêm Tài Khoản Cán Bộ</h4>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -575,7 +637,6 @@
                 </div>
                 <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition">Cấp Tài Khoản Mới</button>
             </form>
-
             <div>
                 <h4 class="font-bold text-xs text-slate-500 uppercase mb-2">Danh Sách Cán Bộ Cấp Quyền</h4>
                 <div class="overflow-x-auto">
@@ -592,30 +653,6 @@
                     </table>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- MODAL THÊM HỘ DÂN -->
-    <div id="modal-add-resident" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-slate-800 text-sm">Thêm Hộ Dân Mới</h3>
-                <button onclick="closeModal('modal-add-resident')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
-            </div>
-            <form onsubmit="handleCreateResident(event)" class="space-y-3">
-                <div><label class="text-xs text-slate-500">Tên Chủ Hộ *</label><input type="text" id="res-name" required placeholder="Nguyễn Văn A" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div><label class="text-xs text-slate-500">Mã Hộ *</label><input type="text" id="res-code" required placeholder="DL-X3-001" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                    <div><label class="text-xs text-slate-500">Số CCCD Chủ Hộ *</label><input type="text" id="res-cccd" required placeholder="040092xxxxxx" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div><label class="text-xs text-slate-500">Số Điện Thoại</label><input type="text" id="res-phone" placeholder="0987..." class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                    <div><label class="text-xs text-slate-500">Số Nhân Khẩu</label><input type="number" id="res-members" value="4" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                </div>
-                <div><label class="text-xs text-slate-500">Nhà Số / Địa Chỉ</label><input type="text" id="res-address" placeholder="Nhà số 12, Xóm 3" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                <div><label class="text-xs text-slate-500">Ghi chú</label><textarea id="res-note" rows="2" placeholder="Gia đình thương binh, Hộ nghèo..." class="w-full border rounded-xl p-2.5 text-xs mt-1"></textarea></div>
-                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-xs transition">Lưu Hộ Dân</button>
-            </form>
         </div>
     </div>
 
@@ -689,7 +726,6 @@
 
         function applyPermissionsUI() {
             if (!currentAdmin) return;
-
             document.getElementById('user-display-name').innerText = currentAdmin.name || 'Cán bộ';
             document.getElementById('user-display-role').innerText = currentAdmin.isSuper ? 'Xóm trưởng' : (currentAdmin.role || 'Cán bộ Xóm');
             
@@ -697,17 +733,11 @@
             if (btnOpenPerm) btnOpenPerm.style.display = currentAdmin.isSuper ? 'block' : 'none';
 
             const perms = currentAdmin.permissions || [];
-            const navResidents = document.getElementById('nav-residents');
-            const navFinances = document.getElementById('nav-finances');
-            const navNewsDocs = document.getElementById('nav-news_docs');
-            const navAnnouncements = document.getElementById('nav-announcements');
-            const navSos = document.getElementById('nav-sos');
-
-            if (navResidents) navResidents.style.display = (currentAdmin.isSuper || perms.includes('residents')) ? 'flex' : 'none';
-            if (navFinances) navFinances.style.display = (currentAdmin.isSuper || perms.includes('finances')) ? 'flex' : 'none';
-            if (navNewsDocs) navNewsDocs.style.display = (currentAdmin.isSuper || perms.includes('news_docs')) ? 'flex' : 'none';
-            if (navAnnouncements) navAnnouncements.style.display = (currentAdmin.isSuper || perms.includes('announcements')) ? 'flex' : 'none';
-            if (navSos) navSos.style.display = (currentAdmin.isSuper || perms.includes('sos')) ? 'flex' : 'none';
+            if (document.getElementById('nav-residents')) document.getElementById('nav-residents').style.display = (currentAdmin.isSuper || perms.includes('residents')) ? 'flex' : 'none';
+            if (document.getElementById('nav-finances')) document.getElementById('nav-finances').style.display = (currentAdmin.isSuper || perms.includes('finances')) ? 'flex' : 'none';
+            if (document.getElementById('nav-news_docs')) document.getElementById('nav-news_docs').style.display = (currentAdmin.isSuper || perms.includes('news_docs')) ? 'flex' : 'none';
+            if (document.getElementById('nav-announcements')) document.getElementById('nav-announcements').style.display = (currentAdmin.isSuper || perms.includes('announcements')) ? 'flex' : 'none';
+            if (document.getElementById('nav-sos')) document.getElementById('nav-sos').style.display = (currentAdmin.isSuper || perms.includes('sos')) ? 'flex' : 'none';
         }
 
         dbRef.on('value', (snapshot) => {
@@ -729,7 +759,355 @@
             renderDashboard();
         });
 
-        // CẢI TIẾN QUẢN LÝ PHẢN ÁNH: SỬA & GÁN NGƯỜI XỬ LÝ SỰ CỐ
+        // ==========================================
+        // TÍNH NĂNG NHÂN KHẨU & DIỆN TÍCH RUỘNG
+        // ==========================================
+        function handleCreateResident(e) {
+            e.preventDefault();
+            const landArea = Number(document.getElementById('res-land').value) || 0;
+            const newRes = {
+                name: document.getElementById('res-name').value.trim(),
+                code: document.getElementById('res-code').value.trim(),
+                cccd: document.getElementById('res-cccd').value.trim(),
+                phone: document.getElementById('res-phone').value.trim(),
+                members: Number(document.getElementById('res-members').value) || 1,
+                landArea: landArea,
+                hasLand: landArea > 0,
+                address: document.getElementById('res-address').value.trim() || 'Xóm Thịnh Sơn 1, Đô Lương',
+                note: document.getElementById('res-note').value.trim()
+            };
+            dbRef.child('residents').push(newRes);
+            closeModal('modal-add-resident');
+            e.target.reset();
+            alert("Đã lưu hộ dân mới!");
+        }
+
+        function openEditResidentModal(key) {
+            const res = dbData.residents ? dbData.residents[key] : null;
+            if (!res) return;
+
+            document.getElementById('edit-res-key').value = key;
+            document.getElementById('edit-res-name').value = res.name || '';
+            document.getElementById('edit-res-code').value = res.code || '';
+            document.getElementById('edit-res-cccd').value = res.cccd || '';
+            document.getElementById('edit-res-phone').value = res.phone || '';
+            document.getElementById('edit-res-members').value = res.members || 1;
+            document.getElementById('edit-res-land').value = res.landArea || 0;
+            document.getElementById('edit-res-address').value = res.address || '';
+            document.getElementById('edit-res-note').value = res.note || '';
+
+            openModal('modal-edit-resident');
+        }
+
+        function handleUpdateResidentSubmit(e) {
+            e.preventDefault();
+            const key = document.getElementById('edit-res-key').value;
+            const landArea = Number(document.getElementById('edit-res-land').value) || 0;
+
+            const updatedRes = {
+                name: document.getElementById('edit-res-name').value.trim(),
+                code: document.getElementById('edit-res-code').value.trim(),
+                cccd: document.getElementById('edit-res-cccd').value.trim(),
+                phone: document.getElementById('edit-res-phone').value.trim(),
+                members: Number(document.getElementById('edit-res-members').value) || 1,
+                landArea: landArea,
+                hasLand: landArea > 0,
+                address: document.getElementById('edit-res-address').value.trim(),
+                note: document.getElementById('edit-res-note').value.trim()
+            };
+
+            dbRef.child('residents').child(key).update(updatedRes);
+            closeModal('modal-edit-resident');
+            alert("✅ Đã cập nhật thông tin hộ dân thành công!");
+        }
+
+        function filterResidents() {
+            residentSearchQuery = (document.getElementById('search-resident-input').value || '').toLowerCase().trim();
+            renderResidentsTable();
+        }
+
+        function renderResidentsTable() {
+            const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
+            const filtered = resList.filter(r => {
+                const q = residentSearchQuery;
+                return (r.name || '').toLowerCase().includes(q) ||
+                       (r.code || '').toLowerCase().includes(q) ||
+                       (r.cccd || '').toLowerCase().includes(q) ||
+                       (r.phone || '').toLowerCase().includes(q) ||
+                       (r.address || '').toLowerCase().includes(q) ||
+                       (r.landArea || '').toString().includes(q) ||
+                       (r.note || '').toLowerCase().includes(q);
+            });
+
+            const canManageResidents = currentAdmin && (currentAdmin.isSuper || (currentAdmin.permissions && currentAdmin.permissions.includes('residents')));
+
+            const tbody = document.getElementById('full-residents-tbody');
+            if (tbody) {
+                tbody.innerHTML = filtered.map(r => {
+                    const landArea = Number(r.landArea || 0);
+                    const sao = (landArea / 500).toFixed(1);
+
+                    return `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3 font-bold text-purple-600">${r.code || 'DL-X3'}</td>
+                            <td class="p-3 font-semibold text-slate-800">${r.name}<br><span class="text-[10px] text-slate-400 font-normal">${r.address || ''}</span></td>
+                            <td class="p-3 font-mono text-slate-600">${r.cccd || '---'}</td>
+                            <td class="p-3">${r.members || 1} người</td>
+                            <td class="p-3">
+                                ${landArea > 0 ? `
+                                    <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-xs flex items-center gap-1 w-max">
+                                        <i class="fas fa-wheat-awn text-emerald-600"></i> ${landArea.toLocaleString('vi-VN')} m² (${sao} sào)
+                                    </span>
+                                ` : '<span class="text-slate-400 italic">Không có ruộng</span>'}
+                            </td>
+                            <td class="p-3 text-slate-500">${r.phone || '---'}</td>
+                            <td class="p-3 text-slate-600 max-w-xs text-[11px]">${r.note || '<span class="text-slate-300 italic">Không có</span>'}</td>
+                            <td class="p-3 text-right">
+                                ${canManageResidents ? `
+                                    <button onclick="openEditResidentModal('${r._key}')" class="text-blue-600 hover:text-blue-800 font-bold mr-2 text-xs"><i class="fas fa-pen-to-square"></i> Sửa</button>
+                                    <button onclick="deleteResident('${r._key}')" class="text-red-500 hover:text-red-700 font-bold text-xs"><i class="fas fa-trash"></i> Xóa</button>
+                                ` : '<span class="text-slate-300">-</span>'}
+                            </td>
+                        </tr>
+                    `;
+                }).join('') || '<tr><td colspan="8" class="p-4 text-center text-slate-400">Không tìm thấy hộ dân nào</td></tr>';
+            }
+        }
+
+        function deleteResident(key) { if (confirm("Xóa hộ dân này?")) dbRef.child('residents').child(key).remove(); }
+
+        function downloadResidentExcelTemplate() {
+            const sampleData = [{ "Mã Hộ": "DL-TS1-0001", "Họ và Tên Chủ Hộ": "Nguyễn Văn A", "Số CCCD": "040092001234", "Số Điện Thoại": "0987654321", "Số Nhân Khẩu": 4, "Diện Tích Ruộng (m2)": 1000, "Địa Chỉ": "Nhà số 12, Xóm Thịnh Sơn 1", "Ghi Chú": "Hộ gia đình văn hóa" }];
+            const worksheet = XLSX.utils.json_to_sheet(sampleData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Mau_Nhap_Ho_Dan");
+            XLSX.writeFile(workbook, "Mau_Nhap_Danh_Sach_Ho_Dan.xlsx");
+        }
+
+        function handleExcelImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+                    if (!jsonRows || jsonRows.length === 0) return alert("File Excel trống!");
+
+                    let addedCount = 0;
+                    const updates = {};
+
+                    jsonRows.forEach((row, index) => {
+                        const name = (row["Họ và Tên Chủ Hộ"] || row["Họ và Tên"] || row["Chủ Hộ"] || "").toString().trim();
+                        const code = (row["Mã Hộ"] || `DL-TS1-${1000 + index}`).toString().trim();
+                        const cccd = (row["Số CCCD"] || "").toString().trim();
+                        const phone = (row["Số Điện Thoại"] || row["SĐT"] || "").toString().trim();
+                        const members = Number(row["Số Nhân Khẩu"] || 1);
+                        const landArea = Number(row["Diện Tích Ruộng (m2)"] || row["Diện Tích Ruộng"] || row["Ruộng (m2)"] || 0);
+                        const address = (row["Địa Chỉ"] || "Xóm Thịnh Sơn 1, Đô Lương").toString().trim();
+                        const note = (row["Ghi Chú"] || "").toString().trim();
+
+                        if (name || code) {
+                            const newKey = dbRef.child('residents').push().key;
+                            updates[`residents/${newKey}`] = { name: name || "Chưa tên", code, cccd, phone, members: isNaN(members) ? 1 : members, landArea: isNaN(landArea) ? 0 : landArea, hasLand: landArea > 0, address, note };
+                            addedCount++;
+                        }
+                    });
+
+                    if (addedCount > 0) dbRef.update(updates, () => alert(`🎉 Đã nhập thành công ${addedCount} hộ dân!`));
+
+                } catch (err) { alert("Lỗi đọc file Excel!"); } 
+                finally { event.target.value = ""; }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function exportResidentsToExcel() {
+            const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
+            if (resList.length === 0) return alert("Chưa có dữ liệu hộ dân!");
+
+            const excelData = resList.map((r, index) => ({
+                "STT": index + 1, "Mã Hộ": r.code || 'DL-TS1', "Họ và Tên Chủ Hộ": r.name || '', "Số CCCD": r.cccd || '', "Số Điện Thoại": r.phone || '', "Số Nhân Khẩu": r.members || 1, "Diện Tích Ruộng (m2)": r.landArea || 0, "Số Sào (500m2)": (Number(r.landArea || 0) / 500).toFixed(1), "Địa Chỉ": r.address || 'Xóm Thịnh Sơn 1, Đô Lương', "Ghi Chú": r.note || ''
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachHoDan");
+            XLSX.writeFile(workbook, `Danh_Sach_Ho_Dan_Xom_So_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.xlsx`);
+        }
+
+        // ==========================================
+        // THU TIỀN QUỸ & THỦY LỢI TỰ ĐỘNG
+        // ==========================================
+        function toggleScopeSelect() {
+            const scope = document.getElementById('thu-scope').value;
+            const containerCustom = document.getElementById('scope-custom-container');
+            const containerFixed = document.getElementById('scope-fixed-container');
+            const containerThuyLoi = document.getElementById('scope-thuyloi-container');
+
+            if (scope === 'CUSTOM') {
+                containerCustom.classList.remove('hidden');
+                containerFixed.classList.remove('hidden');
+                containerThuyLoi.classList.add('hidden');
+                renderHouseholdPicker();
+            } else if (scope === 'THUY_LOI') {
+                containerCustom.classList.add('hidden');
+                containerFixed.classList.add('hidden');
+                containerThuyLoi.classList.remove('hidden');
+            } else {
+                containerCustom.classList.add('hidden');
+                containerFixed.classList.remove('hidden');
+                containerThuyLoi.classList.add('hidden');
+            }
+        }
+
+        function handleCreateCollection(e) {
+            e.preventDefault();
+            const scope = document.getElementById('thu-scope').value;
+            const allResList = Object.values(dbData.residents || {});
+            
+            let assigned = [];
+            let houseAmounts = {}; // Chứa số tiền riêng từng hộ (cho thủy lợi)
+            let baseAmount = Number(document.getElementById('thu-amount').value) || 0;
+
+            if (scope === 'ALL') {
+                assigned = allResList.map(r => r.code);
+            } else if (scope === 'CUSTOM') {
+                assigned = selectedCustomHouses;
+                if (assigned.length === 0) return alert("Vui lòng chọn ít nhất 1 hộ dân!");
+            } else if (scope === 'THUY_LOI') {
+                const unitPricePerSao = Number(document.getElementById('thu-unit-price').value) || 0;
+                if (unitPricePerSao <= 0) return alert("Vui lòng nhập đơn giá thủy lợi hợp lệ trên 1 sào!");
+
+                // Lọc các hộ có diện tích ruộng > 0
+                const landOwners = allResList.filter(r => Number(r.landArea || 0) > 0);
+                if (landOwners.length === 0) return alert("Hiện tại chưa có hộ nào có diện tích ruộng được nhập vào hệ thống!");
+
+                landOwners.forEach(r => {
+                    assigned.push(r.code);
+                    const landArea = Number(r.landArea || 0);
+                    // Công thức: (Diện tích / 500) * đơn giá 1 sào
+                    const calculatedAmount = Math.round((landArea / 500) * unitPricePerSao);
+                    houseAmounts[r.code] = calculatedAmount;
+                });
+
+                baseAmount = unitPricePerSao; // Lưu đơn giá sào làm mốc
+            }
+
+            const newCampaign = {
+                title: document.getElementById('thu-title').value.trim(),
+                amount: baseAmount,
+                scope: scope,
+                assignedHouses: assigned,
+                houseAmounts: houseAmounts, // Danh sách số tiền tùy chỉnh từng hộ
+                deadline: document.getElementById('thu-deadline').value,
+                createdAt: new Date().toLocaleDateString('vi-VN')
+            };
+
+            dbRef.child('campaigns').push(newCampaign);
+            e.target.reset();
+            selectedCustomHouses = [];
+            document.getElementById('scope-custom-container').classList.add('hidden');
+            document.getElementById('scope-thuyloi-container').classList.add('hidden');
+            document.getElementById('scope-fixed-container').classList.remove('hidden');
+            alert(`🎉 Đã tạo đợt thu thành công! (${assigned.length} hộ được gán)`);
+        }
+
+        // LẤY SỐ TIỀN CỤ THỂ CỦA MỘT HỘ TRONG ĐỢT THU
+        function getHouseCampaignAmount(campaign, houseCode) {
+            if (campaign.scope === 'THUY_LOI' && campaign.houseAmounts && campaign.houseAmounts[houseCode] !== undefined) {
+                return Number(campaign.houseAmounts[houseCode]);
+            }
+            return Number(campaign.amount || 0);
+        }
+
+        function updatePayHouseDropdown(targetHouseCode = null) {
+            const campaignKey = document.getElementById('pay-campaign-select').value;
+            const campaign = dbData.campaigns ? dbData.campaigns[campaignKey] : null;
+            const selectHouse = document.getElementById('pay-house-select');
+
+            if (!campaign) { selectHouse.innerHTML = `<option value="">Không có hộ nào</option>`; return; }
+
+            const assignedCodes = campaign.assignedHouses || [];
+            const payments = Object.values(dbData.payments || {});
+            const paidCodes = payments.filter(p => p.campaignKey === campaignKey).map(p => p.houseCode);
+            
+            const unpaidCodes = assignedCodes.filter(code => !paidCodes.includes(code));
+            const residentsList = Object.values(dbData.residents || {});
+
+            if (unpaidCodes.length === 0) { selectHouse.innerHTML = `<option value="">🎉 Tất cả các hộ đã nộp đủ!</option>`; return; }
+
+            selectHouse.innerHTML = unpaidCodes.map(code => {
+                const res = residentsList.find(r => r.code === code);
+                const amt = getHouseCampaignAmount(campaign, code);
+                return `<option value="${code}">${code} - ${res ? res.name : 'Chưa cập nhật tên'} (${amt.toLocaleString('vi-VN')} đ)</option>`;
+            }).join('');
+
+            if (targetHouseCode && unpaidCodes.includes(targetHouseCode)) selectHouse.value = targetHouseCode;
+        }
+
+        function handleRecordPaymentSubmit(e) {
+            e.preventDefault();
+            const campaignKey = document.getElementById('pay-campaign-select').value;
+            const houseCode = document.getElementById('pay-house-select').value;
+            const method = document.getElementById('pay-method-select').value;
+
+            if (!houseCode) return alert("Vui lòng chọn một hộ dân hợp lệ!");
+            const campaign = dbData.campaigns ? dbData.campaigns[campaignKey] : null;
+            const actualAmount = getHouseCampaignAmount(campaign, houseCode);
+
+            const newPayment = {
+                campaignKey, campaignTitle: campaign.title, houseCode, amount: actualAmount, method,
+                date: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})
+            };
+
+            dbRef.child('payments').push(newPayment);
+            closeModal('modal-record-payment');
+            alert(`✅ Đã ghi nhận hộ [${houseCode}] nộp ${actualAmount.toLocaleString('vi-VN')} đ thành công!`);
+        }
+
+        // ==========================================
+        // CÁC HÀM Bổ TRỢ KHÁC & RENDER DỮ LIỆU
+        // ==========================================
+        function openRecordPaymentModal(preselectedCampaignKey = null, preselectedHouseCode = null) {
+            const campaigns = Object.entries(dbData.campaigns || {}).map(([k, v]) => ({ _key: k, ...v }));
+            if (campaigns.length === 0) return alert("Chưa có đợt thu nào!");
+
+            const selectCamp = document.getElementById('pay-campaign-select');
+            selectCamp.innerHTML = campaigns.map(c => `<option value="${c._key}">${c.title} (${c.scope === 'THUY_LOI' ? 'Đơn giá ' + Number(c.amount).toLocaleString('vi-VN') + ' đ/sào' : Number(c.amount).toLocaleString('vi-VN') + ' đ/hộ'})</option>`).join('');
+
+            if (preselectedCampaignKey) selectCamp.value = preselectedCampaignKey;
+            updatePayHouseDropdown(preselectedHouseCode);
+            openModal('modal-record-payment');
+        }
+
+        function renderHouseholdPicker() {
+            const resList = Object.values(dbData.residents || {});
+            const query = (document.getElementById('search-household-picker')?.value || '').toLowerCase().trim();
+            const filtered = resList.filter(r => (r.name || '').toLowerCase().includes(query) || (r.code || '').toLowerCase().includes(query));
+
+            const listContainer = document.getElementById('household-picker-list');
+            if (listContainer) {
+                listContainer.innerHTML = filtered.map(r => `
+                    <label class="flex items-center gap-2 p-1.5 bg-white rounded border hover:bg-slate-100 cursor-pointer">
+                        <input type="checkbox" value="${r.code}" ${selectedCustomHouses.includes(r.code) ? 'checked' : ''} onchange="toggleCustomHouseSelection('${r.code}')" class="rounded text-emerald-600">
+                        <span><b>${r.code}</b> - ${r.name}</span>
+                    </label>
+                `).join('') || '<p class="text-xs text-slate-400 p-1">Không tìm thấy hộ phù hợp</p>';
+            }
+        }
+
+        function filterHouseholdPicker() { renderHouseholdPicker(); }
+        function toggleCustomHouseSelection(code) {
+            const idx = selectedCustomHouses.indexOf(code);
+            if (idx > -1) selectedCustomHouses.splice(idx, 1);
+            else selectedCustomHouses.push(code);
+        }
+
         function openEditFeedbackModal(key) {
             const fb = dbData.feedbacks ? dbData.feedbacks[key] : null;
             if (!fb) return;
@@ -774,8 +1152,6 @@
         }
 
         function deleteFeedback(key) { if (confirm("Xóa phản ánh này?")) dbRef.child('feedbacks').child(key).remove(); }
-
-        // LƯU CẤU HÌNH TÀI KHOẢN NGÂN HÀNG THỦ QUỸ
         function handleSaveBankInfo(e) {
             e.preventDefault();
             const bankInfo = {
@@ -784,19 +1160,16 @@
                 accountNo: document.getElementById('bank-acc-no').value.trim(),
                 accountOwner: document.getElementById('bank-acc-owner').value.trim().toUpperCase()
             };
-
             dbRef.child('settings/bankInfo').set(bankInfo);
             alert("✅ Đã lưu cấu hình Tài khoản Thủ quỹ & Tạo VietQR thành công!");
         }
 
-        // BẬT / TẮT BẢNG THU CHI CHO DÂN
         function toggleFinancesPublic() {
             const isCurrentPublic = dbData.settings && dbData.settings.showFinances === true;
             dbRef.child('settings').update({ showFinances: !isCurrentPublic });
             alert(!isCurrentPublic ? "Đã BẬT công khai Sổ Thu Chi cho Dân!" : "Đã TẮT công khai!");
         }
 
-        // CHUYỂN TAB THU / CHI
         function switchFinTab(tab) {
             if (tab === 'thu') {
                 document.getElementById('fin-tab-thu').classList.remove('hidden');
@@ -812,7 +1185,6 @@
             }
         }
 
-        // TẠO TIN TỨC / VĂN BẢN PHÁP LUẬT
         function handleCreateNewsDoc(e) {
             e.preventDefault();
             const newItem = {
@@ -822,17 +1194,12 @@
                 link: document.getElementById('news-link').value.trim() || null,
                 date: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})
             };
-
             dbRef.child('news_docs').push(newItem);
             e.target.reset();
             alert("Đã đăng bài viết/văn bản mới lên App Dân!");
         }
 
-        function deleteNewsDoc(key) {
-            if (confirm("Xóa bài viết / văn bản này?")) dbRef.child('news_docs').child(key).remove();
-        }
-
-        // TẠO THÔNG BÁO LOA PHƯỜNG
+        function deleteNewsDoc(key) { if (confirm("Xóa bài viết / văn bản này?")) dbRef.child('news_docs').child(key).remove(); }
         function handleCreateAnnouncement(e) {
             e.preventDefault();
             const newAnn = {
@@ -846,185 +1213,7 @@
             alert("Đã phát thông báo thành công!");
         }
 
-        function deleteAnnouncement(key) {
-            if (confirm("Xóa thông báo này?")) dbRef.child('announcements').child(key).remove();
-        }
-
-        // PHẦN QUẢN LÝ NHÂN KHẨU & NHẬP EXCEL
-        function filterResidents() {
-            residentSearchQuery = (document.getElementById('search-resident-input').value || '').toLowerCase().trim();
-            renderResidentsTable();
-        }
-
-        function renderResidentsTable() {
-            const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
-            const filtered = resList.filter(r => {
-                const q = residentSearchQuery;
-                return (r.name || '').toLowerCase().includes(q) ||
-                       (r.code || '').toLowerCase().includes(q) ||
-                       (r.cccd || '').toLowerCase().includes(q) ||
-                       (r.phone || '').toLowerCase().includes(q) ||
-                       (r.address || '').toLowerCase().includes(q) ||
-                       (r.note || '').toLowerCase().includes(q);
-            });
-
-            const canManageResidents = currentAdmin && (currentAdmin.isSuper || (currentAdmin.permissions && currentAdmin.permissions.includes('residents')));
-
-            const tbody = document.getElementById('full-residents-tbody');
-            if (tbody) {
-                tbody.innerHTML = filtered.map(r => `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 font-bold text-purple-600">${r.code || 'DL-X3'}</td>
-                        <td class="p-3 font-semibold text-slate-800">${r.name}<br><span class="text-[10px] text-slate-400 font-normal">${r.address || ''}</span></td>
-                        <td class="p-3 font-mono text-slate-600">${r.cccd || '---'}</td>
-                        <td class="p-3">${r.members || 1} người</td>
-                        <td class="p-3 text-slate-500">${r.phone || '---'}</td>
-                        <td class="p-3 text-slate-600 max-w-xs text-[11px]">${r.note || '<span class="text-slate-300 italic">Không có</span>'}</td>
-                        <td class="p-3 text-right">
-                            ${canManageResidents ? `<button onclick="deleteResident('${r._key}')" class="text-red-500 hover:text-red-700 font-bold"><i class="fas fa-trash"></i></button>` : '<span class="text-slate-300">-</span>'}
-                        </td>
-                    </tr>
-                `).join('') || '<tr><td colspan="7" class="p-4 text-center text-slate-400">Không tìm thấy hộ dân nào</td></tr>';
-            }
-        }
-
-        function handleCreateResident(e) {
-            e.preventDefault();
-            const newRes = {
-                name: document.getElementById('res-name').value.trim(),
-                code: document.getElementById('res-code').value.trim(),
-                cccd: document.getElementById('res-cccd').value.trim(),
-                phone: document.getElementById('res-phone').value.trim(),
-                members: Number(document.getElementById('res-members').value) || 1,
-                address: document.getElementById('res-address').value.trim() || 'Xóm Thịnh Sơn 1, Đô Lương',
-                note: document.getElementById('res-note').value.trim()
-            };
-            dbRef.child('residents').push(newRes);
-            closeModal('modal-add-resident');
-            e.target.reset();
-            alert("Đã lưu hộ dân mới!");
-        }
-
-        function deleteResident(key) { if (confirm("Xóa hộ dân này?")) dbRef.child('residents').child(key).remove(); }
-
-        function downloadResidentExcelTemplate() {
-            const sampleData = [{ "Mã Hộ": "DL-TS1-0001", "Họ và Tên Chủ Hộ": "Nguyễn Văn A", "Số CCCD": "040092001234", "Số Điện Thoại": "0987654321", "Số Nhân Khẩu": 4, "Địa Chỉ": "Nhà số 12, Xóm Thịnh Sơn 1", "Ghi Chú": "Hộ gia đình văn hóa" }];
-            const worksheet = XLSX.utils.json_to_sheet(sampleData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Mau_Nhap_Ho_Dan");
-            XLSX.writeFile(workbook, "Mau_Nhap_Danh_Sach_Ho_Dan.xlsx");
-        }
-
-        function handleExcelImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-                    if (!jsonRows || jsonRows.length === 0) return alert("File Excel trống!");
-
-                    let addedCount = 0;
-                    const updates = {};
-
-                    jsonRows.forEach((row, index) => {
-                        const name = (row["Họ và Tên Chủ Hộ"] || row["Họ và Tên"] || row["Chủ Hộ"] || "").toString().trim();
-                        const code = (row["Mã Hộ"] || `DL-TS1-${1000 + index}`).toString().trim();
-                        const cccd = (row["Số CCCD"] || "").toString().trim();
-                        const phone = (row["Số Điện Thoại"] || row["SĐT"] || "").toString().trim();
-                        const members = Number(row["Số Nhân Khẩu"] || 1);
-                        const address = (row["Địa Chỉ"] || "Xóm Thịnh Sơn 1, Đô Lương").toString().trim();
-                        const note = (row["Ghi Chú"] || "").toString().trim();
-
-                        if (name || code) {
-                            const newKey = dbRef.child('residents').push().key;
-                            updates[`residents/${newKey}`] = { name: name || "Chưa tên", code, cccd, phone, members: isNaN(members) ? 1 : members, address, note };
-                            addedCount++;
-                        }
-                    });
-
-                    if (addedCount > 0) dbRef.update(updates, () => alert(`🎉 Đã nhập thành công ${addedCount} hộ dân!`));
-
-                } catch (err) { alert("Lỗi đọc file Excel!"); } 
-                finally { event.target.value = ""; }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function exportResidentsToExcel() {
-            const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
-            if (resList.length === 0) return alert("Chưa có dữ liệu hộ dân!");
-
-            const excelData = resList.map((r, index) => ({
-                "STT": index + 1, "Mã Hộ": r.code || 'DL-TS1', "Họ và Tên Chủ Hộ": r.name || '', "Số CCCD": r.cccd || '', "Số Điện Thoại": r.phone || '', "Số Nhân Khẩu": r.members || 1, "Địa Chỉ": r.address || 'Xóm Thịnh Sơn 1, Đô Lương', "Ghi Chú": r.note || ''
-            }));
-
-            const worksheet = XLSX.utils.json_to_sheet(excelData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachHoDan");
-            XLSX.writeFile(workbook, `Danh_Sach_Ho_Dan_Xom_So_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.xlsx`);
-        }
-
-        function toggleScopeSelect() {
-            const scope = document.getElementById('thu-scope').value;
-            const container = document.getElementById('scope-custom-container');
-            if (scope === 'CUSTOM') { container.classList.remove('hidden'); renderHouseholdPicker(); } 
-            else { container.classList.add('hidden'); }
-        }
-
-        function renderHouseholdPicker() {
-            const resList = Object.values(dbData.residents || {});
-            const query = (document.getElementById('search-household-picker')?.value || '').toLowerCase().trim();
-            const filtered = resList.filter(r => (r.name || '').toLowerCase().includes(query) || (r.code || '').toLowerCase().includes(query));
-
-            const listContainer = document.getElementById('household-picker-list');
-            if (listContainer) {
-                listContainer.innerHTML = filtered.map(r => `
-                    <label class="flex items-center gap-2 p-1.5 bg-white rounded border hover:bg-slate-100 cursor-pointer">
-                        <input type="checkbox" value="${r.code}" ${selectedCustomHouses.includes(r.code) ? 'checked' : ''} onchange="toggleCustomHouseSelection('${r.code}')" class="rounded text-emerald-600">
-                        <span><b>${r.code}</b> - ${r.name}</span>
-                    </label>
-                `).join('') || '<p class="text-xs text-slate-400 p-1">Không tìm thấy hộ phù hợp</p>';
-            }
-        }
-
-        function filterHouseholdPicker() { renderHouseholdPicker(); }
-
-        function toggleCustomHouseSelection(code) {
-            const idx = selectedCustomHouses.indexOf(code);
-            if (idx > -1) selectedCustomHouses.splice(idx, 1);
-            else selectedCustomHouses.push(code);
-        }
-
-        function handleCreateCollection(e) {
-            e.preventDefault();
-            const scope = document.getElementById('thu-scope').value;
-            const allResList = Object.values(dbData.residents || {});
-            
-            let assigned = scope === 'ALL' ? allResList.map(r => r.code) : selectedCustomHouses;
-            if (assigned.length === 0) return alert("Vui lòng chọn ít nhất 1 hộ dân!");
-
-            const newCampaign = {
-                title: document.getElementById('thu-title').value.trim(),
-                amount: Number(document.getElementById('thu-amount').value) || 0,
-                deadline: document.getElementById('thu-deadline').value,
-                scope: scope,
-                assignedHouses: assigned,
-                createdAt: new Date().toLocaleDateString('vi-VN')
-            };
-
-            dbRef.child('campaigns').push(newCampaign);
-            e.target.reset();
-            selectedCustomHouses = [];
-            document.getElementById('scope-custom-container').classList.add('hidden');
-            alert("Đã tạo đợt thu thành công!");
-        }
-
+        function deleteAnnouncement(key) { if (confirm("Xóa thông báo này?")) dbRef.child('announcements').child(key).remove(); }
         function deleteCampaign(key) {
             if (confirm("Xóa đợt thu này? Toàn bộ lịch sử nộp tiền đợt này sẽ bị xóa.")) {
                 dbRef.child('campaigns').child(key).remove();
@@ -1044,69 +1233,12 @@
                 receiver: document.getElementById('chi-receiver').value.trim(),
                 note: document.getElementById('chi-note').value.trim()
             };
-
             dbRef.child('expenses').push(newExp);
             e.target.reset();
             alert("Đã lưu Phiếu Chi Xóm!");
         }
 
         function deleteExpense(key) { if (confirm("Xóa phiếu chi này?")) dbRef.child('expenses').child(key).remove(); }
-
-        function openRecordPaymentModal(preselectedCampaignKey = null, preselectedHouseCode = null) {
-            const campaigns = Object.entries(dbData.campaigns || {}).map(([k, v]) => ({ _key: k, ...v }));
-            if (campaigns.length === 0) return alert("Chưa có đợt thu nào!");
-
-            const selectCamp = document.getElementById('pay-campaign-select');
-            selectCamp.innerHTML = campaigns.map(c => `<option value="${c._key}">${c.title} (${Number(c.amount).toLocaleString('vi-VN')} đ/hộ)</option>`).join('');
-
-            if (preselectedCampaignKey) selectCamp.value = preselectedCampaignKey;
-            updatePayHouseDropdown(preselectedHouseCode);
-            openModal('modal-record-payment');
-        }
-
-        function updatePayHouseDropdown(targetHouseCode = null) {
-            const campaignKey = document.getElementById('pay-campaign-select').value;
-            const campaign = dbData.campaigns ? dbData.campaigns[campaignKey] : null;
-            const selectHouse = document.getElementById('pay-house-select');
-
-            if (!campaign) { selectHouse.innerHTML = `<option value="">Không có hộ nào</option>`; return; }
-
-            const assignedCodes = campaign.assignedHouses || [];
-            const payments = Object.values(dbData.payments || {});
-            const paidCodes = payments.filter(p => p.campaignKey === campaignKey).map(p => p.houseCode);
-            
-            const unpaidCodes = assignedCodes.filter(code => !paidCodes.includes(code));
-            const residentsList = Object.values(dbData.residents || {});
-
-            if (unpaidCodes.length === 0) { selectHouse.innerHTML = `<option value="">🎉 Tất cả các hộ đã nộp đủ!</option>`; return; }
-
-            selectHouse.innerHTML = unpaidCodes.map(code => {
-                const res = residentsList.find(r => r.code === code);
-                return `<option value="${code}">${code} - ${res ? res.name : 'Chưa cập nhật tên'}</option>`;
-            }).join('');
-
-            if (targetHouseCode && unpaidCodes.includes(targetHouseCode)) selectHouse.value = targetHouseCode;
-        }
-
-        function handleRecordPaymentSubmit(e) {
-            e.preventDefault();
-            const campaignKey = document.getElementById('pay-campaign-select').value;
-            const houseCode = document.getElementById('pay-house-select').value;
-            const method = document.getElementById('pay-method-select').value;
-
-            if (!houseCode) return alert("Vui lòng chọn một hộ dân hợp lệ!");
-            const campaign = dbData.campaigns ? dbData.campaigns[campaignKey] : null;
-
-            const newPayment = {
-                campaignKey, campaignTitle: campaign.title, houseCode, amount: campaign.amount, method,
-                date: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})
-            };
-
-            dbRef.child('payments').push(newPayment);
-            closeModal('modal-record-payment');
-            alert(`✅ Đã ghi nhận hộ [${houseCode}] nộp tiền thành công!`);
-        }
-
         function cancelHousePayment(campaignKey, houseCode) {
             if (confirm(`Xác nhận HỦY ghi nhận nộp tiền của hộ [${houseCode}]?`)) {
                 const paymentsEntries = Object.entries(dbData.payments || {});
@@ -1117,7 +1249,6 @@
 
         function approveTTTV(key) { dbRef.child('tamtru_tamvang').child(key).update({ status: 'Đã duyệt' }); }
         function deleteTTTV(key) { if (confirm("Xóa hồ sơ này?")) dbRef.child('tamtru_tamvang').child(key).remove(); }
-
         function handleCreateAdminUser(e) {
             e.preventDefault();
             const perms = [];
@@ -1136,10 +1267,9 @@
             e.target.reset();
             alert("Đã cấp tài khoản cán bộ mới!");
         }
-
         function deleteAdminUser(key) { if (confirm("Xóa tài khoản cán bộ này?")) dbRef.child('admin_users').child(key).remove(); }
 
-        // RENDER TẤT CẢ DỮ LIỆU BẢNG ĐIỀU KHIỂN
+        // RENDER TẤT CẢ DỮ LIỆU
         function renderDashboard() {
             try {
                 const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
@@ -1168,8 +1298,11 @@
                     const campaignPayments = payments.filter(p => p.campaignKey === c._key);
                     const paidHouseCodes = campaignPayments.map(p => p.houseCode);
                     const assigned = c.assignedHouses || [];
-                    const unpaidCount = assigned.filter(code => !paidHouseCodes.includes(code)).length;
-                    pendingTotal += unpaidCount * Number(c.amount || 0);
+                    const unpaidHouses = assigned.filter(code => !paidHouseCodes.includes(code));
+                    
+                    unpaidHouses.forEach(code => {
+                        pendingTotal += getHouseCampaignAmount(c, code);
+                    });
                 });
 
                 document.getElementById('stat-residents-count').innerText = resList.length || 0;
@@ -1207,7 +1340,7 @@
                     </tr>
                 `).join('') : '<tr><td colspan="7" class="p-4 text-center text-slate-400">Không có hồ sơ tạm trú/vắng mới</td></tr>';
 
-                // Render Phản ánh (Có SĐT & Nút Sửa / Phân công người xử lý)
+                // Render Phản ánh
                 const renderFeedbackRows = (list) => list.map(f => `
                     <tr>
                         <td class="py-3 font-semibold text-slate-800">
@@ -1253,9 +1386,14 @@
                         <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 space-y-3">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md">${c.scope === 'ALL' ? 'Tất cả các hộ' : 'Tùy chọn hộ'}</span>
+                                    <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                        ${c.scope === 'THUY_LOI' ? '🌾 Đợt Thu Thủy Lợi Ruộng' : (c.scope === 'ALL' ? 'Tất cả các hộ' : 'Tùy chọn hộ')}
+                                    </span>
                                     <h4 class="font-bold text-slate-800 text-sm mt-1">${c.title}</h4>
-                                    <p class="text-xs text-slate-500">Mức đóng: <b class="text-emerald-600">${Number(c.amount).toLocaleString('vi-VN')} đ</b> / hộ | Hạn: <b class="text-red-500">${c.deadline}</b></p>
+                                    <p class="text-xs text-slate-500">
+                                        ${c.scope === 'THUY_LOI' ? `Đơn giá: <b class="text-amber-700">${Number(c.amount).toLocaleString('vi-VN')} đ/sào</b> (tự nhân diện tích)` : `Mức đóng: <b class="text-emerald-600">${Number(c.amount).toLocaleString('vi-VN')} đ</b> / hộ`} 
+                                        | Hạn: <b class="text-red-500">${c.deadline}</b>
+                                    </p>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="text-xs font-bold bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">Tiến độ: ${paidCount}/${assigned.length} hộ</span>
@@ -1267,12 +1405,15 @@
                                 <div class="bg-red-50/70 p-3 rounded-xl border border-red-100">
                                     <p class="font-bold text-red-600 mb-2">⚠️ Chưa nộp (${unpaidHouses.length} hộ):</p>
                                     <div class="max-h-36 overflow-y-auto space-y-1.5 pr-1">
-                                        ${unpaidHouses.map(code => `
-                                            <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-red-100 shadow-2xs">
-                                                <span class="font-medium text-slate-800"><b>${code}</b> - ${residentsMap[code] || 'Chủ hộ'}</span>
-                                                <button onclick="openRecordPaymentModal('${c._key}', '${code}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded text-[10px] transition shrink-0 ml-1">💵 Nộp tiền</button>
-                                            </div>
-                                        `).join('') || '<p class="text-emerald-600 font-bold text-center py-1">🎉 100% các hộ đã hoàn thành!</p>'}
+                                        ${unpaidHouses.map(code => {
+                                            const amt = getHouseCampaignAmount(c, code);
+                                            return `
+                                                <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-red-100 shadow-2xs">
+                                                    <span class="font-medium text-slate-800"><b>${code}</b> -${residentsMap[code] || 'Chủ hộ'} <b class="text-red-600">(${amt.toLocaleString('vi-VN')}đ)</b></span>
+                                                    <button onclick="openRecordPaymentModal('${c._key}', '${code}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded text-[10px] transition shrink-0 ml-1">💵 Nộp tiền</button>
+                                                </div>
+                                            `;
+                                        }).join('') || '<p class="text-emerald-600 font-bold text-center py-1">🎉 100% các hộ đã hoàn thành!</p>'}
                                     </div>
                                 </div>
 
@@ -1282,12 +1423,12 @@
                                         ${campaignPayments.map(p => `
                                             <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
                                                 <div class="text-[11px]">
-                                                    <span class="font-bold text-slate-800">${p.houseCode}</span> -${residentsMap[p.houseCode] || ''}
+                                                    <span class="font-bold text-slate-800">${p.houseCode}</span> -${residentsMap[p.houseCode] || ''} <b class="text-emerald-600">(${Number(p.amount).toLocaleString('vi-VN')}đ)</b>
                                                     <span class="text-[9px] text-slate-400 block">${p.method === 'Tiền mặt' ? '💵 Tiền mặt' : '💳 Chuyển khoản'} \vert{} ${p.date || ''}</span>
                                                 </div>
                                                 <button onclick="cancelHousePayment('${c._key}', '${p.houseCode}')" title="Hủy ghi nhận nộp tiền" class="text-slate-400 hover:text-red-500 font-bold text-xs p-1 ml-1"><i class="fas fa-undo"></i></button>
                                             </div>
-                                        `).join('') || '<p class="text-slate-400 text-center py-1">Chưa có hộ nào nộp</p>'}
+                                        `).join('') || '<p class="text-slate-400 text-center py-1">Chưa có hộ nào nộp</p>';}
                                     </div>
                                 </div>
                             </div>
@@ -1355,9 +1496,7 @@
                     </tr>
                 `).join('') || '<tr><td colspan="4" class="p-2 text-slate-400 text-center">Chưa có cán bộ phụ thuộc</td></tr>';
 
-            } catch (err) {
-                console.error("Lỗi Render Dashboard Admin:", err);
-            }
+            } catch (err) { console.error("Lỗi Render Admin:", err); }
         }
 
         function switchView(viewName) {
@@ -1376,7 +1515,7 @@
 
             const titles = {
                 overview: 'Bảng Điều Khiển Trung Tâm',
-                residents: 'Quản Lý Nhân Khẩu & Tạm Trú',
+                residents: 'Quản Lý Nhân Khẩu & Diện Tích Ruộng',
                 finances: 'Sổ Thu - Chi Quỹ Xóm & Cấu Hình Chuyển Khoản',
                 news_docs: 'Quản Lý Tin Tức & Văn Bản Pháp Luật',
                 announcements: 'Trạm Phát Loa Phường & Thông Báo',
