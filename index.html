@@ -6,7 +6,7 @@
     <title>Xóm Số - Xóm Thịnh Sơn 1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- FIREBASE COMPAT SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -33,8 +33,8 @@
                     <p class="text-[11px] text-emerald-100">Cổng thông tin & Dịch vụ xóm số</p>
                 </div>
             </div>
-            <a href="admin.html" target="_blank" class="bg-emerald-800 hover:bg-emerald-900 text-emerald-100 text-xs px-3 py-1.5 rounded-xl border border-emerald-600 flex items-center gap-1.5 transition">
-                <i class="fas fa-user-shield"></i> Ban cán bộ
+            <a href="admin.html" target="_blank" class="bg-emerald-800 hover:bg-emerald-900 text-emerald-100 text-xs px-3 py-1.5 rounded-xl border border-emerald-600 flex items-center gap-1.5 transition font-semibold">
+                <i class="fas fa-user-shield"></i> Cán bộ đăng nhập
             </a>
         </div>
     </header>
@@ -51,40 +51,47 @@
     <!-- WRAPPER NỘI DUNG CHÍNH -->
     <main class="max-w-4xl mx-auto px-4 mt-4 space-y-5">
 
-        <!-- KHU VỰC 1: ĐĂNG NHẬP / TRA CỨU BẰNG SỐ CCCD -->
+        <!-- KHU VỰC 1: ĐĂNG NHẬP DÂN BẰNG CCCD -->
         <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 space-y-4">
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
-                <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center font-bold text-lg">
-                    <i class="fas fa-id-card"></i>
+            
+            <!-- FORM CHƯA ĐĂNG NHẬP -->
+            <div id="login-form-box" class="space-y-3">
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+                    <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center font-bold text-lg">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-sm sm:text-base">Đăng Nhập Hộ Gia Đình</h2>
+                        <p class="text-xs text-slate-500">Nhập số CCCD (do xóm trưởng cấp) để xem dữ liệu hộ dân</p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="font-bold text-slate-800 text-sm sm:text-base">Tra Cứu Dữ Liệu Gia Đình</h2>
-                    <p class="text-xs text-slate-500">Nhập CCCD, Mã hộ hoặc SĐT để xem ruộng đất & nộp phí</p>
-                </div>
+
+                <form onsubmit="handleResidentLogin(event)" class="flex flex-col sm:flex-row gap-2">
+                    <div class="relative w-full">
+                        <i class="fas fa-address-card absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" id="resident-cccd-input" required placeholder="Nhập số CCCD hoặc Mã hộ gia đình (DL-TS1-...)" class="w-full border border-slate-300 rounded-2xl pl-9 pr-3 py-2.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 py-2.5 rounded-2xl shadow-md transition shrink-0 flex items-center justify-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i> Đăng Nhập
+                    </button>
+                </form>
+
+                <p id="login-error" class="hidden text-xs text-red-600 font-bold bg-red-50 p-2.5 rounded-xl border border-red-200">
+                    <i class="fas fa-exclamation-circle mr-1"></i> Số CCCD này chưa có trong danh sách xóm. Vui lòng liên hệ Xóm trưởng để được cập nhật vào hệ thống.
+                </p>
             </div>
 
-            <!-- FORM NHẬP CCCD -->
-            <form onsubmit="handleResidentLogin(event)" class="flex flex-col sm:flex-row gap-2">
-                <div class="relative w-full">
-                    <i class="fas fa-search absolute left-3.5 top-3 text-slate-400 text-xs"></i>
-                    <input type="text" id="resident-cccd-input" required placeholder="Nhập số CCCD, Mã hộ (DL-TS1-...) hoặc SĐT" class="w-full border border-slate-300 rounded-2xl pl-9 pr-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                </div>
-                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 py-2.5 rounded-2xl shadow-md transition shrink-0 flex items-center justify-center gap-2">
-                    <i class="fas fa-arrow-right"></i> Tra Cứu
-                </button>
-            </form>
-
-            <p id="login-error" class="hidden text-xs text-red-600 font-bold"><i class="fas fa-exclamation-circle"></i> Không tìm thấy thông tin phù hợp trong danh sách hộ dân xóm.</p>
-
-            <!-- KẾT QUẢ TRA CỨU HỘ GIA ĐÌNH -->
-            <div id="household-result-box" class="hidden bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 space-y-4">
-                <div class="flex justify-between items-start border-b border-emerald-200/60 pb-3">
+            <!-- GIAO DIỆN SAU KHI ĐĂNG NHẬP THÀNH CÔNG -->
+            <div id="household-result-box" class="hidden bg-emerald-50/80 border border-emerald-200/90 rounded-2xl p-4 space-y-4">
+                <div class="flex justify-between items-start border-b border-emerald-200/80 pb-3">
                     <div>
                         <span id="res-display-code" class="text-[10px] font-mono font-bold bg-emerald-700 text-white px-2 py-0.5 rounded-md">DL-TS1-0000</span>
                         <h3 id="res-display-name" class="font-black text-base text-slate-800 mt-1">---</h3>
                         <p class="text-xs text-slate-600">SĐT: <b id="res-display-phone">---</b> | CCCD: <b id="res-display-cccd">---</b></p>
                     </div>
-                    <button onclick="logoutResident()" class="text-[11px] font-bold text-slate-500 hover:text-red-600 underline">Thoát tra cứu</button>
+                    <button onclick="logoutResident()" class="bg-white text-red-600 border border-red-200 hover:bg-red-50 px-3 py-1 rounded-xl text-xs font-bold shadow-2xs flex items-center gap-1">
+                        <i class="fas fa-sign-out-alt"></i> Thoát
+                    </button>
                 </div>
 
                 <!-- THÔNG TIN DIỆN TÍCH RUỘNG -->
@@ -142,7 +149,7 @@
             <!-- TAB KHAI BÁO TẠM TRÚ / TẠM VẮNG -->
             <div id="view-tttv" class="hidden bg-white p-5 rounded-3xl border border-slate-200/80 space-y-4">
                 <div class="border-b pb-3">
-                    <h3 class="font-bold text-slate-800 text-sm"><i class="fas fa-id-badge text-purple-600 mr-1.5"></i> Khai Báo Tạm Trú / Tạm Vắng Truy Cập Nhanh</h3>
+                    <h3 class="font-bold text-slate-800 text-sm"><i class="fas fa-id-badge text-purple-600 mr-1.5"></i> Khai Báo Tạm Trú / Tạm Vắng</h3>
                     <p class="text-xs text-slate-500">Gửi thông tin trực tiếp tới Ban cán bộ xóm để cập nhật sổ quản lý hộ khẩu.</p>
                 </div>
                 <form onsubmit="handleTTTVSubmit(event)" class="space-y-3 text-xs">
@@ -174,8 +181,8 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-600 mb-1">Nơi đi / Nơi đến đăng ký *</label>
-                        <input type="text" id="tttv-location" required placeholder="Địa chỉ chi tiết nơi ở mới hoặc nơi thường trú gốc" class="w-full border rounded-xl px-3 py-2">
+                        <label class="block font-semibold text-slate-600 mb-1">Nơi đi / Nơi đến *</label>
+                        <input type="text" id="tttv-location" required placeholder="Địa chỉ nơi ở mới hoặc nơi đăng ký thường trú" class="w-full border rounded-xl px-3 py-2">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
@@ -305,35 +312,57 @@
             }
             renderPublicContent();
 
-            // Nếu người dân đã tra cứu trước đó, tự cập nhật lại giao diện
-            if (currentResident) {
-                renderResidentData(currentResident);
-            }
+            // Tự động khôi phục đăng nhập nếu người dân đã nhập CCCD trước đó
+            checkSavedResidentSession();
         });
 
-        // TRA CỨU ĐĂNG NHẬP BẰNG CCCD / MÃ HỘ / SĐT
+        // KIỂM TRA PHIÊN ĐĂNG NHẬP ĐÃ LƯU KHI TRANG TẢI XONG
+        function checkSavedResidentSession() {
+            const savedCccd = localStorage.getItem('xomso_resident_cccd');
+            if (savedCccd) {
+                findAndLoginResident(savedCccd);
+            }
+        }
+
+        // XỬ LÝ KHI NGƯỜI DÂN BẤM BÚT "ĐĂNG NHẬP"
         function handleResidentLogin(e) {
             e.preventDefault();
             const inputVal = document.getElementById('resident-cccd-input').value.trim().toLowerCase();
+            findAndLoginResident(inputVal);
+        }
+
+        // TÌM KIẾM THEO CCCD / MÃ HỘ / SĐT DO XÓM TRƯỞNG TẠO
+        function findAndLoginResident(searchKey) {
+            if (!searchKey) return;
             const errEl = document.getElementById('login-error');
+            const keyLower = searchKey.toLowerCase();
 
             const resEntries = Object.values(dbData.residents || {});
             const found = resEntries.find(r => 
-                (r.cccd && r.cccd.toLowerCase() === inputVal) ||
-                (r.code && r.code.toLowerCase() === inputVal) ||
-                (r.phone && r.phone.toLowerCase() === inputVal)
+                (r.cccd && r.cccd.toLowerCase() === keyLower) ||
+                (r.code && r.code.toLowerCase() === keyLower) ||
+                (r.phone && r.phone.toLowerCase() === keyLower)
             );
 
             if (found) {
                 errEl.classList.add('hidden');
                 currentResident = found;
+                
+                // Lưu vào bộ nhớ trình duyệt
+                if (found.cccd) {
+                    localStorage.setItem('xomso_resident_cccd', found.cccd);
+                }
+
+                document.getElementById('login-form-box').classList.add('hidden');
                 renderResidentData(found);
             } else {
                 errEl.classList.remove('hidden');
                 document.getElementById('household-result-box').classList.add('hidden');
+                document.getElementById('login-form-box').classList.remove('hidden');
             }
         }
 
+        // RENDER DỮ LIỆU CÁ NHÂN CỦA HỘ DÂN
         function renderResidentData(r) {
             document.getElementById('household-result-box').classList.remove('hidden');
             document.getElementById('res-display-code').innerText = r.code || '---';
@@ -345,7 +374,15 @@
             document.getElementById('res-display-land').innerText = land.toLocaleString('vi-VN') + ' m²';
             document.getElementById('res-display-sao').innerText = (land / 500).toFixed(1) + ' sào Trung Bộ';
 
-            // RENDER CÁC ĐỢT THU CỦA HỘ NÀY
+            // DÂN TỰ ĐỘNG ĐIỀN MÃ HỘ VÀO FORM KHAI BÁO TẠM TRÚ & SOS
+            document.getElementById('tttv-house-code').value = r.code || '';
+            document.getElementById('tttv-name').value = r.name || '';
+            document.getElementById('tttv-cccd').value = r.cccd || '';
+            document.getElementById('tttv-phone').value = r.phone || '';
+            document.getElementById('fb-name').value = r.name || '';
+            document.getElementById('fb-phone').value = r.phone || '';
+
+            // RENDER CÁC ĐỢT THU
             const campaigns = Object.entries(dbData.campaigns || {}).map(([k, v]) => ({ _key: k, ...v }));
             const payments = Object.values(dbData.payments || {});
             const container = document.getElementById('resident-campaigns-list');
@@ -366,7 +403,7 @@
                 const isPaid = payments.some(p => p.campaignKey === c._key && p.houseCode === r.code);
 
                 return `
-                    <div class="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center text-xs shadow-2xs">
                         <div>
                             <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${c.scope === 'THUY_LOI' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}">
                                 ${c.scope === 'THUY_LOI' ? '🌾 Thủy Lợi Ruộng' : 'Quỹ Xóm'}
@@ -388,9 +425,12 @@
             }).join('');
         }
 
+        // ĐĂNG XUẤT HỘ DÂN
         function logoutResident() {
             currentResident = null;
+            localStorage.removeItem('xomso_resident_cccd');
             document.getElementById('household-result-box').classList.add('hidden');
+            document.getElementById('login-form-box').classList.remove('hidden');
             document.getElementById('resident-cccd-input').value = '';
         }
 
