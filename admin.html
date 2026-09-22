@@ -21,268 +21,297 @@
 </head>
 <body class="text-slate-800 pb-12">
 
-    <!-- TOP BAR BAR -->
-    <header class="bg-slate-900 text-white sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="bg-emerald-500 text-slate-900 font-black px-2.5 py-1 rounded-lg text-lg">ADMIN</div>
+    <!-- MÀN HÌNH ĐĂNG NHẬP QUẢN TRỊ (POPUP CHẮN TRANG) -->
+    <div id="login-overlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[9999]">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-5 border border-slate-100 text-center">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-black">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div>
+                <h2 class="font-bold text-lg text-slate-800">Đăng Nhập Quản Trị</h2>
+                <p class="text-xs text-slate-500 mt-1">Dành cho Ban cán bộ Xóm Thịnh Sơn 1</p>
+            </div>
+
+            <form onsubmit="handleAdminLogin(event)" class="space-y-3 text-left">
                 <div>
-                    <h1 class="font-bold text-sm sm:text-base">BAN CÁN BỘ XÓM THỊNH SƠN 1</h1>
-                    <p class="text-[11px] text-slate-400">Hệ thống quản trị xóm số thông minh</p>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu truy cập *</label>
+                    <input type="password" id="admin-password-input" required placeholder="Nhập mật khẩu (Mặc định: 123456)" class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
-            </div>
-            <a href="index.html" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
-                <i class="fas fa-external-link-alt text-emerald-400"></i> Xem Trang Dân
-            </a>
-        </div>
-    </header>
-
-    <!-- MAIN WRAPPER -->
-    <div class="max-w-7xl mx-auto px-4 mt-4 space-y-5">
-
-        <!-- THỐNG KÊ TỔNG QUAN DASHBOARD -->
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
-                <p class="text-[11px] font-semibold text-slate-500 uppercase">Tổng Hộ Dân</p>
-                <h3 id="stat-households" class="text-xl font-black text-slate-800 mt-1">0</h3>
-                <p class="text-[10px] text-slate-400 mt-0.5">Hộ đăng ký</p>
-            </div>
-            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
-                <p class="text-[11px] font-semibold text-slate-500 uppercase">Diện Tích Ruộng</p>
-                <h3 id="stat-land" class="text-xl font-black text-emerald-700 mt-1">0 m²</h3>
-                <p id="stat-sao" class="text-[10px] text-emerald-600 mt-0.5">0 sào Trung Bộ</p>
-            </div>
-            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
-                <p class="text-[11px] font-semibold text-slate-500 uppercase">Tồn Quỹ Hiện Tại</p>
-                <h3 id="stat-fund-balance" class="text-xl font-black text-blue-700 mt-1">0 đ</h3>
-                <p class="text-[10px] text-slate-400 mt-0.5">Thực thu trừ chi</p>
-            </div>
-            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
-                <p class="text-[11px] font-semibold text-slate-500 uppercase">Phản Ánh Chờ Duyệt</p>
-                <h3 id="stat-pending-fb" class="text-xl font-black text-amber-600 mt-1">0</h3>
-                <p class="text-[10px] text-amber-500 mt-0.5">Cần xử lý</p>
-            </div>
-            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs col-span-2 md:col-span-1">
-                <p class="text-[11px] font-semibold text-slate-500 uppercase">Tạm Trú / Tạm Vắng</p>
-                <h3 id="stat-pending-tttv" class="text-xl font-black text-purple-700 mt-1">0</h3>
-                <p class="text-[10px] text-purple-600 mt-0.5">Hồ sơ chờ duyệt</p>
+                <p id="login-error-msg" class="text-xs text-red-600 font-semibold hidden"><i class="fas fa-exclamation-circle"></i> Mật khẩu không chính xác!</p>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-md">
+                    Đăng Nhập Quản Trị
+                </button>
+            </form>
+            <div class="pt-2 border-t border-slate-100">
+                <a href="index.html" class="text-xs text-slate-400 hover:text-slate-600 font-semibold"><i class="fas fa-arrow-left mr-1"></i> Quay lại trang dành cho người dân</a>
             </div>
         </div>
+    </div>
 
-        <!-- THANH ĐIỀU HƯỚNG TABS -->
-        <div class="flex gap-1.5 overflow-x-auto pb-1 border-b border-slate-200 text-xs font-semibold">
-            <button onclick="switchAdminTab('residents')" id="tab-btn-residents" class="tab-btn active px-4 py-2 rounded-xl shrink-0 transition">
-                <i class="fas fa-users mr-1"></i> Hộ Dân & Ruộng
-            </button>
-            <button onclick="switchAdminTab('campaigns')" id="tab-btn-campaigns" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
-                <i class="fas fa-hand-holding-dollar mr-1"></i> Thu Quỹ & Thủy Lợi
-            </button>
-            <button onclick="switchAdminTab('finances')" id="tab-btn-finances" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
-                <i class="fas fa-receipt mr-1"></i> Sổ Chi & Ngân Hàng VietQR
-            </button>
-            <button onclick="switchAdminTab('announcements')" id="tab-btn-announcements" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
-                <i class="fas fa-bullhorn mr-1"></i> Loa Phường & Tin Tức
-            </button>
-            <button onclick="switchAdminTab('tttv')" id="tab-btn-tttv" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
-                <i class="fas fa-passport mr-1"></i> Tạm Trú/Tạm Vắng
-            </button>
-            <button onclick="switchAdminTab('feedbacks')" id="tab-btn-feedbacks" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
-                <i class="fas fa-comment-dots mr-1"></i> SOS & Phản Ánh
-            </button>
-        </div>
-
-        <!-- TAB 1: QUẢN LÝ HỘ DÂN VÀ DIỆN TÍCH RUỘNG -->
-        <div id="admin-view-residents" class="space-y-4">
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-3">
+    <!-- NỘI DUNG TRANG ADMIN (ẨN CHO ĐẾN KHI ĐĂNG NHẬP) -->
+    <div id="admin-main-content" class="hidden">
+        
+        <!-- TOP BAR -->
+        <header class="bg-slate-900 text-white sticky top-0 z-50 shadow-md">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-emerald-500 text-slate-900 font-black px-2.5 py-1 rounded-lg text-lg">ADMIN</div>
                     <div>
-                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-id-card text-emerald-600 mr-1"></i> Danh Sách Hộ Dân & Diện Tích Ruộng</h3>
-                        <p class="text-xs text-slate-500">Quản lý mã hộ, thông tin chủ hộ và diện tích đất canh tác để tính phí thủy lợi.</p>
+                        <h1 class="font-bold text-sm sm:text-base">BAN CÁN BỘ XÓM THỊNH SƠN 1</h1>
+                        <p class="text-[11px] text-slate-400">Hệ thống quản trị xóm số thông minh</p>
                     </div>
-                    <button onclick="openResidentModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm flex items-center gap-1">
-                        <i class="fas fa-plus"></i> Thêm Hộ Dân Mới
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="index.html" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+                        <i class="fas fa-external-link-alt text-emerald-400"></i> Xem Trang Dân
+                    </a>
+                    <button onclick="handleAdminLogout()" class="bg-red-600/80 hover:bg-red-600 text-xs text-white px-3 py-1.5 rounded-lg font-bold transition">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
                     </button>
                 </div>
+            </div>
+        </header>
 
-                <!-- THANH TÌM KIẾM -->
-                <div class="flex gap-2">
-                    <input type="text" id="res-search-input" onkeyup="filterResidents()" placeholder="Tìm theo Mã hộ, Tên chủ hộ, Số CCCD..." class="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        <!-- MAIN WRAPPER -->
+        <div class="max-w-7xl mx-auto px-4 mt-4 space-y-5">
+
+            <!-- THỐNG KÊ TỔNG QUAN DASHBOARD -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase">Tổng Hộ Dân</p>
+                    <h3 id="stat-households" class="text-xl font-black text-slate-800 mt-1">0</h3>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Hộ đăng ký</p>
                 </div>
-
-                <!-- BẢNG DANH SÁCH HỘ DÂN -->
-                <div class="overflow-x-auto rounded-xl border border-slate-200">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px]">
-                            <tr>
-                                <th class="p-3">Mã Hộ</th>
-                                <th class="p-3">Chủ Hộ</th>
-                                <th class="p-3">CCCD / SĐT</th>
-                                <th class="p-3">Diện Tích Ruộng</th>
-                                <th class="p-3">Địa Chỉ</th>
-                                <th class="p-3 text-center">Thao Tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="residents-table-body" class="divide-y divide-slate-200"></tbody>
-                    </table>
+                <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase">Diện Tích Ruộng</p>
+                    <h3 id="stat-land" class="text-xl font-black text-emerald-700 mt-1">0 m²</h3>
+                    <p id="stat-sao" class="text-[10px] text-emerald-600 mt-0.5">0 sào Trung Bộ</p>
+                </div>
+                <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase">Tồn Quỹ Hiện Tại</p>
+                    <h3 id="stat-fund-balance" class="text-xl font-black text-blue-700 mt-1">0 đ</h3>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Thực thu trừ chi</p>
+                </div>
+                <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase">Phản Ánh Chờ Duyệt</p>
+                    <h3 id="stat-pending-fb" class="text-xl font-black text-amber-600 mt-1">0</h3>
+                    <p class="text-[10px] text-amber-500 mt-0.5">Cần xử lý</p>
+                </div>
+                <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs col-span-2 md:col-span-1">
+                    <p class="text-[11px] font-semibold text-slate-500 uppercase">Tạm Trú / Tạm Vắng</p>
+                    <h3 id="stat-pending-tttv" class="text-xl font-black text-purple-700 mt-1">0</h3>
+                    <p class="text-[10px] text-purple-600 mt-0.5">Hồ sơ chờ duyệt</p>
                 </div>
             </div>
-        </div>
 
-        <!-- TAB 2: THU QUỸ VÀ THỦY LỢI RUỘNG -->
-        <div id="admin-view-campaigns" class="hidden space-y-4">
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
-                <div class="flex justify-between items-center border-b pb-3">
-                    <div>
-                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-hand-holding-dollar text-emerald-600 mr-1"></i> Các Đợt Thu Quỹ & Phí Thủy Lợi</h3>
-                        <p class="text-xs text-slate-500">Tạo đợt thu toàn xóm hoặc đợt thu thủy lợi tự động theo m² ruộng.</p>
-                    </div>
-                    <button onclick="openCampaignModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm flex items-center gap-1">
-                        <i class="fas fa-plus"></i> Tạo Đợt Thu Mới
-                    </button>
-                </div>
-
-                <!-- DANH SÁCH ĐỢT THU -->
-                <div id="campaigns-list" class="space-y-3"></div>
+            <!-- THANH ĐIỀU HƯỚNG TABS -->
+            <div class="flex gap-1.5 overflow-x-auto pb-1 border-b border-slate-200 text-xs font-semibold">
+                <button onclick="switchAdminTab('residents')" id="tab-btn-residents" class="tab-btn active px-4 py-2 rounded-xl shrink-0 transition">
+                    <i class="fas fa-users mr-1"></i> Hộ Dân & Ruộng
+                </button>
+                <button onclick="switchAdminTab('campaigns')" id="tab-btn-campaigns" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
+                    <i class="fas fa-hand-holding-dollar mr-1"></i> Thu Quỹ & Thủy Lợi
+                </button>
+                <button onclick="switchAdminTab('finances')" id="tab-btn-finances" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
+                    <i class="fas fa-receipt mr-1"></i> Sổ Chi & Ngân Hàng VietQR
+                </button>
+                <button onclick="switchAdminTab('announcements')" id="tab-btn-announcements" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
+                    <i class="fas fa-bullhorn mr-1"></i> Loa Phường & Tin Tức
+                </button>
+                <button onclick="switchAdminTab('tttv')" id="tab-btn-tttv" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
+                    <i class="fas fa-passport mr-1"></i> Tạm Trú/Tạm Vắng
+                </button>
+                <button onclick="switchAdminTab('feedbacks')" id="tab-btn-feedbacks" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
+                    <i class="fas fa-comment-dots mr-1"></i> SOS & Phản Ánh
+                </button>
             </div>
-        </div>
 
-        <!-- TAB 3: SỔ CHI VÀ CẤU HÌNH TÀI KHOẢN VIETQR -->
-        <div id="admin-view-finances" class="hidden space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- KHU VỰC CẤU HÌNH NGÂN HÀNG VIETQR -->
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5 border-b pb-2">
-                        <i class="fas fa-qrcode text-emerald-600"></i> Cấu Hình Ngân Hàng Nhận Chuyển Khoản
-                    </h3>
-                    <p class="text-xs text-slate-500">Mã VietQR tự động trên trang của dân sẽ tạo theo thông tin này:</p>
-                    
-                    <form onsubmit="saveBankConfig(event)" class="space-y-2.5">
+            <!-- TAB 1: QUẢN LÝ HỘ DÂN VÀ DIỆN TÍCH RUỘNG -->
+            <div id="admin-view-residents" class="space-y-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-3">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Mã Ngân Hàng (VietQR) *</label>
-                            <input type="text" id="bank-id" required placeholder="VD: MB, ICB, TCB, VCB, BIDV..." class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
+                            <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-id-card text-emerald-600 mr-1"></i> Danh Sách Hộ Dân & Diện Tích Ruộng</h3>
+                            <p class="text-xs text-slate-500">Quản lý mã hộ, thông tin chủ hộ và diện tích đất canh tác để tính phí thủy lợi.</p>
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tên Ngân Hàng *</label>
-                            <input type="text" id="bank-name" required placeholder="VD: Ngân hàng MBBank, Agribank..." class="w-full border rounded-xl px-3 py-2 text-xs">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Số Tài Khoản *</label>
-                            <input type="text" id="bank-acc-no" required placeholder="VD: 038xxxxxxx" class="w-full border rounded-xl px-3 py-2 text-xs font-mono font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tên Chủ Tài Khoản *</label>
-                            <input type="text" id="bank-acc-owner" required placeholder="VD: NGUYEN VAN NAM" class="w-full border rounded-xl px-3 py-2 text-xs uppercase font-bold">
-                        </div>
-                        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-xl text-xs transition">
-                            Lưu Cấu Hình Ngân Hàng
+                        <button onclick="openResidentModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm flex items-center gap-1">
+                            <i class="fas fa-plus"></i> Thêm Hộ Dân Mới
                         </button>
-                    </form>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input type="text" id="res-search-input" onkeyup="filterResidents()" placeholder="Tìm theo Mã hộ, Tên chủ hộ, Số CCCD..." class="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px]">
+                                <tr>
+                                    <th class="p-3">Mã Hộ</th>
+                                    <th class="p-3">Chủ Hộ</th>
+                                    <th class="p-3">CCCD / SĐT</th>
+                                    <th class="p-3">Diện Tích Ruộng</th>
+                                    <th class="p-3">Địa Chỉ</th>
+                                    <th class="p-3 text-center">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="residents-table-body" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: THU QUỸ VÀ THỦY LỢI RUỘNG -->
+            <div id="admin-view-campaigns" class="hidden space-y-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-hand-holding-dollar text-emerald-600 mr-1"></i> Các Đợt Thu Quỹ & Phí Thủy Lợi</h3>
+                            <p class="text-xs text-slate-500">Tạo đợt thu toàn xóm hoặc đợt thu thủy lợi tự động theo m² ruộng.</p>
+                        </div>
+                        <button onclick="openCampaignModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm flex items-center gap-1">
+                            <i class="fas fa-plus"></i> Tạo Đợt Thu Mới
+                        </button>
+                    </div>
+
+                    <div id="campaigns-list" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- TAB 3: SỔ CHI VÀ CẤU HÌNH TÀI KHOẢN VIETQR -->
+            <div id="admin-view-finances" class="hidden space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- KHU VỰC CẤU HÌNH NGÂN HÀNG VIETQR -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5 border-b pb-2">
+                            <i class="fas fa-qrcode text-emerald-600"></i> Cấu Hình Ngân Hàng Nhận Chuyển Khoản
+                        </h3>
+                        <p class="text-xs text-slate-500">Mã VietQR tự động trên trang của dân sẽ tạo theo thông tin này:</p>
+                        
+                        <form onsubmit="saveBankConfig(event)" class="space-y-2.5">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Mã Ngân Hàng (VietQR) *</label>
+                                <input type="text" id="bank-id" required placeholder="VD: MB, ICB, TCB, VCB, BIDV..." class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tên Ngân Hàng *</label>
+                                <input type="text" id="bank-name" required placeholder="VD: Ngân hàng MBBank, Agribank..." class="w-full border rounded-xl px-3 py-2 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Số Tài Khoản *</label>
+                                <input type="text" id="bank-acc-no" required placeholder="VD: 038xxxxxxx" class="w-full border rounded-xl px-3 py-2 text-xs font-mono font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tên Chủ Tài Khoản *</label>
+                                <input type="text" id="bank-acc-owner" required placeholder="VD: NGUYEN VAN NAM" class="w-full border rounded-xl px-3 py-2 text-xs uppercase font-bold">
+                            </div>
+                            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-xl text-xs transition">
+                                Lưu Cấu Hình Ngân Hàng
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- CÔNG KHAI SỔ THU CHI & LẬP PHIẾU CHI -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-lock-open text-blue-600 mr-1"></i> Trạng Thái Sổ Thu Chi</h3>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggle-finances-public" onchange="togglePublicFinances(this.checked)" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+                        <p class="text-xs text-slate-500">Bật công khai để người dân xem được tổng tồn quỹ và lịch sử phiếu chi.</p>
+
+                        <hr class="border-slate-100 my-2">
+
+                        <h4 class="font-bold text-xs text-slate-800">Lập Phiếu Chi Mới</h4>
+                        <form onsubmit="handleCreateExpense(event)" class="space-y-2.5">
+                            <input type="text" id="exp-title" required placeholder="Nội dung chi (VD: Sửa điện đường xóm 3)" class="w-full border rounded-xl px-3 py-2 text-xs">
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" id="exp-amount" required placeholder="Số tiền (đ)" class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
+                                <input type="text" id="exp-receiver" required placeholder="Người nhận tiền" class="w-full border rounded-xl px-3 py-2 text-xs">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="exp-category" class="border rounded-xl px-3 py-2 text-xs">
+                                    <option value="Hạ tầng">Hạ tầng / Đường xóm</option>
+                                    <option value="Thủy lợi">Thủy lợi / Kênh mương</option>
+                                    <option value="Hoạt động">Hoạt động / Văn nghệ</option>
+                                    <option value="Khác">Chi khác</option>
+                                </select>
+                                <input type="date" id="exp-date" required class="border rounded-xl px-3 py-2 text-xs">
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-xs shadow-sm transition">
+                                Thêm Phiếu Chi
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
-                <!-- CÔNG KHAI SỔ THU CHI & LẬP PHIẾU CHI -->
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <div class="flex justify-between items-center border-b pb-2">
-                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-lock-open text-blue-600 mr-1"></i> Trạng Thái Sổ Thu Chi</h3>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggle-finances-public" onchange="togglePublicFinances(this.checked)" class="sr-only peer">
-                            <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-                        </label>
+                    <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-list text-slate-600 mr-1"></i> Lịch Sử Lập Phiếu Chi</h3>
+                    <div id="expenses-admin-list" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- TAB 4: LOA PHƯỜNG & TIN TỨC VĂN BẢN -->
+            <div id="admin-view-announcements" class="hidden space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-bullhorn text-emerald-600 mr-1"></i> Phát Thông Báo (Loa Phường)</h3>
+                        <form onsubmit="handleCreateAnnouncement(event)" class="space-y-2.5">
+                            <input type="text" id="ann-title" required placeholder="Tiêu đề thông báo..." class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
+                            <textarea id="ann-content" required rows="3" placeholder="Nội dung chi tiết phát thanh..." class="w-full border rounded-xl p-2.5 text-xs"></textarea>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="ann-urgent" class="w-4 h-4 text-red-600 rounded">
+                                <label for="ann-urgent" class="text-xs font-bold text-red-600">Ghim làm Thông Báo Khẩn (Hiện thanh đỏ cho dân)</label>
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                Phát Thông Báo
+                            </button>
+                        </form>
                     </div>
-                    <p class="text-xs text-slate-500">Bật công khai để người dân xem được tổng tồn quỹ và lịch sử phiếu chi.</p>
 
-                    <hr class="border-slate-100 my-2">
-
-                    <h4 class="font-bold text-xs text-slate-800">Lập Phiếu Chi Mới</h4>
-                    <form onsubmit="handleCreateExpense(event)" class="space-y-2.5">
-                        <input type="text" id="exp-title" required placeholder="Nội dung chi (VD: Sửa điện đường xóm 3)" class="w-full border rounded-xl px-3 py-2 text-xs">
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="number" id="exp-amount" required placeholder="Số tiền (đ)" class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
-                            <input type="text" id="exp-receiver" required placeholder="Người nhận tiền" class="w-full border rounded-xl px-3 py-2 text-xs">
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <select id="exp-category" class="border rounded-xl px-3 py-2 text-xs">
-                                <option value="Hạ tầng">Hạ tầng / Đường xóm</option>
-                                <option value="Thủy lợi">Thủy lợi / Kênh mương</option>
-                                <option value="Hoạt động">Hoạt động / Văn nghệ</option>
-                                <option value="Khác">Chi khác</option>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-newspaper text-purple-600 mr-1"></i> Đăng Tin Tức / Chỉ Thị Pháp Luật</h3>
+                        <form onsubmit="handleCreateNews(event)" class="space-y-2.5">
+                            <input type="text" id="news-title" required placeholder="Tiêu đề tin tức hoặc văn bản..." class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
+                            <select id="news-category" class="w-full border rounded-xl px-3 py-2 text-xs">
+                                <option value="Tin tức xóm">Tin tức hoạt động xóm</option>
+                                <option value="Văn bản pháp luật">Văn bản chỉ thị / Pháp luật</option>
+                                <option value="Nông nghiệp">Khuyến nông & Lịch vụ mùa</option>
                             </select>
-                            <input type="date" id="exp-date" required class="border rounded-xl px-3 py-2 text-xs">
-                        </div>
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-xs shadow-sm transition">
-                            Thêm Phiếu Chi
-                        </button>
-                    </form>
+                            <textarea id="news-content" required rows="3" placeholder="Tóm tắt nội dung chỉ thị / tin tức..." class="w-full border rounded-xl p-2.5 text-xs"></textarea>
+                            <input type="url" id="news-link" placeholder="Link đính kèm tài liệu (nếu có): https://..." class="w-full border rounded-xl px-3 py-2 text-xs">
+                            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                Đăng Tin Tức
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            </div>
 
-            <!-- DANH SÁCH PHIẾU CHI -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-list text-slate-600 mr-1"></i> Lịch Sử Lập Phiếu Chi</h3>
-                <div id="expenses-admin-list" class="space-y-2"></div>
-            </div>
-        </div>
-
-        <!-- TAB 4: LOA PHƯỜNG & TIN TỨC VĂN BẢN -->
-        <div id="admin-view-announcements" class="hidden space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- TẠO THÔNG BÁO LOA PHƯỜNG -->
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-bullhorn text-emerald-600 mr-1"></i> Phát Thông Báo (Loa Phường)</h3>
-                    <form onsubmit="handleCreateAnnouncement(event)" class="space-y-2.5">
-                        <input type="text" id="ann-title" required placeholder="Tiêu đề thông báo..." class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
-                        <textarea id="ann-content" required rows="3" placeholder="Nội dung chi tiết phát thanh..." class="w-full border rounded-xl p-2.5 text-xs"></textarea>
-                        <div class="flex items-center gap-2">
-                            <input type="checkbox" id="ann-urgent" class="w-4 h-4 text-red-600 rounded">
-                            <label for="ann-urgent" class="text-xs font-bold text-red-600">Ghim làm Thông Báo Khẩn (Hiện thanh đỏ cho dân)</label>
-                        </div>
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition">
-                            Phát Thông Báo
-                        </button>
-                    </form>
+                    <h3 class="font-bold text-sm text-slate-800">Danh Sách Thông Báo & Tin Tức Đã Đăng</h3>
+                    <div id="admin-news-ann-list" class="space-y-2"></div>
                 </div>
+            </div>
 
-                <!-- ĐĂNG TIN TỨC / VĂN BẢN CHỈ THỊ -->
+            <!-- TAB 5: KHAI BÁO TẠM TRÚ / TẠM VẮNG -->
+            <div id="admin-view-tttv" class="hidden space-y-4">
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-newspaper text-purple-600 mr-1"></i> Đăng Tin Tức / Chỉ Thị Pháp Luật</h3>
-                    <form onsubmit="handleCreateNews(event)" class="space-y-2.5">
-                        <input type="text" id="news-title" required placeholder="Tiêu đề tin tức hoặc văn bản..." class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
-                        <select id="news-category" class="w-full border rounded-xl px-3 py-2 text-xs">
-                            <option value="Tin tức xóm">Tin tức hoạt động xóm</option>
-                            <option value="Văn bản pháp luật">Văn bản chỉ thị / Pháp luật</option>
-                            <option value="Nông nghiệp">Khuyến nông & Lịch vụ mùa</option>
-                        </select>
-                        <textarea id="news-content" required rows="3" placeholder="Tóm tắt nội dung chỉ thị / tin tức..." class="w-full border rounded-xl p-2.5 text-xs"></textarea>
-                        <input type="url" id="news-link" placeholder="Link đính kèm tài liệu (nếu có): https://..." class="w-full border rounded-xl px-3 py-2 text-xs">
-                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-xs transition">
-                            Đăng Tin Tức
-                        </button>
-                    </form>
+                    <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-passport text-purple-600 mr-1"></i> Danh Sách Đăng Ký Tạm Trú / Tạm Vắng</h3>
+                    <div id="tttv-admin-list" class="space-y-2.5"></div>
                 </div>
             </div>
 
-            <!-- DANH SÁCH BẢN TIN ĐÃ ĐĂNG -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                <h3 class="font-bold text-sm text-slate-800">Danh Sách Thông Báo & Tin Tức Đã Đăng</h3>
-                <div id="admin-news-ann-list" class="space-y-2"></div>
+            <!-- TAB 6: PHẢN ÁNH & SOS -->
+            <div id="admin-view-feedbacks" class="hidden space-y-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                    <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-comment-dots text-red-500 mr-1"></i> Danh Sách Phản Ánh & Yêu Cầu Hỗ Trợ SOS</h3>
+                    <div id="feedbacks-admin-list" class="space-y-2.5"></div>
+                </div>
             </div>
-        </div>
 
-        <!-- TAB 5: KHAI BÁO TẠM TRÚ / TẠM VẮNG -->
-        <div id="admin-view-tttv" class="hidden space-y-4">
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-passport text-purple-600 mr-1"></i> Danh Sách Đăng Ký Tạm Trú / Tạm Vắng</h3>
-                <div id="tttv-admin-list" class="space-y-2.5"></div>
-            </div>
         </div>
-
-        <!-- TAB 6: PHẢN ÁNH & SOS -->
-        <div id="admin-view-feedbacks" class="hidden space-y-4">
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-comment-dots text-red-500 mr-1"></i> Danh Sách Phản Ánh & Yêu Cầu Hỗ Trợ SOS</h3>
-                <div id="feedbacks-admin-list" class="space-y-2.5"></div>
-            </div>
-        </div>
-
     </div>
 
     <!-- MODAL THÊM / SỬA HỘ DÂN -->
@@ -370,6 +399,8 @@
 
     <!-- JAVASCRIPT XỬ LÝ TOÀN BỘ CHỨC NĂNG ADMIN -->
     <script>
+        const DEFAULT_ADMIN_PASS = "123456"; // Mật khẩu mặc định
+
         const firebaseConfig = {
             apiKey: "AIzaSyAC7mztrDAHldUlUz7eSp0eBNeLLoA_ISQ",
             authDomain: "xom-so.firebaseapp.com",
@@ -385,23 +416,59 @@
         const dbRef = firebase.database().ref('xomso_data');
         let dbData = { residents: {}, announcements: {}, feedbacks: {}, settings: {}, campaigns: {}, payments: {}, expenses: {}, news_docs: {}, tamtru_tamvang: {} };
 
-        // LẮNG NGHE DỮ LIỆU CHÍNH TỪ FIREBASE
-        dbRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                dbData = data;
-                if (!dbData.residents) dbData.residents = {};
-                if (!dbData.announcements) dbData.announcements = {};
-                if (!dbData.feedbacks) dbData.feedbacks = {};
-                if (!dbData.settings) dbData.settings = {};
-                if (!dbData.campaigns) dbData.campaigns = {};
-                if (!dbData.payments) dbData.payments = {};
-                if (!dbData.expenses) dbData.expenses = {};
-                if (!dbData.news_docs) dbData.news_docs = {};
-                if (!dbData.tamtru_tamvang) dbData.tamtru_tamvang = {};
+        // KIỂM TRA PHIÊN ĐĂNG NHẬP KHI TẢI TRANG
+        window.addEventListener('DOMContentLoaded', () => {
+            const isAuth = sessionStorage.getItem('xomso_admin_logged');
+            if (isAuth === 'true') {
+                showAdminDashboard();
             }
-            renderAdminAll();
         });
+
+        // XỬ LÝ ĐĂNG NHẬP
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const passInput = document.getElementById('admin-password-input').value;
+            const errEl = document.getElementById('login-error-msg');
+
+            // Kiểm tra mật khẩu (có thể lấy từ Firebase settings nếu cài đặt)
+            const savedPass = (dbData.settings && dbData.settings.adminPass) ? dbData.settings.adminPass : DEFAULT_ADMIN_PASS;
+
+            if (passInput === savedPass) {
+                sessionStorage.setItem('xomso_admin_logged', 'true');
+                errEl.classList.add('hidden');
+                showAdminDashboard();
+            } else {
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function showAdminDashboard() {
+            document.getElementById('login-overlay').classList.add('hidden');
+            document.getElementById('admin-main-content').classList.remove('hidden');
+            
+            // Bắt đầu kết nối dữ liệu Firebase
+            dbRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    dbData = data;
+                    if (!dbData.residents) dbData.residents = {};
+                    if (!dbData.announcements) dbData.announcements = {};
+                    if (!dbData.feedbacks) dbData.feedbacks = {};
+                    if (!dbData.settings) dbData.settings = {};
+                    if (!dbData.campaigns) dbData.campaigns = {};
+                    if (!dbData.payments) dbData.payments = {};
+                    if (!dbData.expenses) dbData.expenses = {};
+                    if (!dbData.news_docs) dbData.news_docs = {};
+                    if (!dbData.tamtru_tamvang) dbData.tamtru_tamvang = {};
+                }
+                renderAdminAll();
+            });
+        }
+
+        function handleAdminLogout() {
+            sessionStorage.removeItem('xomso_admin_logged');
+            window.location.reload();
+        }
 
         // RENDER TỔNG THỂ GIAO DIỆN ADMIN
         function renderAdminAll() {
@@ -543,12 +610,9 @@
         }
 
         // 3. THU QUỸ VÀ THỦY LỢI
-        function openCampaignModal() {
-            document.getElementById('campaign-modal').classList.remove('hidden');
-        }
-        function closeCampaignModal() {
-            document.getElementById('campaign-modal').classList.add('hidden');
-        }
+        function openCampaignModal() { document.getElementById('campaign-modal').classList.remove('hidden'); }
+        function closeCampaignModal() { document.getElementById('campaign-modal').classList.add('hidden'); }
+        
         function toggleScopeInputs(val) {
             if (val === 'THUY_LOI') {
                 document.getElementById('camp-amount-box').classList.add('hidden');
@@ -658,14 +722,10 @@
 
         function togglePaymentStatus(campKey, houseCode, amount, currentIsPaid) {
             if (currentIsPaid) {
-                // Hủy đóng tiền
                 const payEntries = Object.entries(dbData.payments || {});
                 const found = payEntries.find(([k, v]) => v.campaignKey === campKey && v.houseCode === houseCode);
-                if (found) {
-                    dbRef.child('payments/' + found[0]).remove();
-                }
+                if (found) dbRef.child('payments/' + found[0]).remove();
             } else {
-                // Xác nhận nộp tiền
                 dbRef.child('payments').push({
                     campaignKey: campKey,
                     houseCode: houseCode,
@@ -676,9 +736,7 @@
         }
 
         function deleteCampaign(key) {
-            if (confirm("Bạn có muốn xóa đợt thu này?")) {
-                dbRef.child('campaigns/' + key).remove();
-            }
+            if (confirm("Bạn có muốn xóa đợt thu này?")) dbRef.child('campaigns/' + key).remove();
         }
 
         // 4. SỔ CHI & NGÂN HÀNG VIETQR
@@ -708,9 +766,7 @@
             alert("✅ Đã lưu thông tin tài khoản ngân hàng VietQR thành công!");
         }
 
-        function togglePublicFinances(val) {
-            dbRef.child('settings/showFinances').set(val);
-        }
+        function togglePublicFinances(val) { dbRef.child('settings/showFinances').set(val); }
 
         function handleCreateExpense(e) {
             e.preventDefault();
@@ -752,9 +808,7 @@
         }
 
         function deleteExpense(key) {
-            if (confirm("Bạn có muốn xóa phiếu chi này?")) {
-                dbRef.child('expenses/' + key).remove();
-            }
+            if (confirm("Bạn có muốn xóa phiếu chi này?")) dbRef.child('expenses/' + key).remove();
         }
 
         // 5. LOA PHƯỜNG & TIN TỨC
@@ -849,12 +903,8 @@
             `).join('');
         }
 
-        function updateTTTVStatus(key, status) {
-            dbRef.child('tamtru_tamvang/' + key + '/status').set(status);
-        }
-        function deleteTTTV(key) {
-            if (confirm("Xóa đơn này?")) dbRef.child('tamtru_tamvang/' + key).remove();
-        }
+        function updateTTTVStatus(key, status) { dbRef.child('tamtru_tamvang/' + key + '/status').set(status); }
+        function deleteTTTV(key) { if (confirm("Xóa đơn này?")) dbRef.child('tamtru_tamvang/' + key).remove(); }
 
         function renderFeedbacksAdmin() {
             const list = Object.entries(dbData.feedbacks || {}).reverse();
@@ -884,12 +934,8 @@
             `).join('');
         }
 
-        function updateFeedbackStatus(key, status) {
-            dbRef.child('feedbacks/' + key + '/status').set(status);
-        }
-        function deleteFeedback(key) {
-            if (confirm("Xóa phản ánh này?")) dbRef.child('feedbacks/' + key).remove();
-        }
+        function updateFeedbackStatus(key, status) { dbRef.child('feedbacks/' + key + '/status').set(status); }
+        function deleteFeedback(key) { if (confirm("Xóa phản ánh này?")) dbRef.child('feedbacks/' + key).remove(); }
 
         // CHUYỂN TAB TRÊN TRANG ADMIN
         function switchAdminTab(tabName) {
