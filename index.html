@@ -584,6 +584,7 @@
             }
         }
 
+        // GỬI PHẢN ÁNH LÊN SỰ CỐ TỚI XÓM TRƯỞNG
         function submitFeedback(e) {
             e.preventDefault();
             if (!currentResident) return;
@@ -592,10 +593,12 @@
             const newFb = {
                 name: currentResident.name,
                 houseNo: currentResident.code,
+                phone: currentResident.phone || 'Chưa cập nhật SĐT', // ĐẦY ĐỦ SỐ ĐIỆN THOẠI
                 content: content,
                 image: imageBase64 || null,
                 location: currentLocation || null,
                 status: 'Chờ xử lý',
+                personInCharge: '', // Ô lưu người xử lý
                 time: new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) + ' ' + new Date().toLocaleDateString('vi-VN')
             };
 
@@ -606,7 +609,8 @@
             document.getElementById('location-status').className = 'text-[11px] text-slate-400 font-medium';
             currentLocation = null;
 
-            alert("Đã gửi phản ánh tới Xóm trưởng!");
+            // THÔNG BÁO XÁC NHẬN CHUẨN
+            alert("cảm ơn bác đã phản ánh, ban quản lí xóm sẽ khắc phục sớm nhất.");
             closeModal('modal-feedback');
         }
 
@@ -616,10 +620,12 @@
                 const sosFeedback = {
                     name: `🚨 SOS: ${currentResident.name}`,
                     houseNo: currentResident.code,
+                    phone: currentResident.phone || 'Chưa cập nhật SĐT',
                     content: `CẦN HỖ TRỢ KHẨN CẤP TẠI ĐỊA CHỈ: ${currentResident.address || 'Xóm Thịnh Sơn 1'} (SĐT: ${currentResident.phone || 'Chưa có'})`,
                     image: null,
                     location: currentLocation || null,
                     status: 'Chờ xử lý',
+                    personInCharge: '',
                     time: new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) + ' ' + new Date().toLocaleDateString('vi-VN')
                 };
                 dbRef.child('feedbacks').push(sosFeedback);
@@ -647,9 +653,7 @@
             currentNewsFilter = category;
             ['all', 'local', 'law'].forEach(cat => {
                 const el = document.getElementById(`tab-news-${cat}`);
-                if (el) {
-                    el.className = "flex-1 py-2.5 text-center text-slate-500";
-                }
+                if (el) el.className = "flex-1 py-2.5 text-center text-slate-500";
             });
 
             if (category === 'ALL') document.getElementById('tab-news-all').className = "flex-1 py-2.5 text-center text-teal-700 border-b-2 border-teal-600 font-bold";
@@ -738,7 +742,7 @@
                     `).join('') || '<p class="text-xs text-slate-400 text-center py-2">Không có tin tức</p>';
                 }
 
-                // 3. KHOẢN PHẢI NẠP & HIỂN THỊ TÀI KHOẢN THỦ QUỸ + VIETQR CODE
+                // 3. KHOẢN PHẢI NẠP & HIỂN THỊ TÀI KHOẢN THỦ QUỸ
                 const bankInfo = (dbData.settings && dbData.settings.bankInfo) ? dbData.settings.bankInfo : {
                     bankName: "MBBank (Nghệ An)",
                     bankId: "MB",
@@ -783,7 +787,6 @@
                                     </div>
                                     <p class="text-[10px] text-slate-500">Hạn hoàn thành: <b class="text-red-600">${c.deadline || 'Chưa quy định'}</b></p>
                                     
-                                    <!-- KHUNG THÔNG TIN TÀI KHOẢN CHUYỂN KHOẢN CỦA THỦ QUỸ -->
                                     <div class="bg-white p-3 rounded-xl border border-red-200 space-y-2 text-xs">
                                         <p class="font-bold text-slate-800 flex items-center gap-1 text-[11px] text-blue-700">
                                             <i class="fas fa-building-columns"></i> Thông Tin Chuyển Khoản Thủ Quỹ:
@@ -798,7 +801,6 @@
                                             <p>• Nội dung CK: <b class="text-red-600 font-mono">${currentResident.code}</b></p>
                                         </div>
 
-                                        <!-- MÃ QR CODE VIETQR TỰ ĐỘNG -->
                                         <div class="pt-2 border-t text-center">
                                             <p class="text-[10px] font-bold text-slate-500 mb-1">HOẶC QUÉT MÃ QR DƯỚI ĐÂY BẰNG APP NGÂN HÀNG:</p>
                                             <img src="${qrUrl}" alt="Mã QR Chuyển Khoản" class="w-48 mx-auto rounded-xl border border-slate-200 shadow-sm">
@@ -810,7 +812,6 @@
                     }).join('') || '<p class="text-xs text-slate-400 text-center py-4">Gia đình không có khoản quỹ nào cần nộp</p>';
                 }
 
-                // Cập nhật thẻ thông báo nợ ở Màn hình chính
                 const badgeUnpaid = document.getElementById('badge-unpaid-status');
                 if (badgeUnpaid) {
                     if (unpaidCount > 0) {
@@ -822,7 +823,7 @@
                     }
                 }
 
-                // 4. SỔ THU CHI QUỸ XÓM CÔNG KHAI
+                // 4. SỔ THU CHI QUY XÓM CÔNG KHAI
                 const totalThu = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
                 const expenses = Object.values(dbData.expenses || {}).reverse();
                 const totalChi = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
@@ -865,18 +866,19 @@
                     `).join('') : '<p class="text-xs text-slate-400 text-center py-2">Chưa có lịch sử khai báo</p>';
                 }
 
-                // 7. Lịch sử Phản ánh
+                // 7. Lịch sử Phản ánh (Có hiển thị Người xử lý sự cố nếu đã được cán bộ phân công)
                 const allFbList = Object.values(dbData.feedbacks || {}).reverse();
                 const myFbList = allFbList.filter(f => f && f.name && (f.name.includes(currentResident.name) || (f.houseNo && f.houseNo.includes(currentResident.code))));
                 const elemFb = document.getElementById('my-feedbacks-list');
                 if (elemFb) {
                     elemFb.innerHTML = myFbList.length ? myFbList.map(f => `
                         <div class="p-3 rounded-xl border border-slate-100 bg-slate-50 text-xs space-y-1.5">
-                            <div class="flex justify-between">
+                            <div class="flex justify-between items-center">
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded ${f.status === 'Chờ xử lý' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">${f.status}</span>
                                 <span class="text-[10px] text-slate-400">${f.time || ''}</span>
                             </div>
                             <p class="text-slate-700 font-medium">${f.content}</p>
+                            ${f.personInCharge ? `<p class="text-[10px] text-emerald-700 font-semibold bg-emerald-50 p-1 rounded"><i class="fas fa-user-check"></i> Cán bộ tiếp nhận/xử lý: <b>${f.personInCharge}</b></p>` : ''}
                             ${f.image ? `<img src="${f.image}" class="w-full h-32 object-cover rounded-xl border border-slate-200 mt-1">` : ''}
                             ${f.location ? `<a href="${f.location.mapsUrl}" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg hover:underline"><i class="fas fa-location-dot text-red-500"></i> Xem GPS Google Maps</a>` : ''}
                         </div>
