@@ -3,660 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Xóm Số - Đô Lương</title>
+    <title>Quản Lý Xóm Số - Xóm Thịnh Sơn 1 (Admin)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- FIREBASE & SHEETJS -->
+    <!-- FIREBASE COMPAT SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
-        .active-menu { background-color: #10b981 !important; color: #ffffff !important; }
-        .tab-active { border-bottom: 3px solid #10b981; color: #059669; font-weight: 700; }
+        .tab-btn.active { background-color: #059669; color: white; font-weight: 700; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 5px; }
     </style>
 </head>
-<body class="text-slate-800 antialiased flex h-screen overflow-hidden">
+<body class="text-slate-800 pb-12">
 
-    <!-- 1. MÀN HÌNH ĐĂNG NHẬP ADMIN -->
-    <div id="admin-login-overlay" class="fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl text-center">
-            <div class="bg-emerald-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
-                <i class="fas fa-shield-halved"></i>
-            </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-1">Đăng Nhập Quản Trị Xóm Số</h2>
-            <p class="text-xs text-slate-500 mb-6">Tài khoản Xóm trưởng: <b class="text-emerald-600">huynh</b> / <b class="text-emerald-600">xomthinhson1@37</b></p>
-            
-            <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tài khoản</label>
-                    <input type="text" id="admin-user" required placeholder="Nhập tài khoản..." class="w-full border rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu</label>
-                    <input type="password" id="admin-pass" required placeholder="Nhập mật khẩu..." class="w-full border rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <p id="admin-login-error" class="text-xs text-red-500 hidden font-semibold text-center">Tài khoản hoặc mật khẩu không chính xác!</p>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-md transition">Vào Bảng Điều Hành</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- 2. SIDEBAR BÊN TRÁI -->
-    <aside class="w-64 bg-[#1e293b] text-slate-300 flex flex-col justify-between shrink-0">
-        <div class="p-4 space-y-6">
-            <div class="flex items-center gap-3 px-2">
-                <div class="bg-emerald-500 text-slate-900 font-extrabold text-lg w-10 h-10 rounded-xl flex items-center justify-center shadow-md">XS</div>
-                <div>
-                    <h1 class="font-bold text-white text-base uppercase tracking-wider">XÓM SỐ</h1>
-                    <p class="text-[11px] text-slate-400">Ban quản lý Xóm 3</p>
-                </div>
-            </div>
-
-            <nav class="space-y-1.5 text-sm">
-                <button onclick="switchView('overview')" id="nav-overview" class="w-full active-menu font-medium rounded-xl px-3.5 py-2.5 flex items-center gap-3 transition">
-                    <i class="fas fa-chart-pie w-5 text-center"></i><span>Tổng quan</span>
-                </button>
-                <button onclick="switchView('residents')" id="nav-residents" class="w-full hover:bg-slate-800 hover:text-white rounded-xl px-3.5 py-2.5 flex items-center gap-3 text-slate-400 transition">
-                    <i class="fas fa-users-gear w-5 text-center"></i><span>Quản lý Nhân khẩu & Ruộng</span>
-                </button>
-                <button onclick="switchView('finances')" id="nav-finances" class="w-full hover:bg-slate-800 hover:text-white rounded-xl px-3.5 py-2.5 flex items-center gap-3 text-slate-400 transition">
-                    <i class="fas fa-wallet w-5 text-center"></i><span>Sổ Thu - Chi Quỹ</span>
-                </button>
-                <button onclick="switchView('news_docs')" id="nav-news_docs" class="w-full hover:bg-slate-800 hover:text-white rounded-xl px-3.5 py-2.5 flex items-center gap-3 text-slate-400 transition">
-                    <i class="fas fa-newspaper w-5 text-center"></i><span>Tin Tức & Văn Bản</span>
-                </button>
-                <button onclick="switchView('announcements')" id="nav-announcements" class="w-full hover:bg-slate-800 hover:text-white rounded-xl px-3.5 py-2.5 flex items-center gap-3 text-slate-400 transition">
-                    <i class="fas fa-bullhorn w-5 text-center"></i><span>Phát Loa Phường</span>
-                </button>
-                <button onclick="switchView('sos')" id="nav-sos" class="w-full hover:bg-slate-800 hover:text-white rounded-xl px-3.5 py-2.5 flex items-center justify-between text-slate-400 transition">
-                    <div class="flex items-center gap-3">
-                        <i class="fas fa-triangle-exclamation w-5 text-center"></i><span>Hòm thư & SOS</span>
-                    </div>
-                    <span id="badge-sos-count" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
-                </button>
-            </nav>
-        </div>
-
-        <div class="p-4 border-t border-slate-800 flex items-center justify-between">
+    <!-- TOP BAR BAR -->
+    <header class="bg-slate-900 text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="bg-sky-500 text-white font-bold text-xs w-9 h-9 rounded-full flex items-center justify-center border-2 border-sky-300">XT</div>
+                <div class="bg-emerald-500 text-slate-900 font-black px-2.5 py-1 rounded-lg text-lg">ADMIN</div>
                 <div>
-                    <h4 id="user-display-name" class="font-bold text-white text-xs">Bác Nam</h4>
-                    <p id="user-display-role" class="text-[10px] text-slate-400">Xóm trưởng</p>
+                    <h1 class="font-bold text-sm sm:text-base">BAN CÁN BỘ XÓM THỊNH SƠN 1</h1>
+                    <p class="text-[11px] text-slate-400">Hệ thống quản trị xóm số thông minh</p>
                 </div>
             </div>
-            <button onclick="adminLogout()" title="Đăng xuất" class="text-slate-400 hover:text-red-400 transition px-2 py-1"><i class="fas fa-right-from-bracket"></i></button>
+            <a href="index.html" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+                <i class="fas fa-external-link-alt text-emerald-400"></i> Xem Trang Dân
+            </a>
         </div>
-    </aside>
+    </header>
 
-    <!-- 3. MAIN CONTENT -->
-    <main class="flex-1 overflow-y-auto p-6 space-y-6">
-        <div class="flex justify-between items-center">
-            <h2 id="main-view-title" class="text-xl font-bold text-slate-800">Bảng Điều Khiển Trung Tâm</h2>
-            
-            <div class="flex items-center gap-3">
-                <div class="bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2">
-                    <span class="text-xs font-semibold text-slate-600"><i class="fas fa-wallet text-emerald-600 mr-1"></i> Sổ Thu Chi cho Dân:</span>
-                    <button id="btn-toggle-finances" onclick="toggleFinancesPublic()" class="px-2.5 py-1 text-xs font-bold rounded-lg text-white bg-slate-400 transition">Chờ tải...</button>
-                </div>
+    <!-- MAIN WRAPPER -->
+    <div class="max-w-7xl mx-auto px-4 mt-4 space-y-5">
 
-                <button id="btn-open-perm" onclick="openModal('modal-manage-users')" title="Phân quyền Cán bộ" class="text-slate-500 hover:text-slate-800 bg-white p-2 rounded-xl shadow-sm border border-slate-200 transition">
-                    <i class="fas fa-gear text-sm"></i>
-                </button>
+        <!-- THỐNG KÊ TỔNG QUAN DASHBOARD -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+                <p class="text-[11px] font-semibold text-slate-500 uppercase">Tổng Hộ Dân</p>
+                <h3 id="stat-households" class="text-xl font-black text-slate-800 mt-1">0</h3>
+                <p class="text-[10px] text-slate-400 mt-0.5">Hộ đăng ký</p>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+                <p class="text-[11px] font-semibold text-slate-500 uppercase">Diện Tích Ruộng</p>
+                <h3 id="stat-land" class="text-xl font-black text-emerald-700 mt-1">0 m²</h3>
+                <p id="stat-sao" class="text-[10px] text-emerald-600 mt-0.5">0 sào Trung Bộ</p>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+                <p class="text-[11px] font-semibold text-slate-500 uppercase">Tồn Quỹ Hiện Tại</p>
+                <h3 id="stat-fund-balance" class="text-xl font-black text-blue-700 mt-1">0 đ</h3>
+                <p class="text-[10px] text-slate-400 mt-0.5">Thực thu trừ chi</p>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+                <p class="text-[11px] font-semibold text-slate-500 uppercase">Phản Ánh Chờ Duyệt</p>
+                <h3 id="stat-pending-fb" class="text-xl font-black text-amber-600 mt-1">0</h3>
+                <p class="text-[10px] text-amber-500 mt-0.5">Cần xử lý</p>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs col-span-2 md:col-span-1">
+                <p class="text-[11px] font-semibold text-slate-500 uppercase">Tạm Trú / Tạm Vắng</p>
+                <h3 id="stat-pending-tttv" class="text-xl font-black text-purple-700 mt-1">0</h3>
+                <p class="text-[10px] text-purple-600 mt-0.5">Hồ sơ chờ duyệt</p>
             </div>
         </div>
 
-        <!-- VIEW 1: TỔNG QUAN -->
-        <div id="view-overview" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-white p-4 rounded-2xl border-l-4 border-blue-500 shadow-sm flex items-center justify-between">
+        <!-- THANH ĐIỀU HƯỚNG TABS -->
+        <div class="flex gap-1.5 overflow-x-auto pb-1 border-b border-slate-200 text-xs font-semibold">
+            <button onclick="switchAdminTab('residents')" id="tab-btn-residents" class="tab-btn active px-4 py-2 rounded-xl shrink-0 transition">
+                <i class="fas fa-users mr-1"></i> Hộ Dân & Ruộng
+            </button>
+            <button onclick="switchAdminTab('campaigns')" id="tab-btn-campaigns" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
+                <i class="fas fa-hand-holding-dollar mr-1"></i> Thu Quỹ & Thủy Lợi
+            </button>
+            <button onclick="switchAdminTab('finances')" id="tab-btn-finances" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
+                <i class="fas fa-receipt mr-1"></i> Sổ Chi & Ngân Hàng VietQR
+            </button>
+            <button onclick="switchAdminTab('announcements')" id="tab-btn-announcements" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
+                <i class="fas fa-bullhorn mr-1"></i> Loa Phường & Tin Tức
+            </button>
+            <button onclick="switchAdminTab('tttv')" id="tab-btn-tttv" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
+                <i class="fas fa-passport mr-1"></i> Tạm Trú/Tạm Vắng
+            </button>
+            <button onclick="switchAdminTab('feedbacks')" id="tab-btn-feedbacks" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-200 shrink-0 transition">
+                <i class="fas fa-comment-dots mr-1"></i> SOS & Phản Ánh
+            </button>
+        </div>
+
+        <!-- TAB 1: QUẢN LÝ HỘ DÂN VÀ DIỆN TÍCH RUỘNG -->
+        <div id="admin-view-residents" class="space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-3">
                     <div>
-                        <p class="text-xs font-semibold text-slate-400 mb-1">Tổng Số Hộ</p>
-                        <p id="stat-residents-count" class="text-2xl font-bold text-slate-800">0</p>
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-id-card text-emerald-600 mr-1"></i> Danh Sách Hộ Dân & Diện Tích Ruộng</h3>
+                        <p class="text-xs text-slate-500">Quản lý mã hộ, thông tin chủ hộ và diện tích đất canh tác để tính phí thủy lợi.</p>
                     </div>
-                    <div class="bg-blue-50 text-blue-600 w-11 h-11 rounded-full flex items-center justify-center text-lg"><i class="fas fa-house"></i></div>
+                    <button onclick="openResidentModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm flex items-center gap-1">
+                        <i class="fas fa-plus"></i> Thêm Hộ Dân Mới
+                    </button>
                 </div>
 
-                <div class="bg-white p-4 rounded-2xl border-l-4 border-emerald-500 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400 mb-1">Quỹ Xóm Tồn</p>
-                        <p id="stat-fund-amount" class="text-2xl font-bold text-slate-800">0 đ</p>
-                    </div>
-                    <div class="bg-emerald-50 text-emerald-600 w-11 h-11 rounded-full flex items-center justify-center text-lg"><i class="fas fa-wallet"></i></div>
+                <!-- THANH TÌM KIẾM -->
+                <div class="flex gap-2">
+                    <input type="text" id="res-search-input" onkeyup="filterResidents()" placeholder="Tìm theo Mã hộ, Tên chủ hộ, Số CCCD..." class="w-full border border-slate-300 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                 </div>
 
-                <div class="bg-white p-4 rounded-2xl border-l-4 border-amber-500 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400 mb-1">Tạm Trú / Tạm Vắng</p>
-                        <p class="text-2xl font-bold text-slate-800"><span id="stat-tamtru-count">0</span> <span class="text-xs font-normal text-amber-600 ml-1">chờ duyệt</span></p>
-                    </div>
-                    <div class="bg-amber-50 text-amber-600 w-11 h-11 rounded-full flex items-center justify-center text-lg"><i class="fas fa-passport"></i></div>
-                </div>
-
-                <div class="bg-white p-4 rounded-2xl border-l-4 border-red-500 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-400 mb-1">Phản ánh mới</p>
-                        <p id="stat-feedbacks-count" class="text-2xl font-bold text-slate-800">0</p>
-                    </div>
-                    <div class="bg-red-50 text-red-500 w-11 h-11 rounded-full flex items-center justify-center text-lg"><i class="fas fa-comment-dots"></i></div>
-                </div>
-            </div>
-
-            <!-- TẠM TRÚ TẠM VẮNG DUYỆT -->
-            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-3">
-                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-passport text-indigo-600"></i> Hồ Sơ Tạm Trú / Tạm Vắng Cần Phê Duyệt</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-50 text-slate-500 font-semibold uppercase">
+                <!-- BẢNG DANH SÁCH HỘ DÂN -->
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px]">
                             <tr>
-                                <th class="p-2.5">Loại</th>
-                                <th class="p-2.5">Họ & Tên</th>
-                                <th class="p-2.5">CCCD / SĐT</th>
-                                <th class="p-2.5">Địa chỉ / Nơi đến</th>
-                                <th class="p-2.5">Thời gian</th>
-                                <th class="p-2.5">Lý do</th>
-                                <th class="p-2.5 text-right">Thao tác</th>
+                                <th class="p-3">Mã Hộ</th>
+                                <th class="p-3">Chủ Hộ</th>
+                                <th class="p-3">CCCD / SĐT</th>
+                                <th class="p-3">Diện Tích Ruộng</th>
+                                <th class="p-3">Địa Chỉ</th>
+                                <th class="p-3 text-center">Thao Tác</th>
                             </tr>
                         </thead>
-                        <tbody id="tamtru-requests-tbody" class="divide-y divide-slate-100"></tbody>
+                        <tbody id="residents-table-body" class="divide-y divide-slate-200"></tbody>
                     </table>
                 </div>
             </div>
+        </div>
 
-            <!-- LOA PHƯỜNG & PHẢN ÁNH -->
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                <div id="section-announcement" class="lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-4">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-tower-broadcast text-emerald-500 text-base"></i>
-                        <h3 class="font-bold text-slate-800 text-sm">Trạm Phát Loa Phường</h3>
+        <!-- TAB 2: THU QUỸ VÀ THỦY LỢI RUỘNG -->
+        <div id="admin-view-campaigns" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <div>
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-hand-holding-dollar text-emerald-600 mr-1"></i> Các Đợt Thu Quỹ & Phí Thủy Lợi</h3>
+                        <p class="text-xs text-slate-500">Tạo đợt thu toàn xóm hoặc đợt thu thủy lợi tự động theo m² ruộng.</p>
                     </div>
+                    <button onclick="openCampaignModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm flex items-center gap-1">
+                        <i class="fas fa-plus"></i> Tạo Đợt Thu Mới
+                    </button>
+                </div>
 
-                    <form onsubmit="handleCreateAnnouncement(event)" class="space-y-3">
-                        <input type="text" id="ann-title" required placeholder="Tiêu đề thông báo..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <textarea id="ann-content" required rows="4" placeholder="Nội dung truyền đạt..." class="w-full border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
-                        <div class="flex items-center gap-2">
-                            <input type="checkbox" id="ann-urgent" class="rounded text-red-500">
-                            <label for="ann-urgent" class="text-xs text-red-600 font-medium">Đánh dấu khẩn cấp</label>
+                <!-- DANH SÁCH ĐỢT THU -->
+                <div id="campaigns-list" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: SỔ CHI VÀ CẤU HÌNH TÀI KHOẢN VIETQR -->
+        <div id="admin-view-finances" class="hidden space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- KHU VỰC CẤU HÌNH NGÂN HÀNG VIETQR -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                    <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5 border-b pb-2">
+                        <i class="fas fa-qrcode text-emerald-600"></i> Cấu Hình Ngân Hàng Nhận Chuyển Khoản
+                    </h3>
+                    <p class="text-xs text-slate-500">Mã VietQR tự động trên trang của dân sẽ tạo theo thông tin này:</p>
+                    
+                    <form onsubmit="saveBankConfig(event)" class="space-y-2.5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Mã Ngân Hàng (VietQR) *</label>
+                            <input type="text" id="bank-id" required placeholder="VD: MB, ICB, TCB, VCB, BIDV..." class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
                         </div>
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">Phát Thông Báo</button>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tên Ngân Hàng *</label>
+                            <input type="text" id="bank-name" required placeholder="VD: Ngân hàng MBBank, Agribank..." class="w-full border rounded-xl px-3 py-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Số Tài Khoản *</label>
+                            <input type="text" id="bank-acc-no" required placeholder="VD: 038xxxxxxx" class="w-full border rounded-xl px-3 py-2 text-xs font-mono font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tên Chủ Tài Khoản *</label>
+                            <input type="text" id="bank-acc-owner" required placeholder="VD: NGUYEN VAN NAM" class="w-full border rounded-xl px-3 py-2 text-xs uppercase font-bold">
+                        </div>
+                        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-xl text-xs transition">
+                            Lưu Cấu Hình Ngân Hàng
+                        </button>
                     </form>
                 </div>
 
-                <div id="section-sos" class="lg:col-span-3 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-slate-800 text-sm">Phản ánh từ người dân cần xử lý</h3>
-                        <button onclick="switchView('sos')" class="text-xs text-emerald-600 font-semibold hover:underline">Xem tất cả</button>
+                <!-- CÔNG KHAI SỔ THU CHI & LẬP PHIẾU CHI -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-lock-open text-blue-600 mr-1"></i> Trạng Thái Sổ Thu Chi</h3>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-finances-public" onchange="togglePublicFinances(this.checked)" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        </label>
                     </div>
+                    <p class="text-xs text-slate-500">Bật công khai để người dân xem được tổng tồn quỹ và lịch sử phiếu chi.</p>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead class="text-slate-400 uppercase text-[10px] border-b border-slate-100">
-                                <tr>
-                                    <th class="pb-2.5 font-semibold">Hộ Dân / SĐT</th>
-                                    <th class="pb-2.5 font-semibold">Nội Dung / Ảnh / Vị trí</th>
-                                    <th class="pb-2.5 font-semibold">Người Xử Lý</th>
-                                    <th class="pb-2.5 font-semibold">Trạng Thái</th>
-                                    <th class="pb-2.5 font-semibold text-right">Hành Động</th>
-                                </tr>
-                            </thead>
-                            <tbody id="feedbacks-overview-tbody" class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    <hr class="border-slate-100 my-2">
 
-        <!-- VIEW 2: QUẢN LÝ NHÂN KHẨU & DIỆN TÍCH RUỘNG -->
-        <div id="view-residents" class="hidden space-y-4 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-slate-100">
-                <div>
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-users text-purple-600"></i> Danh Sách Hộ Dân & Diện Tích Ruộng</h3>
-                    <p class="text-[11px] text-slate-500 mt-0.5">Quản lý nhân khẩu và căn cứ tính phí thủy lợi mùa vụ (1 sào Trung Bộ = 500m²)</p>
-                </div>
-                
-                <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="downloadResidentExcelTemplate()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 flex items-center gap-1.5 transition">
-                        <i class="fas fa-file-arrow-down text-slate-500"></i> File Mẫu Excel
-                    </button>
-                    <input type="file" id="excel-import-input" accept=".xlsx, .xls" onchange="handleExcelImport(event)" class="hidden">
-                    <button onclick="document.getElementById('excel-import-input').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
-                        <i class="fas fa-file-import"></i> Nhập Excel
-                    </button>
-                    <button onclick="exportResidentsToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
-                        <i class="fas fa-file-excel"></i> Xuất Excel
-                    </button>
-                    <button onclick="openModal('modal-add-resident')" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition">
-                        <i class="fas fa-plus mr-1"></i> Thêm Hộ Dân
-                    </button>
-                </div>
-            </div>
-
-            <div class="relative">
-                <i class="fas fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
-                <input type="text" id="search-resident-input" onkeyup="filterResidents()" placeholder="Tìm kiếm theo Tên chủ hộ, Mã hộ, CCCD, SĐT, Địa chỉ, Diện tích ruộng..." class="w-full border rounded-xl pl-9 pr-4 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none">
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-slate-500 font-semibold uppercase">
-                        <tr>
-                            <th class="p-3">Mã Hộ</th>
-                            <th class="p-3">Chủ Hộ / Địa Chỉ</th>
-                            <th class="p-3">Số CCCD</th>
-                            <th class="p-3">Nhân Khẩu</th>
-                            <th class="p-3">Diện Tích Ruộng (m²)</th>
-                            <th class="p-3">SĐT</th>
-                            <th class="p-3">Ghi Chú</th>
-                            <th class="p-3 text-right">Thao Tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="full-residents-tbody" class="divide-y divide-slate-100"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- VIEW 3: THU - CHI QUY XÓM -->
-        <div id="view-finances" class="hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl">
-                    <p class="text-xs font-bold text-emerald-700 uppercase mb-1">Tổng Tiền Thu Về</p>
-                    <p id="fin-stat-total-thu" class="text-2xl font-bold text-emerald-600">0 đ</p>
-                </div>
-                <div class="bg-red-50 border border-red-200 p-4 rounded-2xl">
-                    <p class="text-xs font-bold text-red-700 uppercase mb-1">Tổng Tiền Đã Chi</p>
-                    <p id="fin-stat-total-chi" class="text-2xl font-bold text-red-600">0 đ</p>
-                </div>
-                <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
-                    <p class="text-xs font-bold text-blue-700 uppercase mb-1">Quỹ Dư Hiện Tại</p>
-                    <p id="fin-stat-balance" class="text-2xl font-bold text-blue-600">0 đ</p>
-                </div>
-                <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl">
-                    <p class="text-xs font-bold text-amber-700 uppercase mb-1">Tiền Chưa Thu (Nợ Quỹ)</p>
-                    <p id="fin-stat-pending" class="text-2xl font-bold text-amber-600">0 đ</p>
-                </div>
-            </div>
-
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <h3 class="font-bold text-slate-800 text-xs flex items-center gap-2"><i class="fas fa-qrcode text-emerald-600"></i> Cấu Hình Tài Khoản Chuyển Khoản Thủ Quỹ (Tự động tạo VietQR)</h3>
-                <form onsubmit="handleSaveBankInfo(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-                    <div>
-                        <label class="block font-semibold text-slate-600 mb-1">Tên Ngân Hàng *</label>
-                        <input type="text" id="bank-name" required placeholder="VD: MBBank (Nghệ An)" class="w-full border rounded-xl px-3 py-2">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-600 mb-1">Mã Viết Tắt VietQR *</label>
-                        <input type="text" id="bank-id" required placeholder="VD: MB, VCB, VBA, CTG" class="w-full border rounded-xl px-3 py-2 font-mono font-bold">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-600 mb-1">Số Tài Khoản *</label>
-                        <input type="text" id="bank-acc-no" required placeholder="VD: 038192000111" class="w-full border rounded-xl px-3 py-2 font-mono font-bold">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-600 mb-1">Tên Chủ Tài Khoản *</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="bank-acc-owner" required placeholder="VD: LE THI THU QUY" class="w-full border rounded-xl px-3 py-2 uppercase">
-                            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-xl shrink-0">Lưu TK</button>
+                    <h4 class="font-bold text-xs text-slate-800">Lập Phiếu Chi Mới</h4>
+                    <form onsubmit="handleCreateExpense(event)" class="space-y-2.5">
+                        <input type="text" id="exp-title" required placeholder="Nội dung chi (VD: Sửa điện đường xóm 3)" class="w-full border rounded-xl px-3 py-2 text-xs">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="exp-amount" required placeholder="Số tiền (đ)" class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
+                            <input type="text" id="exp-receiver" required placeholder="Người nhận tiền" class="w-full border rounded-xl px-3 py-2 text-xs">
                         </div>
-                    </div>
-                </form>
-            </div>
-
-            <div class="flex border-b border-slate-200 gap-6 text-sm">
-                <button onclick="switchFinTab('thu')" id="tab-btn-thu" class="pb-3 tab-active flex items-center gap-2"><i class="fas fa-hand-holding-dollar"></i> Quản Lý Khoản Thu & Nộp Tiền Từng Hộ</button>
-                <button onclick="switchFinTab('chi')" id="tab-btn-chi" class="pb-3 text-slate-500 font-semibold flex items-center gap-2"><i class="fas fa-file-invoice-dollar"></i> Quản Lý Mẫu Phiếu Chi</button>
-            </div>
-
-            <div id="fin-tab-thu" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-plus-circle text-emerald-600"></i> Tạo Đợt Thu Mới</h3>
-                    <form onsubmit="handleCreateCollection(event)" class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tên Khoản Thu *</label>
-                            <input type="text" id="thu-title" required placeholder="VD: Quỹ vệ sinh, Tiền thủy lợi Vụ Xuân..." class="w-full border rounded-xl px-3 py-2 text-xs">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Phạm Vi & Cách Tính Tiền *</label>
-                            <select id="thu-scope" onchange="toggleScopeSelect()" class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-emerald-700">
-                                <option value="ALL">Bắt buộc tất cả các hộ trong xóm (Mức cố định)</option>
-                                <option value="THUY_LOI">🌾 Thu Thủy Lợi (Tự động tính theo diện tích ruộng)</option>
-                                <option value="CUSTOM">Tùy đối tượng (Chọn danh sách hộ)</option>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="exp-category" class="border rounded-xl px-3 py-2 text-xs">
+                                <option value="Hạ tầng">Hạ tầng / Đường xóm</option>
+                                <option value="Thủy lợi">Thủy lợi / Kênh mương</option>
+                                <option value="Hoạt động">Hoạt động / Văn nghệ</option>
+                                <option value="Khác">Chi khác</option>
                             </select>
+                            <input type="date" id="exp-date" required class="border rounded-xl px-3 py-2 text-xs">
                         </div>
-
-                        <!-- KHU VỰC THU TIỀN CỐ ĐỊNH -->
-                        <div id="scope-fixed-container">
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Số Tiền / Hộ (VNĐ) *</label>
-                            <input type="number" id="thu-amount" placeholder="VD: 50000" class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
-                        </div>
-
-                        <!-- KHU VỰC THU TIỀN THỦY LỢI THEO DIỆN TÍCH RUỘNG -->
-                        <div id="scope-thuyloi-container" class="hidden space-y-2 border p-3 rounded-xl bg-amber-50/70 border-amber-200">
-                            <label class="block text-xs font-bold text-amber-800">Đơn giá Thu Thủy Lợi / 1 Sào (500m²) *</label>
-                            <div class="relative">
-                                <input type="number" id="thu-unit-price" placeholder="VD: 50000" class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-amber-900 border-amber-300">
-                                <span class="absolute right-3 top-2 text-xs text-amber-600 font-bold">VNĐ / sào</span>
-                            </div>
-                            <p class="text-[11px] text-amber-700 leading-snug">💡 <i>Hệ thống tự động lọc các hộ có diện tích ruộng > 0m² và tự tính: (Diện tích / 500) × Đơn giá.</i></p>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Hạn Hoàn Thành *</label>
-                            <input type="date" id="thu-deadline" required class="w-full border rounded-xl px-3 py-2 text-xs">
-                        </div>
-
-                        <div id="scope-custom-container" class="hidden space-y-2 border p-3 rounded-xl bg-slate-50">
-                            <label class="block text-xs font-semibold text-slate-600">Tìm & Chọn Hộ Nộp Quỹ:</label>
-                            <input type="text" id="search-household-picker" onkeyup="filterHouseholdPicker()" placeholder="Gõ tên hoặc mã hộ..." class="w-full border rounded-lg p-2 text-xs bg-white">
-                            <div id="household-picker-list" class="max-h-36 overflow-y-auto space-y-1 text-xs"></div>
-                        </div>
-
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">Tạo & Thông Báo Tới Dân</button>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-xs shadow-sm transition">
+                            Thêm Phiếu Chi
+                        </button>
                     </form>
-                </div>
-
-                <div class="lg:col-span-2 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-slate-800 text-sm">Danh Sách Đợt Thu & Ghi Nhận Nộp Tiền</h3>
-                        <button onclick="openRecordPaymentModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1.5"><i class="fas fa-hand-holding-dollar"></i> Chọn Hộ Nộp Tiền Nhanh</button>
-                    </div>
-
-                    <div id="collection-campaigns-list" class="space-y-4"></div>
                 </div>
             </div>
 
-            <div id="fin-tab-chi" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-file-signature text-red-600"></i> Lập Phiếu Chi Mới</h3>
-                    <form onsubmit="handleCreateExpense(event)" class="space-y-3">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Mã Phiếu Chi</label>
-                                <input type="text" id="chi-code" readonly class="w-full border rounded-xl px-3 py-2 text-xs bg-slate-100 font-mono font-bold text-slate-600">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Hạng Mục Chi *</label>
-                                <select id="chi-category" class="w-full border rounded-xl px-3 py-2 text-xs font-semibold">
-                                    <option value="Đường xóm & Điện">Đường xóm & Điện</option>
-                                    <option value="Thủy lợi & Kênh mương">Thủy lợi & Kênh mương</option>
-                                    <option value="Lễ hội & Sự kiện">Lễ hội & Sự kiện</option>
-                                    <option value="Khuyến học & Quà">Khuyến học & Quà</option>
-                                    <option value="Sửa chữa & Mua sắm">Sửa chữa & Mua sắm</option>
-                                    <option value="Hoạt động khác">Hoạt động khác</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nội Dung Chi Tiết *</label>
-                            <input type="text" id="chi-title" required placeholder="VD: Mua dây điện chiếu sáng Ngõ 2" class="w-full border rounded-xl px-3 py-2 text-xs">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Số Tiền Chi (VNĐ) *</label>
-                                <input type="number" id="chi-amount" required placeholder="VD: 1500000" class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-red-600">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Ngày Chi *</label>
-                                <input type="date" id="chi-date" required class="w-full border rounded-xl px-3 py-2 text-xs">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Người Nhận Tiền / Đại Diện *</label>
-                            <input type="text" id="chi-receiver" required placeholder="Nguyễn Văn B (Thợ điện)" class="w-full border rounded-xl px-3 py-2 text-xs">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Ghi Chú / Chứng Từ Chi</label>
-                            <textarea id="chi-note" rows="2" placeholder="Có hóa đơn đính kèm..." class="w-full border rounded-xl p-2 text-xs"></textarea>
-                        </div>
-
-                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">Lưu Phiếu Chi Xóm</button>
-                    </form>
-                </div>
-
-                <div class="lg:col-span-2 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
-                    <h3 class="font-bold text-slate-800 text-sm">Sổ Nhật Ký Phiếu Chi Xóm</h3>
-                    <div id="expense-vouchers-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-1"></div>
-                </div>
+            <!-- DANH SÁCH PHIẾU CHI -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-list text-slate-600 mr-1"></i> Lịch Sử Lập Phiếu Chi</h3>
+                <div id="expenses-admin-list" class="space-y-2"></div>
             </div>
         </div>
 
-        <!-- VIEW 4: QUẢN LÝ TIN TỨC XÓM & VĂN BẢN PHÁP LUẬT -->
-        <div id="view-news_docs" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
-                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-plus-circle text-teal-600"></i> Đăng Bài Viết / Văn Bản Mới</h3>
-                <form onsubmit="handleCreateNewsDoc(event)" class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Thể Loại *</label>
-                        <select id="news-category" class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-teal-700">
-                            <option value="Tin tức xóm">📰 Tin tức địa phương / Xóm</option>
-                            <option value="Văn bản pháp luật">⚖️ Văn bản pháp luật / Chỉ thị mới</option>
+        <!-- TAB 4: LOA PHƯỜNG & TIN TỨC VĂN BẢN -->
+        <div id="admin-view-announcements" class="hidden space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- TẠO THÔNG BÁO LOA PHƯỜNG -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                    <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-bullhorn text-emerald-600 mr-1"></i> Phát Thông Báo (Loa Phường)</h3>
+                    <form onsubmit="handleCreateAnnouncement(event)" class="space-y-2.5">
+                        <input type="text" id="ann-title" required placeholder="Tiêu đề thông báo..." class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
+                        <textarea id="ann-content" required rows="3" placeholder="Nội dung chi tiết phát thanh..." class="w-full border rounded-xl p-2.5 text-xs"></textarea>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="ann-urgent" class="w-4 h-4 text-red-600 rounded">
+                            <label for="ann-urgent" class="text-xs font-bold text-red-600">Ghim làm Thông Báo Khẩn (Hiện thanh đỏ cho dân)</label>
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                            Phát Thông Báo
+                        </button>
+                    </form>
+                </div>
+
+                <!-- ĐĂNG TIN TỨC / VĂN BẢN CHỈ THỊ -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                    <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-newspaper text-purple-600 mr-1"></i> Đăng Tin Tức / Chỉ Thị Pháp Luật</h3>
+                    <form onsubmit="handleCreateNews(event)" class="space-y-2.5">
+                        <input type="text" id="news-title" required placeholder="Tiêu đề tin tức hoặc văn bản..." class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
+                        <select id="news-category" class="w-full border rounded-xl px-3 py-2 text-xs">
+                            <option value="Tin tức xóm">Tin tức hoạt động xóm</option>
+                            <option value="Văn bản pháp luật">Văn bản chỉ thị / Pháp luật</option>
+                            <option value="Nông nghiệp">Khuyến nông & Lịch vụ mùa</option>
                         </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tiêu Đề Bài Viết / Văn Bản *</label>
-                        <input type="text" id="news-title" required placeholder="Nhập tiêu đề tin tức hoặc tên văn bản..." class="w-full border rounded-xl px-3 py-2 text-xs">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nội Dung Chi Tiết *</label>
-                        <textarea id="news-content" required rows="5" placeholder="Nội dung trích yếu, tóm tắt hoặc hướng dẫn..." class="w-full border rounded-xl p-3 text-xs"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Đường Dẫn File / Bài Viết Gốc (Nếu có)</label>
-                        <input type="url" id="news-link" placeholder="https://..." class="w-full border rounded-xl px-3 py-2 text-xs">
-                    </div>
-
-                    <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">Đăng Lên App Người Dân</button>
-                </form>
+                        <textarea id="news-content" required rows="3" placeholder="Tóm tắt nội dung chỉ thị / tin tức..." class="w-full border rounded-xl p-2.5 text-xs"></textarea>
+                        <input type="url" id="news-link" placeholder="Link đính kèm tài liệu (nếu có): https://..." class="w-full border rounded-xl px-3 py-2 text-xs">
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                            Đăng Tin Tức
+                        </button>
+                    </form>
+                </div>
             </div>
 
-            <div class="lg:col-span-2 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
-                <h3 class="font-bold text-slate-800 text-sm">Danh Sách Tin Tức & Văn Bản Đã Đăng</h3>
-                <div id="admin-news-docs-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-1"></div>
+            <!-- DANH SÁCH BẢN TIN ĐÃ ĐĂNG -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                <h3 class="font-bold text-sm text-slate-800">Danh Sách Thông Báo & Tin Tức Đã Đăng</h3>
+                <div id="admin-news-ann-list" class="space-y-2"></div>
             </div>
         </div>
 
-        <!-- VIEW 5: BẢN TIN LOA PHƯỜNG -->
-        <div id="view-announcements" class="hidden bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
-            <h3 class="font-bold text-slate-800 text-sm">Lịch Sử Thông Báo Loa Phường</h3>
-            <div id="announcements-list" class="space-y-3"></div>
-        </div>
-
-        <!-- VIEW 6: HÒM THƯ & SOS -->
-        <div id="view-sos" class="hidden bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4">
-            <h3 class="font-bold text-slate-800 text-sm">Tất Cả Phản Ánh & Tín Hiệu Khẩn Cấp từ Dân</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-slate-500 font-semibold uppercase">
-                        <tr>
-                            <th class="p-3">Hộ Dân / SĐT</th>
-                            <th class="p-3">Nội Dung Phản Ánh / Ảnh / Vị trí</th>
-                            <th class="p-3">Người Xử Lý Sự Cố</th>
-                            <th class="p-3">Thời Gian</th>
-                            <th class="p-3">Trạng Thái</th>
-                            <th class="p-3 text-right">Thao Tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="full-sos-tbody" class="divide-y divide-slate-100"></tbody>
-                </table>
+        <!-- TAB 5: KHAI BÁO TẠM TRÚ / TẠM VẮNG -->
+        <div id="admin-view-tttv" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-passport text-purple-600 mr-1"></i> Danh Sách Đăng Ký Tạm Trú / Tạm Vắng</h3>
+                <div id="tttv-admin-list" class="space-y-2.5"></div>
             </div>
         </div>
-    </main>
 
-    <!-- 4. MODALS POPUP -->
+        <!-- TAB 6: PHẢN ÁNH & SOS -->
+        <div id="admin-view-feedbacks" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-comment-dots text-red-500 mr-1"></i> Danh Sách Phản Ánh & Yêu Cầu Hỗ Trợ SOS</h3>
+                <div id="feedbacks-admin-list" class="space-y-2.5"></div>
+            </div>
+        </div>
 
-    <!-- MODAL THÊM HỘ DÂN -->
-    <div id="modal-add-resident" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    </div>
+
+    <!-- MODAL THÊM / SỬA HỘ DÂN -->
+    <div id="resident-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
         <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-slate-800 text-sm">Thêm Hộ Dân Mới</h3>
-                <button onclick="closeModal('modal-add-resident')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+                <h3 id="res-modal-title" class="font-bold text-slate-800 text-sm">Thêm Hộ Dân Mới</h3>
+                <button onclick="closeResidentModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fas fa-xmark"></i></button>
             </div>
-            <form onsubmit="handleCreateResident(event)" class="space-y-3">
-                <div><label class="text-xs text-slate-500 font-semibold">Tên Chủ Hộ *</label><input type="text" id="res-name" required placeholder="Nguyễn Văn A" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+            <form onsubmit="handleSaveResident(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="res-edit-key">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Mã Hộ Dân (VD: DL-TS1-0001) *</label>
+                    <input type="text" id="res-code" required placeholder="DL-TS1-0001" class="w-full border rounded-xl px-3 py-2 font-mono font-bold">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Họ và Tên Chủ Hộ *</label>
+                    <input type="text" id="res-name" required placeholder="Nguyễn Văn A" class="w-full border rounded-xl px-3 py-2 font-bold">
+                </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <div><label class="text-xs text-slate-500 font-semibold">Mã Hộ *</label><input type="text" id="res-code" required placeholder="DL-X3-001" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1 font-bold text-purple-700"></div>
-                    <div><label class="text-xs text-slate-500 font-semibold">Số CCCD Chủ Hộ *</label><input type="text" id="res-cccd" required placeholder="040092xxxxxx" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Số CCCD</label>
+                        <input type="text" id="res-cccd" placeholder="040092xxxxxx" class="w-full border rounded-xl px-3 py-2 font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Số Điện Thoại</label>
+                        <input type="text" id="res-phone" placeholder="0987..." class="w-full border rounded-xl px-3 py-2">
+                    </div>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div><label class="text-xs text-slate-500 font-semibold">Số ĐT</label><input type="text" id="res-phone" placeholder="0987..." class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                    <div><label class="text-xs text-slate-500 font-semibold">Nhân Khẩu</label><input type="number" id="res-members" value="4" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                    <div><label class="text-xs text-emerald-700 font-bold">Ruộng (m²)</label><input type="number" id="res-land" value="0" placeholder="1000" class="w-full border border-emerald-300 rounded-xl px-3 py-1.5 text-xs mt-1 font-bold text-emerald-800"></div>
+                <div>
+                    <label class="block font-semibold text-emerald-800 mb-1">Diện Tích Ruộng Canh Tác (m²) *</label>
+                    <input type="number" id="res-land" required oninput="calcSaoHelp(this.value)" placeholder="VD: 1000" class="w-full border border-emerald-300 rounded-xl px-3 py-2 font-bold text-emerald-700">
+                    <p id="res-sao-hint" class="text-[11px] text-emerald-600 mt-1 font-semibold">Tương đương: 0 sào Trung Bộ (500m² = 1 sào)</p>
                 </div>
-                <div><label class="text-xs text-slate-500 font-semibold">Nhà Số / Địa Chỉ</label><input type="text" id="res-address" placeholder="Nhà số 12, Xóm 3" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                <div><label class="text-xs text-slate-500 font-semibold">Ghi chú</label><textarea id="res-note" rows="2" placeholder="Gia đình thương binh, Hộ nghèo..." class="w-full border rounded-xl p-2.5 text-xs mt-1"></textarea></div>
-                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-xs transition">Lưu Hộ Dân</button>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Địa Chỉ / Xóm</label>
+                    <input type="text" id="res-address" placeholder="Xóm Thịnh Sơn 1" class="w-full border rounded-xl px-3 py-2">
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeResidentModal()" class="w-1/2 bg-slate-100 text-slate-700 font-bold py-2 rounded-xl">Hủy</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl shadow-md">Lưu Hộ Dân</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL CHỈNH SỬA HỘ DÂN -->
-    <div id="modal-edit-resident" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <!-- MODAL TẠO ĐỢT THU QUỸ / THỦY LỢI -->
+    <div id="campaign-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
         <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-user-pen text-purple-600"></i> Chỉnh Sửa Thông Tin Hộ Dân</h3>
-                <button onclick="closeModal('modal-edit-resident')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+                <h3 class="font-bold text-slate-800 text-sm">Tạo Đợt Thu Quỹ / Thủy Lợi Mới</h3>
+                <button onclick="closeCampaignModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fas fa-xmark"></i></button>
             </div>
-            <form onsubmit="handleUpdateResidentSubmit(event)" class="space-y-3">
-                <input type="hidden" id="edit-res-key">
-                <div><label class="text-xs text-slate-500 font-semibold">Tên Chủ Hộ *</label><input type="text" id="edit-res-name" required placeholder="Nguyễn Văn A" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div><label class="text-xs text-slate-500 font-semibold">Mã Hộ *</label><input type="text" id="edit-res-code" required placeholder="DL-X3-001" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1 font-bold text-purple-700"></div>
-                    <div><label class="text-xs text-slate-500 font-semibold">Số CCCD Chủ Hộ *</label><input type="text" id="edit-res-cccd" required placeholder="040092xxxxxx" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1 font-mono"></div>
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div><label class="text-xs text-slate-500 font-semibold">Số ĐT</label><input type="text" id="edit-res-phone" placeholder="0987..." class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                    <div><label class="text-xs text-slate-500 font-semibold">Nhân Khẩu</label><input type="number" id="edit-res-members" value="1" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                    <div><label class="text-xs text-emerald-700 font-bold">Ruộng (m²)</label><input type="number" id="edit-res-land" value="0" placeholder="1000" class="w-full border border-emerald-300 rounded-xl px-3 py-1.5 text-xs mt-1 font-bold text-emerald-800"></div>
-                </div>
-                <div><label class="text-xs text-slate-500 font-semibold">Nhà Số / Địa Chỉ</label><input type="text" id="edit-res-address" placeholder="Nhà số 12, Xóm 3" class="w-full border rounded-xl px-3 py-1.5 text-xs mt-1"></div>
-                <div><label class="text-xs text-slate-500 font-semibold">Ghi chú</label><textarea id="edit-res-note" rows="2" placeholder="Gia đình thương binh, Hộ nghèo..." class="w-full border rounded-xl p-2.5 text-xs mt-1"></textarea></div>
-                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl text-xs transition">Lưu Cập Nhật Hộ Dân</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL CHỈNH SỬA PHẢN ÁNH & PHÂN CÔNG NGƯỜI XỬ LÝ -->
-    <div id="modal-edit-feedback" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-pen-to-square text-blue-600"></i> Chỉnh Sửa Phản Ánh & Người Xử Lý</h3>
-                <button onclick="closeModal('modal-edit-feedback')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
-            </div>
-            <form onsubmit="handleUpdateFeedbackSubmit(event)" class="space-y-3">
-                <input type="hidden" id="edit-fb-key">
+            <form onsubmit="handleSaveCampaign(event)" class="space-y-3 text-xs">
                 <div>
-                    <label class="text-xs font-semibold text-slate-600 mb-1 block">Người gửi / SĐT</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="edit-fb-name" readonly class="border rounded-xl px-3 py-1.5 text-xs bg-slate-100 font-semibold">
-                        <input type="text" id="edit-fb-phone" class="border rounded-xl px-3 py-1.5 text-xs font-bold text-blue-700">
-                    </div>
+                    <label class="block font-semibold text-slate-600 mb-1">Tên Khoản Thu / Đợt Thu *</label>
+                    <input type="text" id="camp-title" required placeholder="VD: Thu Phí Thủy Lợi Vụ Xuân 2026 hoặc Quỹ Xóm" class="w-full border rounded-xl px-3 py-2 font-bold">
                 </div>
                 <div>
-                    <label class="text-xs font-semibold text-slate-600 mb-1 block">Nội dung phản ánh *</label>
-                    <textarea id="edit-fb-content" required rows="3" class="w-full border rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-emerald-700 mb-1 block">Cán bộ / Người chịu trách nhiệm xử lý sự cố *</label>
-                    <input type="text" id="edit-fb-person" required placeholder="VD: Nguyễn Văn A (Cán bộ điện), Bác Nam (Xóm trưởng)..." class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-slate-600 mb-1 block">Trạng thái xử lý *</label>
-                    <select id="edit-fb-status" class="w-full border rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
-                        <option value="Chờ xử lý">⏳ Chờ xử lý</option>
-                        <option value="Đã xử lý">✅ Đã xử lý xong</option>
+                    <label class="block font-semibold text-slate-600 mb-1">Loại Khoản Thu *</label>
+                    <select id="camp-scope" onchange="toggleScopeInputs(this.value)" class="w-full border rounded-xl px-3 py-2 font-bold text-emerald-800">
+                        <option value="ALL">🏠 Toàn Xóm (Số tiền cố định mỗi hộ)</option>
+                        <option value="THUY_LOI">🌾 Thủy Lợi Ruộng (Tự động tính theo m² ruộng của hộ)</option>
                     </select>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">Cập Nhật Thông Tin Phản Ánh</button>
+
+                <div id="camp-amount-box">
+                    <label class="block font-semibold text-slate-600 mb-1">Số Tiền Thu Trên Mỗi Hộ (đ) *</label>
+                    <input type="number" id="camp-amount" placeholder="VD: 100000" class="w-full border rounded-xl px-3 py-2 font-bold">
+                </div>
+
+                <div id="camp-thuyloi-box" class="hidden bg-emerald-50 p-3 rounded-xl border border-emerald-200 space-y-2">
+                    <label class="block font-bold text-emerald-800">Đơn Giá Thủy Lợi (đồng / m²) *</label>
+                    <input type="number" id="camp-rate-m2" placeholder="VD: 200 (200đ/m² = 100.000đ/sào)" class="w-full border border-emerald-300 rounded-xl px-3 py-2 font-bold text-emerald-800">
+                    <p class="text-[10px] text-emerald-700">💡 Hệ thống sẽ lấy $m^2$ ruộng từng hộ nhân với đơn giá này để ra số tiền phải nộp.</p>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeCampaignModal()" class="w-1/2 bg-slate-100 text-slate-700 font-bold py-2 rounded-xl">Hủy</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl shadow-md">Tạo Đợt Thu</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL GHI NHẬN NỘP TIỀN QUỸ THEO TỪNG HỘ -->
-    <div id="modal-record-payment" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fas fa-cash-register text-emerald-600"></i> Ghi Nhận Nộp Tiền Theo Hộ</h3>
-                <button onclick="closeModal('modal-record-payment')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
-            </div>
-            <form onsubmit="handleRecordPaymentSubmit(event)" class="space-y-3">
-                <div>
-                    <label class="text-xs font-semibold text-slate-600">1. Chọn Đợt Thu *</label>
-                    <select id="pay-campaign-select" onchange="updatePayHouseDropdown()" required class="w-full border rounded-xl px-3 py-2 text-xs mt-1 font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500"></select>
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-slate-600">2. Chọn Hộ Dân Nộp Tiền (Chỉ hiện các hộ chưa nộp) *</label>
-                    <select id="pay-house-select" required class="w-full border rounded-xl px-3 py-2 text-xs mt-1 font-bold text-blue-700 focus:ring-2 focus:ring-emerald-500"></select>
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-slate-600">3. Hình Thức Thanh Toán *</label>
-                    <select id="pay-method-select" required class="w-full border rounded-xl px-3 py-2 text-xs mt-1 font-bold text-emerald-700 focus:ring-2 focus:ring-emerald-500">
-                        <option value="Tiền mặt">💵 Tiền mặt (Thu trực tiếp)</option>
-                        <option value="Chuyển khoản">💳 Chuyển khoản ngân hàng</option>
-                    </select>
-                </div>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">Xác Nhận Đã Thu Tiền Hộ Này</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL PHÂN QUYỀN CÁN BỘ -->
-    <div id="modal-manage-users" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xl rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-slate-800 text-base"><i class="fas fa-user-gear text-emerald-600 mr-2"></i> Phân Quyền Cán Bộ Xóm</h3>
-                <button onclick="closeModal('modal-manage-users')" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
-            </div>
-            <form onsubmit="handleCreateAdminUser(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                <h4 class="font-bold text-xs text-slate-700 uppercase">Thêm Tài Khoản Cán Bộ</h4>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    <input type="text" id="new-adm-name" required placeholder="Tên cán bộ..." class="border rounded-xl px-3 py-1.5 text-xs bg-white">
-                    <input type="text" id="new-adm-user" required placeholder="Tài khoản..." class="border rounded-xl px-3 py-1.5 text-xs bg-white">
-                    <input type="text" id="new-adm-pass" required placeholder="Mật khẩu..." class="border rounded-xl px-3 py-1.5 text-xs bg-white">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Giao quyền truy cập:</label>
-                    <div class="flex flex-wrap gap-3 text-xs text-slate-700">
-                        <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="perm-residents" class="rounded text-emerald-600"> Nhân khẩu</label>
-                        <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="perm-announcements" class="rounded text-emerald-600"> Loa phường</label>
-                        <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="perm-finances" class="rounded text-emerald-600"> Sổ Thu Chi</label>
-                        <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="perm-sos" class="rounded text-emerald-600"> SOS & Phản ánh</label>
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition">Cấp Tài Khoản Mới</button>
-            </form>
-            <div>
-                <h4 class="font-bold text-xs text-slate-500 uppercase mb-2">Danh Sách Cán Bộ Cấp Quyền</h4>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-100 text-slate-600 font-semibold">
-                            <tr>
-                                <th class="p-2">Cán bộ</th>
-                                <th class="p-2">Tài khoản</th>
-                                <th class="p-2">Quyền</th>
-                                <th class="p-2 text-right">Xóa</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-users-tbody" class="divide-y divide-slate-100"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT XỬ LÝ TOÀN BỘ QUẢN TRỊ -->
+    <!-- JAVASCRIPT XỬ LÝ TOÀN BỘ CHỨC NĂNG ADMIN -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAC7mztrDAHldUlUz7eSp0eBNeLLoA_ISQ",
@@ -671,75 +383,9 @@
 
         firebase.initializeApp(firebaseConfig);
         const dbRef = firebase.database().ref('xomso_data');
-        
-        let dbData = { residents: {}, announcements: {}, feedbacks: {}, admin_users: {}, tamtru_tamvang: {}, settings: {}, campaigns: {}, payments: {}, expenses: {}, news_docs: {} };
-        let currentAdmin = null;
-        let residentSearchQuery = "";
-        let selectedCustomHouses = [];
+        let dbData = { residents: {}, announcements: {}, feedbacks: {}, settings: {}, campaigns: {}, payments: {}, expenses: {}, news_docs: {}, tamtru_tamvang: {} };
 
-        const DEFAULT_SUPER_ADMIN = {
-            username: 'huynh',
-            pass: 'xomthinhson1@37',
-            name: 'Bác Nam',
-            role: 'Xóm trưởng',
-            isSuper: true,
-            permissions: ['residents', 'announcements', 'finances', 'sos', 'news_docs']
-        };
-
-        function checkAdminSession() {
-            const savedAdmin = localStorage.getItem('CURRENT_ADMIN_USER');
-            if (savedAdmin) {
-                currentAdmin = JSON.parse(savedAdmin);
-                document.getElementById('admin-login-overlay').classList.add('hidden');
-                applyPermissionsUI();
-            }
-        }
-
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const user = document.getElementById('admin-user').value.trim();
-            const pass = document.getElementById('admin-pass').value.trim();
-
-            let found = null;
-            if (user === DEFAULT_SUPER_ADMIN.username && pass === DEFAULT_SUPER_ADMIN.pass) {
-                found = DEFAULT_SUPER_ADMIN;
-            } else {
-                const usersList = Object.values(dbData.admin_users || {});
-                found = usersList.find(u => u.username === user && u.pass === pass);
-            }
-
-            if (found) {
-                currentAdmin = found;
-                localStorage.setItem('CURRENT_ADMIN_USER', JSON.stringify(found));
-                document.getElementById('admin-login-overlay').classList.add('hidden');
-                document.getElementById('admin-login-error').classList.add('hidden');
-                applyPermissionsUI();
-            } else {
-                document.getElementById('admin-login-error').classList.remove('hidden');
-            }
-        }
-
-        function adminLogout() {
-            localStorage.removeItem('CURRENT_ADMIN_USER');
-            location.reload();
-        }
-
-        function applyPermissionsUI() {
-            if (!currentAdmin) return;
-            document.getElementById('user-display-name').innerText = currentAdmin.name || 'Cán bộ';
-            document.getElementById('user-display-role').innerText = currentAdmin.isSuper ? 'Xóm trưởng' : (currentAdmin.role || 'Cán bộ Xóm');
-            
-            const btnOpenPerm = document.getElementById('btn-open-perm');
-            if (btnOpenPerm) btnOpenPerm.style.display = currentAdmin.isSuper ? 'block' : 'none';
-
-            const perms = currentAdmin.permissions || [];
-            if (document.getElementById('nav-residents')) document.getElementById('nav-residents').style.display = (currentAdmin.isSuper || perms.includes('residents')) ? 'flex' : 'none';
-            if (document.getElementById('nav-finances')) document.getElementById('nav-finances').style.display = (currentAdmin.isSuper || perms.includes('finances')) ? 'flex' : 'none';
-            if (document.getElementById('nav-news_docs')) document.getElementById('nav-news_docs').style.display = (currentAdmin.isSuper || perms.includes('news_docs')) ? 'flex' : 'none';
-            if (document.getElementById('nav-announcements')) document.getElementById('nav-announcements').style.display = (currentAdmin.isSuper || perms.includes('announcements')) ? 'flex' : 'none';
-            if (document.getElementById('nav-sos')) document.getElementById('nav-sos').style.display = (currentAdmin.isSuper || perms.includes('sos')) ? 'flex' : 'none';
-        }
-
+        // LẮNG NGHE DỮ LIỆU CHÍNH TỪ FIREBASE
         dbRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -747,786 +393,525 @@
                 if (!dbData.residents) dbData.residents = {};
                 if (!dbData.announcements) dbData.announcements = {};
                 if (!dbData.feedbacks) dbData.feedbacks = {};
-                if (!dbData.admin_users) dbData.admin_users = {};
-                if (!dbData.tamtru_tamvang) dbData.tamtru_tamvang = {};
                 if (!dbData.settings) dbData.settings = {};
                 if (!dbData.campaigns) dbData.campaigns = {};
                 if (!dbData.payments) dbData.payments = {};
                 if (!dbData.expenses) dbData.expenses = {};
                 if (!dbData.news_docs) dbData.news_docs = {};
+                if (!dbData.tamtru_tamvang) dbData.tamtru_tamvang = {};
             }
-            checkAdminSession();
-            renderDashboard();
+            renderAdminAll();
         });
 
-        // ==========================================
-        // TÍNH NĂNG NHÂN KHẨU & DIỆN TÍCH RUỘNG
-        // ==========================================
-        function handleCreateResident(e) {
-            e.preventDefault();
-            const landArea = Number(document.getElementById('res-land').value) || 0;
-            const newRes = {
-                name: document.getElementById('res-name').value.trim(),
-                code: document.getElementById('res-code').value.trim(),
-                cccd: document.getElementById('res-cccd').value.trim(),
-                phone: document.getElementById('res-phone').value.trim(),
-                members: Number(document.getElementById('res-members').value) || 1,
-                landArea: landArea,
-                hasLand: landArea > 0,
-                address: document.getElementById('res-address').value.trim() || 'Xóm Thịnh Sơn 1, Đô Lương',
-                note: document.getElementById('res-note').value.trim()
-            };
-            dbRef.child('residents').push(newRes);
-            closeModal('modal-add-resident');
-            e.target.reset();
-            alert("Đã lưu hộ dân mới!");
+        // RENDER TỔNG THỂ GIAO DIỆN ADMIN
+        function renderAdminAll() {
+            renderDashboardStats();
+            renderResidentsTable();
+            renderCampaignsList();
+            renderFinancesAdmin();
+            renderNewsAnnAdmin();
+            renderTTTVAdmin();
+            renderFeedbacksAdmin();
+            loadBankConfigForm();
         }
 
-        function openEditResidentModal(key) {
-            const res = dbData.residents ? dbData.residents[key] : null;
-            if (!res) return;
+        // 1. STATS DASHBOARD
+        function renderDashboardStats() {
+            const resArr = Object.values(dbData.residents || {});
+            document.getElementById('stat-households').innerText = resArr.length;
 
-            document.getElementById('edit-res-key').value = key;
-            document.getElementById('edit-res-name').value = res.name || '';
-            document.getElementById('edit-res-code').value = res.code || '';
-            document.getElementById('edit-res-cccd').value = res.cccd || '';
-            document.getElementById('edit-res-phone').value = res.phone || '';
-            document.getElementById('edit-res-members').value = res.members || 1;
-            document.getElementById('edit-res-land').value = res.landArea || 0;
-            document.getElementById('edit-res-address').value = res.address || '';
-            document.getElementById('edit-res-note').value = res.note || '';
+            const totalLand = resArr.reduce((sum, r) => sum + Number(r.landArea || 0), 0);
+            document.getElementById('stat-land').innerText = totalLand.toLocaleString('vi-VN') + ' m²';
+            document.getElementById('stat-sao').innerText = (totalLand / 500).toFixed(1) + ' sào Trung Bộ';
 
-            openModal('modal-edit-resident');
+            const payments = Object.values(dbData.payments || {});
+            const expenses = Object.values(dbData.expenses || {});
+            const totalThu = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+            const totalChi = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+            document.getElementById('stat-fund-balance').innerText = (totalThu - totalChi).toLocaleString('vi-VN') + ' đ';
+
+            const pendingFb = Object.values(dbData.feedbacks || {}).filter(f => f.status !== 'Đã xử lý').length;
+            document.getElementById('stat-pending-fb').innerText = pendingFb;
+
+            const pendingTTTV = Object.values(dbData.tamtru_tamvang || {}).filter(t => t.status === 'Chờ duyệt').length;
+            document.getElementById('stat-pending-tttv').innerText = pendingTTTV;
         }
 
-        function handleUpdateResidentSubmit(e) {
-            e.preventDefault();
-            const key = document.getElementById('edit-res-key').value;
-            const landArea = Number(document.getElementById('edit-res-land').value) || 0;
+        // 2. QUẢN LÝ HỘ DÂN & RUỘNG
+        function renderResidentsTable() {
+            const tbody = document.getElementById('residents-table-body');
+            const resEntries = Object.entries(dbData.residents || {});
 
-            const updatedRes = {
-                name: document.getElementById('edit-res-name').value.trim(),
-                code: document.getElementById('edit-res-code').value.trim(),
-                cccd: document.getElementById('edit-res-cccd').value.trim(),
-                phone: document.getElementById('edit-res-phone').value.trim(),
-                members: Number(document.getElementById('edit-res-members').value) || 1,
-                landArea: landArea,
-                hasLand: landArea > 0,
-                address: document.getElementById('edit-res-address').value.trim(),
-                note: document.getElementById('edit-res-note').value.trim()
-            };
+            if (resEntries.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Chưa có hộ dân nào. Hãy bấm "Thêm Hộ Dân Mới".</td></tr>`;
+                return;
+            }
 
-            dbRef.child('residents').child(key).update(updatedRes);
-            closeModal('modal-edit-resident');
-            alert("✅ Đã cập nhật thông tin hộ dân thành công!");
+            tbody.innerHTML = resEntries.map(([key, r]) => {
+                const land = Number(r.landArea || 0);
+                const sao = (land / 500).toFixed(1);
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-mono font-bold text-emerald-700">${r.code || key}</td>
+                        <td class="p-3 font-bold text-slate-800">${r.name}</td>
+                        <td class="p-3 text-slate-600 font-mono">${r.cccd || '---'} <br><span class="text-[10px] text-slate-400">${r.phone || ''}</span></td>
+                        <td class="p-3"><b class="text-emerald-700">${land} m²</b> <span class="text-[10px] text-slate-500">(${sao} sào)</span></td>
+                        <td class="p-3 text-slate-500">${r.address || 'Xóm Thịnh Sơn 1'}</td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="editResident('${key}')" title="Sửa" class="bg-amber-100 text-amber-700 hover:bg-amber-200 px-2 py-1 rounded-lg text-[11px] font-bold"><i class="fas fa-pen"></i></button>
+                            <button onclick="deleteResident('${key}')" title="Xóa" class="bg-red-100 text-red-600 hover:bg-red-200 px-2 py-1 rounded-lg text-[11px] font-bold"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function filterResidents() {
-            residentSearchQuery = (document.getElementById('search-resident-input').value || '').toLowerCase().trim();
-            renderResidentsTable();
-        }
-
-        function renderResidentsTable() {
-            const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
-            const filtered = resList.filter(r => {
-                const q = residentSearchQuery;
-                return (r.name || '').toLowerCase().includes(q) ||
-                       (r.code || '').toLowerCase().includes(q) ||
-                       (r.cccd || '').toLowerCase().includes(q) ||
-                       (r.phone || '').toLowerCase().includes(q) ||
-                       (r.address || '').toLowerCase().includes(q) ||
-                       (r.landArea || '').toString().includes(q) ||
-                       (r.note || '').toLowerCase().includes(q);
+            const query = (document.getElementById('res-search-input').value || '').toLowerCase();
+            const rows = document.querySelectorAll('#residents-table-body tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
             });
-
-            const canManageResidents = currentAdmin && (currentAdmin.isSuper || (currentAdmin.permissions && currentAdmin.permissions.includes('residents')));
-
-            const tbody = document.getElementById('full-residents-tbody');
-            if (tbody) {
-                tbody.innerHTML = filtered.map(r => {
-                    const landArea = Number(r.landArea || 0);
-                    const sao = (landArea / 500).toFixed(1);
-
-                    return `
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-3 font-bold text-purple-600">${r.code || 'DL-X3'}</td>
-                            <td class="p-3 font-semibold text-slate-800">${r.name}<br><span class="text-[10px] text-slate-400 font-normal">${r.address || ''}</span></td>
-                            <td class="p-3 font-mono text-slate-600">${r.cccd || '---'}</td>
-                            <td class="p-3">${r.members || 1} người</td>
-                            <td class="p-3">
-                                ${landArea > 0 ? `
-                                    <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-xs flex items-center gap-1 w-max">
-                                        <i class="fas fa-wheat-awn text-emerald-600"></i> ${landArea.toLocaleString('vi-VN')} m² (${sao} sào)
-                                    </span>
-                                ` : '<span class="text-slate-400 italic">Không có ruộng</span>'}
-                            </td>
-                            <td class="p-3 text-slate-500">${r.phone || '---'}</td>
-                            <td class="p-3 text-slate-600 max-w-xs text-[11px]">${r.note || '<span class="text-slate-300 italic">Không có</span>'}</td>
-                            <td class="p-3 text-right">
-                                ${canManageResidents ? `
-                                    <button onclick="openEditResidentModal('${r._key}')" class="text-blue-600 hover:text-blue-800 font-bold mr-2 text-xs"><i class="fas fa-pen-to-square"></i> Sửa</button>
-                                    <button onclick="deleteResident('${r._key}')" class="text-red-500 hover:text-red-700 font-bold text-xs"><i class="fas fa-trash"></i> Xóa</button>
-                                ` : '<span class="text-slate-300">-</span>'}
-                            </td>
-                        </tr>
-                    `;
-                }).join('') || '<tr><td colspan="8" class="p-4 text-center text-slate-400">Không tìm thấy hộ dân nào</td></tr>';
-            }
         }
 
-        function deleteResident(key) { if (confirm("Xóa hộ dân này?")) dbRef.child('residents').child(key).remove(); }
-
-        function downloadResidentExcelTemplate() {
-            const sampleData = [{ "Mã Hộ": "DL-TS1-0001", "Họ và Tên Chủ Hộ": "Nguyễn Văn A", "Số CCCD": "040092001234", "Số Điện Thoại": "0987654321", "Số Nhân Khẩu": 4, "Diện Tích Ruộng (m2)": 1000, "Địa Chỉ": "Nhà số 12, Xóm Thịnh Sơn 1", "Ghi Chú": "Hộ gia đình văn hóa" }];
-            const worksheet = XLSX.utils.json_to_sheet(sampleData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Mau_Nhap_Ho_Dan");
-            XLSX.writeFile(workbook, "Mau_Nhap_Danh_Sach_Ho_Dan.xlsx");
-        }
-
-        function handleExcelImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-                    if (!jsonRows || jsonRows.length === 0) return alert("File Excel trống!");
-
-                    let addedCount = 0;
-                    const updates = {};
-
-                    jsonRows.forEach((row, index) => {
-                        const name = (row["Họ và Tên Chủ Hộ"] || row["Họ và Tên"] || row["Chủ Hộ"] || "").toString().trim();
-                        const code = (row["Mã Hộ"] || `DL-TS1-${1000 + index}`).toString().trim();
-                        const cccd = (row["Số CCCD"] || "").toString().trim();
-                        const phone = (row["Số Điện Thoại"] || row["SĐT"] || "").toString().trim();
-                        const members = Number(row["Số Nhân Khẩu"] || 1);
-                        const landArea = Number(row["Diện Tích Ruộng (m2)"] || row["Diện Tích Ruộng"] || row["Ruộng (m2)"] || 0);
-                        const address = (row["Địa Chỉ"] || "Xóm Thịnh Sơn 1, Đô Lương").toString().trim();
-                        const note = (row["Ghi Chú"] || "").toString().trim();
-
-                        if (name || code) {
-                            const newKey = dbRef.child('residents').push().key;
-                            updates[`residents/${newKey}`] = { name: name || "Chưa tên", code, cccd, phone, members: isNaN(members) ? 1 : members, landArea: isNaN(landArea) ? 0 : landArea, hasLand: landArea > 0, address, note };
-                            addedCount++;
-                        }
-                    });
-
-                    if (addedCount > 0) dbRef.update(updates, () => alert(`🎉 Đã nhập thành công ${addedCount} hộ dân!`));
-
-                } catch (err) { alert("Lỗi đọc file Excel!"); } 
-                finally { event.target.value = ""; }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function exportResidentsToExcel() {
-            const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
-            if (resList.length === 0) return alert("Chưa có dữ liệu hộ dân!");
-
-            const excelData = resList.map((r, index) => ({
-                "STT": index + 1, "Mã Hộ": r.code || 'DL-TS1', "Họ và Tên Chủ Hộ": r.name || '', "Số CCCD": r.cccd || '', "Số Điện Thoại": r.phone || '', "Số Nhân Khẩu": r.members || 1, "Diện Tích Ruộng (m2)": r.landArea || 0, "Số Sào (500m2)": (Number(r.landArea || 0) / 500).toFixed(1), "Địa Chỉ": r.address || 'Xóm Thịnh Sơn 1, Đô Lương', "Ghi Chú": r.note || ''
-            }));
-
-            const worksheet = XLSX.utils.json_to_sheet(excelData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachHoDan");
-            XLSX.writeFile(workbook, `Danh_Sach_Ho_Dan_Xom_So_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.xlsx`);
-        }
-
-        // ==========================================
-        // THU TIỀN QUỸ & THỦY LỢI TỰ ĐỘNG
-        // ==========================================
-        function toggleScopeSelect() {
-            const scope = document.getElementById('thu-scope').value;
-            const containerCustom = document.getElementById('scope-custom-container');
-            const containerFixed = document.getElementById('scope-fixed-container');
-            const containerThuyLoi = document.getElementById('scope-thuyloi-container');
-
-            if (scope === 'CUSTOM') {
-                containerCustom.classList.remove('hidden');
-                containerFixed.classList.remove('hidden');
-                containerThuyLoi.classList.add('hidden');
-                renderHouseholdPicker();
-            } else if (scope === 'THUY_LOI') {
-                containerCustom.classList.add('hidden');
-                containerFixed.classList.add('hidden');
-                containerThuyLoi.classList.remove('hidden');
+        function openResidentModal(key = null) {
+            document.getElementById('resident-modal').classList.remove('hidden');
+            if (key && dbData.residents[key]) {
+                const r = dbData.residents[key];
+                document.getElementById('res-modal-title').innerText = 'Sửa Thông Tin Hộ Dân';
+                document.getElementById('res-edit-key').value = key;
+                document.getElementById('res-code').value = r.code || key;
+                document.getElementById('res-name').value = r.name || '';
+                document.getElementById('res-cccd').value = r.cccd || '';
+                document.getElementById('res-phone').value = r.phone || '';
+                document.getElementById('res-land').value = r.landArea || 0;
+                document.getElementById('res-address').value = r.address || '';
+                calcSaoHelp(r.landArea || 0);
             } else {
-                containerCustom.classList.add('hidden');
-                containerFixed.classList.remove('hidden');
-                containerThuyLoi.classList.add('hidden');
+                document.getElementById('res-modal-title').innerText = 'Thêm Hộ Dân Mới';
+                document.getElementById('res-edit-key').value = '';
+                document.getElementById('res-code').value = 'DL-TS1-' + String(Object.keys(dbData.residents || {}).length + 1).padStart(4, '0');
+                document.getElementById('res-name').value = '';
+                document.getElementById('res-cccd').value = '';
+                document.getElementById('res-phone').value = '';
+                document.getElementById('res-land').value = '';
+                document.getElementById('res-address').value = 'Xóm Thịnh Sơn 1';
+                calcSaoHelp(0);
             }
         }
 
-        function handleCreateCollection(e) {
+        function closeResidentModal() {
+            document.getElementById('resident-modal').classList.add('hidden');
+        }
+
+        function calcSaoHelp(val) {
+            const m2 = Number(val || 0);
+            const sao = (m2 / 500).toFixed(1);
+            document.getElementById('res-sao-hint').innerText = `Tương đương: ${sao} sào Trung Bộ (500m² = 1 sào)`;
+        }
+
+        function handleSaveResident(e) {
             e.preventDefault();
-            const scope = document.getElementById('thu-scope').value;
-            const allResList = Object.values(dbData.residents || {});
-            
-            let assigned = [];
-            let houseAmounts = {}; // Chứa số tiền riêng từng hộ (cho thủy lợi)
-            let baseAmount = Number(document.getElementById('thu-amount').value) || 0;
+            const key = document.getElementById('res-edit-key').value;
+            const code = document.getElementById('res-code').value.trim();
 
-            if (scope === 'ALL') {
-                assigned = allResList.map(r => r.code);
-            } else if (scope === 'CUSTOM') {
-                assigned = selectedCustomHouses;
-                if (assigned.length === 0) return alert("Vui lòng chọn ít nhất 1 hộ dân!");
-            } else if (scope === 'THUY_LOI') {
-                const unitPricePerSao = Number(document.getElementById('thu-unit-price').value) || 0;
-                if (unitPricePerSao <= 0) return alert("Vui lòng nhập đơn giá thủy lợi hợp lệ trên 1 sào!");
+            const resObj = {
+                code: code,
+                name: document.getElementById('res-name').value.trim(),
+                cccd: document.getElementById('res-cccd').value.trim(),
+                phone: document.getElementById('res-phone').value.trim(),
+                landArea: Number(document.getElementById('res-land').value || 0),
+                address: document.getElementById('res-address').value.trim()
+            };
 
-                // Lọc các hộ có diện tích ruộng > 0
-                const landOwners = allResList.filter(r => Number(r.landArea || 0) > 0);
-                if (landOwners.length === 0) return alert("Hiện tại chưa có hộ nào có diện tích ruộng được nhập vào hệ thống!");
-
-                landOwners.forEach(r => {
-                    assigned.push(r.code);
-                    const landArea = Number(r.landArea || 0);
-                    // Công thức: (Diện tích / 500) * đơn giá 1 sào
-                    const calculatedAmount = Math.round((landArea / 500) * unitPricePerSao);
-                    houseAmounts[r.code] = calculatedAmount;
-                });
-
-                baseAmount = unitPricePerSao; // Lưu đơn giá sào làm mốc
+            if (key) {
+                dbRef.child('residents/' + key).update(resObj);
+            } else {
+                dbRef.child('residents/' + code).set(resObj);
             }
 
-            const newCampaign = {
-                title: document.getElementById('thu-title').value.trim(),
-                amount: baseAmount,
+            closeResidentModal();
+            alert("✅ Đã lưu thông tin hộ dân thành công!");
+        }
+
+        function editResident(key) { openResidentModal(key); }
+        function deleteResident(key) {
+            if (confirm("Bạn có chắc chắn muốn xóa hộ dân này khỏi danh sách?")) {
+                dbRef.child('residents/' + key).remove();
+            }
+        }
+
+        // 3. THU QUỸ VÀ THỦY LỢI
+        function openCampaignModal() {
+            document.getElementById('campaign-modal').classList.remove('hidden');
+        }
+        function closeCampaignModal() {
+            document.getElementById('campaign-modal').classList.add('hidden');
+        }
+        function toggleScopeInputs(val) {
+            if (val === 'THUY_LOI') {
+                document.getElementById('camp-amount-box').classList.add('hidden');
+                document.getElementById('camp-thuyloi-box').classList.remove('hidden');
+            } else {
+                document.getElementById('camp-amount-box').classList.remove('hidden');
+                document.getElementById('camp-thuyloi-box').classList.add('hidden');
+            }
+        }
+
+        function handleSaveCampaign(e) {
+            e.preventDefault();
+            const title = document.getElementById('camp-title').value.trim();
+            const scope = document.getElementById('camp-scope').value;
+
+            const allResidents = Object.values(dbData.residents || {});
+            const assignedHouses = allResidents.map(r => r.code);
+
+            let amount = 0;
+            let houseAmounts = {};
+
+            if (scope === 'THUY_LOI') {
+                const rate = Number(document.getElementById('camp-rate-m2').value || 0);
+                allResidents.forEach(r => {
+                    const land = Number(r.landArea || 0);
+                    houseAmounts[r.code] = land * rate;
+                });
+            } else {
+                amount = Number(document.getElementById('camp-amount').value || 0);
+            }
+
+            const newCamp = {
+                title: title,
                 scope: scope,
-                assignedHouses: assigned,
-                houseAmounts: houseAmounts, // Danh sách số tiền tùy chỉnh từng hộ
-                deadline: document.getElementById('thu-deadline').value,
+                amount: amount,
+                houseAmounts: houseAmounts,
+                assignedHouses: assignedHouses,
                 createdAt: new Date().toLocaleDateString('vi-VN')
             };
 
-            dbRef.child('campaigns').push(newCampaign);
-            e.target.reset();
-            selectedCustomHouses = [];
-            document.getElementById('scope-custom-container').classList.add('hidden');
-            document.getElementById('scope-thuyloi-container').classList.add('hidden');
-            document.getElementById('scope-fixed-container').classList.remove('hidden');
-            alert(`🎉 Đã tạo đợt thu thành công! (${assigned.length} hộ được gán)`);
+            dbRef.child('campaigns').push(newCamp);
+            closeCampaignModal();
+            alert("🎉 Đã tạo đợt thu mới thành công!");
         }
 
-        // LẤY SỐ TIỀN CỤ THỂ CỦA MỘT HỘ TRONG ĐỢT THU
-        function getHouseCampaignAmount(campaign, houseCode) {
-            if (campaign.scope === 'THUY_LOI' && campaign.houseAmounts && campaign.houseAmounts[houseCode] !== undefined) {
-                return Number(campaign.houseAmounts[houseCode]);
-            }
-            return Number(campaign.amount || 0);
-        }
-
-        function updatePayHouseDropdown(targetHouseCode = null) {
-            const campaignKey = document.getElementById('pay-campaign-select').value;
-            const campaign = dbData.campaigns ? dbData.campaigns[campaignKey] : null;
-            const selectHouse = document.getElementById('pay-house-select');
-
-            if (!campaign) { selectHouse.innerHTML = `<option value="">Không có hộ nào</option>`; return; }
-
-            const assignedCodes = campaign.assignedHouses || [];
-            const payments = Object.values(dbData.payments || {});
-            const paidCodes = payments.filter(p => p.campaignKey === campaignKey).map(p => p.houseCode);
-            
-            const unpaidCodes = assignedCodes.filter(code => !paidCodes.includes(code));
-            const residentsList = Object.values(dbData.residents || {});
-
-            if (unpaidCodes.length === 0) { selectHouse.innerHTML = `<option value="">🎉 Tất cả các hộ đã nộp đủ!</option>`; return; }
-
-            selectHouse.innerHTML = unpaidCodes.map(code => {
-                const res = residentsList.find(r => r.code === code);
-                const amt = getHouseCampaignAmount(campaign, code);
-                return `<option value="${code}">${code} - ${res ? res.name : 'Chưa cập nhật tên'} (${amt.toLocaleString('vi-VN')} đ)</option>`;
-            }).join('');
-
-            if (targetHouseCode && unpaidCodes.includes(targetHouseCode)) selectHouse.value = targetHouseCode;
-        }
-
-        function handleRecordPaymentSubmit(e) {
-            e.preventDefault();
-            const campaignKey = document.getElementById('pay-campaign-select').value;
-            const houseCode = document.getElementById('pay-house-select').value;
-            const method = document.getElementById('pay-method-select').value;
-
-            if (!houseCode) return alert("Vui lòng chọn một hộ dân hợp lệ!");
-            const campaign = dbData.campaigns ? dbData.campaigns[campaignKey] : null;
-            const actualAmount = getHouseCampaignAmount(campaign, houseCode);
-
-            const newPayment = {
-                campaignKey, campaignTitle: campaign.title, houseCode, amount: actualAmount, method,
-                date: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})
-            };
-
-            dbRef.child('payments').push(newPayment);
-            closeModal('modal-record-payment');
-            alert(`✅ Đã ghi nhận hộ [${houseCode}] nộp ${actualAmount.toLocaleString('vi-VN')} đ thành công!`);
-        }
-
-        // ==========================================
-        // CÁC HÀM Bổ TRỢ KHÁC & RENDER DỮ LIỆU
-        // ==========================================
-        function openRecordPaymentModal(preselectedCampaignKey = null, preselectedHouseCode = null) {
+        function renderCampaignsList() {
+            const container = document.getElementById('campaigns-list');
             const campaigns = Object.entries(dbData.campaigns || {}).map(([k, v]) => ({ _key: k, ...v }));
-            if (campaigns.length === 0) return alert("Chưa có đợt thu nào!");
 
-            const selectCamp = document.getElementById('pay-campaign-select');
-            selectCamp.innerHTML = campaigns.map(c => `<option value="${c._key}">${c.title} (${c.scope === 'THUY_LOI' ? 'Đơn giá ' + Number(c.amount).toLocaleString('vi-VN') + ' đ/sào' : Number(c.amount).toLocaleString('vi-VN') + ' đ/hộ'})</option>`).join('');
-
-            if (preselectedCampaignKey) selectCamp.value = preselectedCampaignKey;
-            updatePayHouseDropdown(preselectedHouseCode);
-            openModal('modal-record-payment');
-        }
-
-        function renderHouseholdPicker() {
-            const resList = Object.values(dbData.residents || {});
-            const query = (document.getElementById('search-household-picker')?.value || '').toLowerCase().trim();
-            const filtered = resList.filter(r => (r.name || '').toLowerCase().includes(query) || (r.code || '').toLowerCase().includes(query));
-
-            const listContainer = document.getElementById('household-picker-list');
-            if (listContainer) {
-                listContainer.innerHTML = filtered.map(r => `
-                    <label class="flex items-center gap-2 p-1.5 bg-white rounded border hover:bg-slate-100 cursor-pointer">
-                        <input type="checkbox" value="${r.code}" ${selectedCustomHouses.includes(r.code) ? 'checked' : ''} onchange="toggleCustomHouseSelection('${r.code}')" class="rounded text-emerald-600">
-                        <span><b>${r.code}</b> - ${r.name}</span>
-                    </label>
-                `).join('') || '<p class="text-xs text-slate-400 p-1">Không tìm thấy hộ phù hợp</p>';
+            if (campaigns.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">Chưa có đợt thu nào được tạo.</p>`;
+                return;
             }
+
+            const payments = Object.values(dbData.payments || {});
+            const residents = Object.values(dbData.residents || {});
+
+            container.innerHTML = campaigns.reverse().map(c => {
+                const assigned = c.assignedHouses || [];
+                let paidCount = 0;
+
+                const houseRows = assigned.map(hCode => {
+                    const house = residents.find(r => r.code === hCode) || { name: hCode, landArea: 0 };
+                    let owedAmount = Number(c.amount || 0);
+                    if (c.scope === 'THUY_LOI' && c.houseAmounts && c.houseAmounts[hCode] !== undefined) {
+                        owedAmount = Number(c.houseAmounts[hCode]);
+                    }
+
+                    const isPaid = payments.some(p => p.campaignKey === c._key && p.houseCode === hCode);
+                    if (isPaid) paidCount++;
+
+                    return `
+                        <div class="flex justify-between items-center py-1.5 border-b border-slate-100 text-xs">
+                            <div>
+                                <span class="font-mono font-bold text-slate-700">${hCode}</span> - <b>${house.name}</b>
+                                ${c.scope === 'THUY_LOI' ? `<span class="text-[10px] text-emerald-600">(${house.landArea}m²)</span>` : ''}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-800">${owedAmount.toLocaleString('vi-VN')} đ</span>
+                                <button onclick="togglePaymentStatus('${c._key}', '${hCode}', ${owedAmount}, ${isPaid})" class="px-2 py-0.5 rounded-full font-bold text-[10px] ${isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}">
+                                    ${isPaid ? '✅ Đã nộp' : '⚠️ Chưa nộp (Bấm nộp)'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[9px] font-bold px-2 py-0.5 rounded ${c.scope === 'THUY_LOI' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}">
+                                    ${c.scope === 'THUY_LOI' ? '🌾 Thủy Lợi Ruộng' : 'Quỹ Cố Định'}
+                                </span>
+                                <h4 class="font-bold text-sm text-slate-800 mt-1">${c.title}</h4>
+                                <p class="text-[11px] text-slate-500">Đã nộp: <b class="text-emerald-700">${paidCount}/${assigned.length} hộ</b></p>
+                            </div>
+                            <button onclick="deleteCampaign('${c._key}')" class="text-xs text-red-600 hover:underline"><i class="fas fa-trash"></i> Xóa đợt thu</button>
+                        </div>
+                        <div class="max-h-48 overflow-y-auto bg-white p-2.5 rounded-xl border border-slate-200">
+                            ${houseRows}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function filterHouseholdPicker() { renderHouseholdPicker(); }
-        function toggleCustomHouseSelection(code) {
-            const idx = selectedCustomHouses.indexOf(code);
-            if (idx > -1) selectedCustomHouses.splice(idx, 1);
-            else selectedCustomHouses.push(code);
-        }
-
-        function openEditFeedbackModal(key) {
-            const fb = dbData.feedbacks ? dbData.feedbacks[key] : null;
-            if (!fb) return;
-
-            document.getElementById('edit-fb-key').value = key;
-            document.getElementById('edit-fb-name').value = `${fb.name || ''} (${fb.houseNo || ''})`;
-            document.getElementById('edit-fb-phone').value = fb.phone || '';
-            document.getElementById('edit-fb-content').value = fb.content || '';
-            document.getElementById('edit-fb-person').value = fb.personInCharge || currentAdmin?.name || '';
-            document.getElementById('edit-fb-status').value = fb.status || 'Chờ xử lý';
-
-            openModal('modal-edit-feedback');
-        }
-
-        function handleUpdateFeedbackSubmit(e) {
-            e.preventDefault();
-            const key = document.getElementById('edit-fb-key').value;
-            const updatedData = {
-                phone: document.getElementById('edit-fb-phone').value.trim(),
-                content: document.getElementById('edit-fb-content').value.trim(),
-                personInCharge: document.getElementById('edit-fb-person').value.trim(),
-                status: document.getElementById('edit-fb-status').value
-            };
-
-            dbRef.child('feedbacks').child(key).update(updatedData);
-            closeModal('modal-edit-feedback');
-            alert("✅ Đã cập nhật phản ánh & người xử lý thành công!");
-        }
-
-        function resolveFeedback(key) {
-            const fb = dbData.feedbacks ? dbData.feedbacks[key] : null;
-            const currentPerson = (fb && fb.personInCharge) ? fb.personInCharge : (currentAdmin ? currentAdmin.name : '');
-            
-            const handlerName = prompt("Nhập tên Cán bộ / Người chịu trách nhiệm xử lý sự cố này:", currentPerson);
-            if (handlerName !== null) {
-                dbRef.child('feedbacks').child(key).update({ 
-                    status: 'Đã xử lý',
-                    personInCharge: handlerName.trim() || 'Ban quản lý xóm'
+        function togglePaymentStatus(campKey, houseCode, amount, currentIsPaid) {
+            if (currentIsPaid) {
+                // Hủy đóng tiền
+                const payEntries = Object.entries(dbData.payments || {});
+                const found = payEntries.find(([k, v]) => v.campaignKey === campKey && v.houseCode === houseCode);
+                if (found) {
+                    dbRef.child('payments/' + found[0]).remove();
+                }
+            } else {
+                // Xác nhận nộp tiền
+                dbRef.child('payments').push({
+                    campaignKey: campKey,
+                    houseCode: houseCode,
+                    amount: amount,
+                    payDate: new Date().toLocaleDateString('vi-VN')
                 });
-                alert("✅ Đã chuyển trạng thái Đã Xử Lý!");
             }
         }
 
-        function deleteFeedback(key) { if (confirm("Xóa phản ánh này?")) dbRef.child('feedbacks').child(key).remove(); }
-        function handleSaveBankInfo(e) {
+        function deleteCampaign(key) {
+            if (confirm("Bạn có muốn xóa đợt thu này?")) {
+                dbRef.child('campaigns/' + key).remove();
+            }
+        }
+
+        // 4. SỔ CHI & NGÂN HÀNG VIETQR
+        function loadBankConfigForm() {
+            const bank = dbData.settings ? dbData.settings.bankInfo : null;
+            if (bank) {
+                document.getElementById('bank-id').value = bank.bankId || 'MB';
+                document.getElementById('bank-name').value = bank.bankName || '';
+                document.getElementById('bank-acc-no').value = bank.accountNo || '';
+                document.getElementById('bank-acc-owner').value = bank.accountOwner || '';
+            }
+
+            const isPublic = dbData.settings ? dbData.settings.showFinances : false;
+            document.getElementById('toggle-finances-public').checked = isPublic;
+        }
+
+        function saveBankConfig(e) {
             e.preventDefault();
             const bankInfo = {
+                bankId: document.getElementById('bank-id').value.trim(),
                 bankName: document.getElementById('bank-name').value.trim(),
-                bankId: document.getElementById('bank-id').value.trim().toUpperCase(),
                 accountNo: document.getElementById('bank-acc-no').value.trim(),
-                accountOwner: document.getElementById('bank-acc-owner').value.trim().toUpperCase()
+                accountOwner: document.getElementById('bank-acc-owner').value.trim()
             };
+
             dbRef.child('settings/bankInfo').set(bankInfo);
-            alert("✅ Đã lưu cấu hình Tài khoản Thủ quỹ & Tạo VietQR thành công!");
+            alert("✅ Đã lưu thông tin tài khoản ngân hàng VietQR thành công!");
         }
 
-        function toggleFinancesPublic() {
-            const isCurrentPublic = dbData.settings && dbData.settings.showFinances === true;
-            dbRef.child('settings').update({ showFinances: !isCurrentPublic });
-            alert(!isCurrentPublic ? "Đã BẬT công khai Sổ Thu Chi cho Dân!" : "Đã TẮT công khai!");
-        }
-
-        function switchFinTab(tab) {
-            if (tab === 'thu') {
-                document.getElementById('fin-tab-thu').classList.remove('hidden');
-                document.getElementById('fin-tab-chi').classList.add('hidden');
-                document.getElementById('tab-btn-thu').className = 'pb-3 tab-active flex items-center gap-2';
-                document.getElementById('tab-btn-chi').className = 'pb-3 text-slate-500 font-semibold flex items-center gap-2';
-            } else {
-                document.getElementById('fin-tab-thu').classList.add('hidden');
-                document.getElementById('fin-tab-chi').classList.remove('hidden');
-                document.getElementById('tab-btn-chi').className = 'pb-3 tab-active flex items-center gap-2';
-                document.getElementById('tab-btn-thu').className = 'pb-3 text-slate-500 font-semibold flex items-center gap-2';
-                document.getElementById('chi-code').value = 'PC-' + Math.floor(1000 + Math.random() * 9000);
-            }
-        }
-
-        function handleCreateNewsDoc(e) {
-            e.preventDefault();
-            const newItem = {
-                category: document.getElementById('news-category').value,
-                title: document.getElementById('news-title').value.trim(),
-                content: document.getElementById('news-content').value.trim(),
-                link: document.getElementById('news-link').value.trim() || null,
-                date: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})
-            };
-            dbRef.child('news_docs').push(newItem);
-            e.target.reset();
-            alert("Đã đăng bài viết/văn bản mới lên App Dân!");
-        }
-
-        function deleteNewsDoc(key) { if (confirm("Xóa bài viết / văn bản này?")) dbRef.child('news_docs').child(key).remove(); }
-        function handleCreateAnnouncement(e) {
-            e.preventDefault();
-            const newAnn = {
-                title: document.getElementById('ann-title').value.trim(),
-                content: document.getElementById('ann-content').value.trim(),
-                urgent: document.getElementById('ann-urgent').checked,
-                date: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})
-            };
-            dbRef.child('announcements').push(newAnn);
-            e.target.reset();
-            alert("Đã phát thông báo thành công!");
-        }
-
-        function deleteAnnouncement(key) { if (confirm("Xóa thông báo này?")) dbRef.child('announcements').child(key).remove(); }
-        function deleteCampaign(key) {
-            if (confirm("Xóa đợt thu này? Toàn bộ lịch sử nộp tiền đợt này sẽ bị xóa.")) {
-                dbRef.child('campaigns').child(key).remove();
-                const payments = Object.entries(dbData.payments || {});
-                payments.forEach(([pKey, pVal]) => { if (pVal && pVal.campaignKey === key) dbRef.child('payments').child(pKey).remove(); });
-            }
+        function togglePublicFinances(val) {
+            dbRef.child('settings/showFinances').set(val);
         }
 
         function handleCreateExpense(e) {
             e.preventDefault();
-            const newExp = {
-                code: document.getElementById('chi-code').value,
-                category: document.getElementById('chi-category').value,
-                title: document.getElementById('chi-title').value.trim(),
-                amount: Number(document.getElementById('chi-amount').value) || 0,
-                date: document.getElementById('chi-date').value,
-                receiver: document.getElementById('chi-receiver').value.trim(),
-                note: document.getElementById('chi-note').value.trim()
+            const exp = {
+                title: document.getElementById('exp-title').value.trim(),
+                amount: Number(document.getElementById('exp-amount').value || 0),
+                receiver: document.getElementById('exp-receiver').value.trim(),
+                category: document.getElementById('exp-category').value,
+                date: document.getElementById('exp-date').value
             };
-            dbRef.child('expenses').push(newExp);
+
+            dbRef.child('expenses').push(exp);
             e.target.reset();
-            alert("Đã lưu Phiếu Chi Xóm!");
+            alert("✅ Đã tạo phiếu chi thành công!");
         }
 
-        function deleteExpense(key) { if (confirm("Xóa phiếu chi này?")) dbRef.child('expenses').child(key).remove(); }
-        function cancelHousePayment(campaignKey, houseCode) {
-            if (confirm(`Xác nhận HỦY ghi nhận nộp tiền của hộ [${houseCode}]?`)) {
-                const paymentsEntries = Object.entries(dbData.payments || {});
-                const foundEntry = paymentsEntries.find(([k, p]) => p && p.campaignKey === campaignKey && p.houseCode === houseCode);
-                if (foundEntry) dbRef.child('payments').child(foundEntry[0]).remove();
+        function renderFinancesAdmin() {
+            const expenses = Object.entries(dbData.expenses || {}).map(([k, v]) => ({ _key: k, ...v }));
+            const list = document.getElementById('expenses-admin-list');
+
+            if (expenses.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400 py-2">Chưa có phiếu chi nào được lập.</p>`;
+                return;
+            }
+
+            list.innerHTML = expenses.reverse().map(e => `
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="text-[9px] font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded">${e.category}</span>
+                        <h5 class="font-bold text-slate-800 mt-0.5">${e.title}</h5>
+                        <p class="text-[10px] text-slate-400">Người nhận: ${e.receiver} | Ngày: ${e.date}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-red-600">-${Number(e.amount).toLocaleString('vi-VN')} đ</span>
+                        <button onclick="deleteExpense('${e._key}')" class="text-red-500 hover:underline text-[10px]"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteExpense(key) {
+            if (confirm("Bạn có muốn xóa phiếu chi này?")) {
+                dbRef.child('expenses/' + key).remove();
             }
         }
 
-        function approveTTTV(key) { dbRef.child('tamtru_tamvang').child(key).update({ status: 'Đã duyệt' }); }
-        function deleteTTTV(key) { if (confirm("Xóa hồ sơ này?")) dbRef.child('tamtru_tamvang').child(key).remove(); }
-        function handleCreateAdminUser(e) {
+        // 5. LOA PHƯỜNG & TIN TỨC
+        function handleCreateAnnouncement(e) {
             e.preventDefault();
-            const perms = [];
-            if (document.getElementById('perm-residents')?.checked) perms.push('residents');
-            if (document.getElementById('perm-announcements')?.checked) perms.push('announcements');
-            if (document.getElementById('perm-finances')?.checked) perms.push('finances');
-            if (document.getElementById('perm-sos')?.checked) perms.push('sos');
-
-            const newUser = {
-                name: document.getElementById('new-adm-name').value.trim(),
-                username: document.getElementById('new-adm-user').value.trim(),
-                pass: document.getElementById('new-adm-pass').value.trim(),
-                role: 'Cán bộ Xóm', permissions: perms
+            const ann = {
+                title: document.getElementById('ann-title').value.trim(),
+                content: document.getElementById('ann-content').value.trim(),
+                urgent: document.getElementById('ann-urgent').checked,
+                date: new Date().toLocaleDateString('vi-VN')
             };
-            dbRef.child('admin_users').push(newUser);
+
+            dbRef.child('announcements').push(ann);
             e.target.reset();
-            alert("Đã cấp tài khoản cán bộ mới!");
-        }
-        function deleteAdminUser(key) { if (confirm("Xóa tài khoản cán bộ này?")) dbRef.child('admin_users').child(key).remove(); }
-
-        // RENDER TẤT CẢ DỮ LIỆU
-        function renderDashboard() {
-            try {
-                const resList = Object.entries(dbData.residents || {}).map(([key, val]) => ({ _key: key, ...val }));
-                const annList = Object.entries(dbData.announcements || {}).map(([key, val]) => ({ _key: key, ...val })).reverse();
-                const fbList = Object.entries(dbData.feedbacks || {}).map(([key, val]) => ({ _key: key, ...val })).reverse();
-                const tttvList = Object.entries(dbData.tamtru_tamvang || {}).map(([key, val]) => ({ _key: key, ...val })).reverse();
-                const campaigns = Object.entries(dbData.campaigns || {}).map(([k, v]) => ({ _key: k, ...v }));
-                const payments = Object.values(dbData.payments || {});
-                const expenses = Object.entries(dbData.expenses || {}).map(([k, v]) => ({ _key: k, ...v })).reverse();
-                const newsList = Object.entries(dbData.news_docs || {}).map(([k, v]) => ({ _key: k, ...v })).reverse();
-
-                if (dbData.settings && dbData.settings.bankInfo) {
-                    const b = dbData.settings.bankInfo;
-                    if (document.getElementById('bank-name') && b.bankName) document.getElementById('bank-name').value = b.bankName;
-                    if (document.getElementById('bank-id') && b.bankId) document.getElementById('bank-id').value = b.bankId;
-                    if (document.getElementById('bank-acc-no') && b.accountNo) document.getElementById('bank-acc-no').value = b.accountNo;
-                    if (document.getElementById('bank-acc-owner') && b.accountOwner) document.getElementById('bank-acc-owner').value = b.accountOwner;
-                }
-
-                const totalThu = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-                const totalChi = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
-                const balance = totalThu - totalChi;
-
-                let pendingTotal = 0;
-                campaigns.forEach(c => {
-                    const campaignPayments = payments.filter(p => p.campaignKey === c._key);
-                    const paidHouseCodes = campaignPayments.map(p => p.houseCode);
-                    const assigned = c.assignedHouses || [];
-                    const unpaidHouses = assigned.filter(code => !paidHouseCodes.includes(code));
-                    
-                    unpaidHouses.forEach(code => {
-                        pendingTotal += getHouseCampaignAmount(c, code);
-                    });
-                });
-
-                document.getElementById('stat-residents-count').innerText = resList.length || 0;
-                document.getElementById('stat-fund-amount').innerText = balance.toLocaleString('vi-VN') + ' đ';
-                document.getElementById('fin-stat-total-thu').innerText = totalThu.toLocaleString('vi-VN') + ' đ';
-                document.getElementById('fin-stat-total-chi').innerText = totalChi.toLocaleString('vi-VN') + ' đ';
-                document.getElementById('fin-stat-balance').innerText = balance.toLocaleString('vi-VN') + ' đ';
-                document.getElementById('fin-stat-pending').innerText = pendingTotal.toLocaleString('vi-VN') + ' đ';
-
-                document.getElementById('stat-tamtru-count').innerText = tttvList.filter(t => t.status === 'Chờ duyệt').length;
-                const pendingSOS = fbList.filter(f => f.status === 'Chờ xử lý').length;
-                document.getElementById('stat-feedbacks-count').innerText = pendingSOS;
-                document.getElementById('badge-sos-count').innerText = pendingSOS;
-
-                const isFinPublic = dbData.settings && dbData.settings.showFinances === true;
-                const btnToggle = document.getElementById('btn-toggle-finances');
-                if (btnToggle) {
-                    btnToggle.innerText = isFinPublic ? "Đang BẬT" : "Đang TẮT";
-                    btnToggle.className = isFinPublic ? "px-2.5 py-1 text-xs font-bold rounded-lg text-white bg-emerald-600 hover:bg-emerald-700" : "px-2.5 py-1 text-xs font-bold rounded-lg text-white bg-slate-500 hover:bg-slate-600";
-                }
-
-                // Render Tạm trú / vắng
-                document.getElementById('tamtru-requests-tbody').innerHTML = tttvList.length ? tttvList.map(t => `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2.5"><span class="font-bold text-[10px] px-2 py-0.5 rounded ${t.type === 'Tạm trú' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700'}">${t.type}</span></td>
-                        <td class="p-2.5 font-bold text-slate-800">${t.name} <span class="text-[10px] text-slate-400 font-normal">(${t.houseCode})</span></td>
-                        <td class="p-2.5 font-mono text-slate-600">${t.cccd}<br>${t.phone}</td>
-                        <td class="p-2.5 text-slate-700 max-w-xs">${t.location}</td>
-                        <td class="p-2.5 text-slate-500">${t.startDate} ➔ ${t.endDate}</td>
-                        <td class="p-2.5 text-slate-500 italic">${t.reason}</td>
-                        <td class="p-2.5 text-right">
-                            ${t.status === 'Chờ duyệt' ? `<button onclick="approveTTTV('${t._key}')" class="bg-emerald-600 text-white font-bold px-2.5 py-1 rounded text-[10px] hover:bg-emerald-700">Duyệt hồ sơ</button>` : `<span class="text-emerald-600 font-bold text-[11px]"><i class="fas fa-check mr-1"></i>Đã duyệt</span>`}
-                            <button onclick="deleteTTTV('${t._key}')" class="text-red-400 hover:text-red-600 ml-2"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `).join('') : '<tr><td colspan="7" class="p-4 text-center text-slate-400">Không có hồ sơ tạm trú/vắng mới</td></tr>';
-
-                // Render Phản ánh
-                const renderFeedbackRows = (list) => list.map(f => `
-                    <tr>
-                        <td class="py-3 font-semibold text-slate-800">
-                            ${f.name || 'Người dân'}<br>
-                            <span class="text-[10px] text-slate-400 font-normal">(${f.houseNo || 'Xóm 3'})</span><br>
-                            <span class="text-[11px] font-bold text-blue-600 font-mono"><i class="fas fa-phone text-[9px]"></i> ${f.phone || 'Chưa cập nhật SĐT'}</span>
-                        </td>
-                        <td class="py-3 text-slate-600 max-w-xs">
-                            <p class="font-medium">${f.content}</p>
-                            ${f.image ? `<img src="${f.image}" class="w-16 h-12 object-cover rounded-lg border border-slate-200 mt-1 cursor-pointer" onclick="window.open('${f.image}')">` : ''}
-                            ${f.location ? `<a href="${f.location.mapsUrl}" target="_blank" class="text-[10px] text-blue-600 underline font-semibold flex items-center gap-1 mt-1"><i class="fas fa-location-dot text-red-500"></i> Xem GPS Google Maps</a>` : ''}
-                        </td>
-                        <td class="py-3">
-                            ${f.personInCharge ? `<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]"><i class="fas fa-user-check"></i> ${f.personInCharge}</span>` : `<span class="text-slate-400 italic text-[10px]">Chưa phân công</span>`}
-                        </td>
-                        <td class="py-3 text-slate-400 text-[10px]">${f.time || 'Vừa xong'}</td>
-                        <td class="py-3"><span class="font-semibold text-[10px] px-2 py-0.5 rounded-full ${f.status === 'Chờ xử lý' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">${f.status}</span></td>
-                        <td class="py-3 text-right">
-                            <button onclick="openEditFeedbackModal('${f._key}')" class="text-blue-600 font-bold hover:underline mr-1.5"><i class="fas fa-pen-to-square"></i> Sửa</button>
-                            ${f.status === 'Chờ xử lý' ? `<button onclick="resolveFeedback('${f._key}')" class="text-emerald-600 font-semibold hover:underline">Xử lý xong</button>` : `<span class="text-slate-400">Đã xong</span>`}
-                            <button onclick="deleteFeedback('${f._key}')" class="text-red-400 hover:text-red-600 ml-2"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `).join('');
-
-                document.getElementById('feedbacks-overview-tbody').innerHTML = renderFeedbackRows(fbList.slice(0, 5)) || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Chưa có phản ánh nào</td></tr>';
-                document.getElementById('full-sos-tbody').innerHTML = renderFeedbackRows(fbList) || '<tr><td colspan="6" class="p-4 text-center text-slate-400">Hòm thư trống</td></tr>';
-
-                renderResidentsTable();
-
-                // Render Đợt thu quỹ
-                const residentsMap = {};
-                resList.forEach(r => residentsMap[r.code] = r.name);
-
-                document.getElementById('collection-campaigns-list').innerHTML = campaigns.map(c => {
-                    const campaignPayments = payments.filter(p => p.campaignKey === c._key);
-                    const paidHouseCodes = campaignPayments.map(p => p.houseCode);
-                    const assigned = c.assignedHouses || [];
-                    const unpaidHouses = assigned.filter(code => !paidHouseCodes.includes(code));
-                    const paidCount = assigned.length - unpaidHouses.length;
-
-                    return `
-                        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 space-y-3">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-md">
-                                        ${c.scope === 'THUY_LOI' ? '🌾 Đợt Thu Thủy Lợi Ruộng' : (c.scope === 'ALL' ? 'Tất cả các hộ' : 'Tùy chọn hộ')}
-                                    </span>
-                                    <h4 class="font-bold text-slate-800 text-sm mt-1">${c.title}</h4>
-                                    <p class="text-xs text-slate-500">
-                                        ${c.scope === 'THUY_LOI' ? `Đơn giá: <b class="text-amber-700">${Number(c.amount).toLocaleString('vi-VN')} đ/sào</b> (tự nhân diện tích)` : `Mức đóng: <b class="text-emerald-600">${Number(c.amount).toLocaleString('vi-VN')} đ</b> / hộ`} 
-                                        | Hạn: <b class="text-red-500">${c.deadline}</b>
-                                    </p>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs font-bold bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">Tiến độ: ${paidCount}/${assigned.length} hộ</span>
-                                    <button onclick="deleteCampaign('${c._key}')" class="text-red-500 hover:text-red-700 font-bold px-2 text-xs" title="Xóa đợt thu"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-200">
-                                <div class="bg-red-50/70 p-3 rounded-xl border border-red-100">
-                                    <p class="font-bold text-red-600 mb-2">⚠️ Chưa nộp (${unpaidHouses.length} hộ):</p>
-                                    <div class="max-h-36 overflow-y-auto space-y-1.5 pr-1">
-                                        ${unpaidHouses.map(code => {
-                                            const amt = getHouseCampaignAmount(c, code);
-                                            return `
-                                                <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-red-100 shadow-2xs">
-                                                    <span class="font-medium text-slate-800"><b>${code}</b> -${residentsMap[code] || 'Chủ hộ'} <b class="text-red-600">(${amt.toLocaleString('vi-VN')}đ)</b></span>
-                                                    <button onclick="openRecordPaymentModal('${c._key}', '${code}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-1 rounded text-[10px] transition shrink-0 ml-1">💵 Nộp tiền</button>
-                                                </div>
-                                            `;
-                                        }).join('') || '<p class="text-emerald-600 font-bold text-center py-1">🎉 100% các hộ đã hoàn thành!</p>'}
-                                    </div>
-                                </div>
-
-                                <div class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-100">
-                                    <p class="font-bold text-emerald-700 mb-2">✅ Đã nộp (${paidCount} hộ):</p>
-                                    <div class="max-h-36 overflow-y-auto space-y-1.5 pr-1">
-                                        ${campaignPayments.map(p => `
-                                            <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-emerald-100 shadow-2xs">
-                                                <div class="text-[11px]">
-                                                    <span class="font-bold text-slate-800">${p.houseCode}</span> -${residentsMap[p.houseCode] || ''} <b class="text-emerald-600">(${Number(p.amount).toLocaleString('vi-VN')}đ)</b>
-                                                    <span class="text-[9px] text-slate-400 block">${p.method === 'Tiền mặt' ? '💵 Tiền mặt' : '💳 Chuyển khoản'} \vert{} ${p.date || ''}</span>
-                                                </div>
-                                                <button onclick="cancelHousePayment('${c._key}', '${p.houseCode}')" title="Hủy ghi nhận nộp tiền" class="text-slate-400 hover:text-red-500 font-bold text-xs p-1 ml-1"><i class="fas fa-undo"></i></button>
-                                            </div>
-                                        `).join('') || '<p class="text-slate-400 text-center py-1">Chưa có hộ nào nộp</p>';}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('') || '<p class="text-xs text-slate-400 text-center py-4">Chưa có đợt thu nào</p>';
-
-                // Render Tin tức & Văn bản Quản trị
-                document.getElementById('admin-news-docs-list').innerHTML = newsList.map(item => `
-                    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex justify-between items-start">
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-2">
-                                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${item.category === 'Văn bản pháp luật' ? 'bg-purple-100 text-purple-700' : 'bg-teal-100 text-teal-700'}">${item.category}</span>
-                                <span class="text-[10px] text-slate-400">${item.date}</span>
-                            </div>
-                            <h4 class="font-bold text-xs text-slate-800">${item.title}</h4>
-                            <p class="text-xs text-slate-600 line-clamp-2">${item.content}</p>
-                            ${item.link ? `<a href="${item.link}" target="_blank" class="text-[10px] text-blue-600 font-bold underline"><i class="fas fa-paperclip"></i> Xem liên kết gốc</a>` : ''}
-                        </div>
-                        <button onclick="deleteNewsDoc('${item._key}')" class="text-red-400 hover:text-red-600 ml-2 text-xs font-bold"><i class="fas fa-trash"></i></button>
-                    </div>
-                `).join('') || '<p class="text-xs text-slate-400 text-center py-4">Chưa có bài viết hay văn bản nào được đăng</p>';
-
-                // Render Mẫu Phiếu Chi
-                document.getElementById('expense-vouchers-list').innerHTML = expenses.map(e => `
-                    <div class="border border-red-100 bg-red-50/50 p-4 rounded-2xl flex justify-between items-center">
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-2">
-                                <span class="font-mono text-xs font-bold bg-red-600 text-white px-2 py-0.5 rounded">${e.code || 'PC'}</span>
-                                <span class="text-xs font-bold text-slate-500">[${e.category}]</span>
-                                <span class="text-xs text-slate-400">${e.date}</span>
-                            </div>
-                            <h4 class="font-bold text-slate-800 text-xs">${e.title}</h4>
-                            <p class="text-[11px] text-slate-600">Người nhận tiền: <b>${e.receiver}</b> ${e.note ? `| Ghi chú: ${e.note}` : ''}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-base font-extrabold text-red-600">-${Number(e.amount).toLocaleString('vi-VN')} đ</p>
-                            <button onclick="deleteExpense('${e._key}')" class="text-xs text-red-400 hover:text-red-600 font-semibold mt-1"><i class="fas fa-trash mr-1"></i>Xóa</button>
-                        </div>
-                    </div>
-                `).join('') || '<p class="text-xs text-slate-400 text-center py-4">Chưa có phiếu chi nào</p>';
-
-                // Render Loa phường
-                document.getElementById('announcements-list').innerHTML = annList.map(a => `
-                    <div class="p-3 rounded-xl border ${a.urgent ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'} space-y-1">
-                        <div class="flex justify-between items-center">
-                            <h4 class="font-bold text-xs ${a.urgent ? 'text-red-600' : 'text-slate-800'}">${a.title}</h4>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] text-slate-400">${a.date}</span>
-                                <button onclick="deleteAnnouncement('${a._key}')" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-600">${a.content}</p>
-                    </div>
-                `).join('') || '<p class="text-xs text-slate-400 text-center py-4">Chưa có thông báo</p>';
-
-                // Render Cán bộ
-                const adminList = Object.entries(dbData.admin_users || {}).map(([key, val]) => ({ _key: key, ...val }));
-                document.getElementById('admin-users-tbody').innerHTML = adminList.map(u => `
-                    <tr>
-                        <td class="p-2 font-bold text-slate-800">${u.name}</td>
-                        <td class="p-2 text-emerald-600 font-mono">${u.username}</td>
-                        <td class="p-2"><div class="flex flex-wrap gap-1">${(u.permissions || []).map(p => `<span class="bg-slate-200 text-slate-700 text-[9px] px-1.5 py-0.5 rounded">${p}</span>`).join('')}</div></td>
-                        <td class="p-2 text-right"><button onclick="deleteAdminUser('${u._key}')" class="text-red-500 font-bold"><i class="fas fa-trash"></i></button></td>
-                    </tr>
-                `).join('') || '<tr><td colspan="4" class="p-2 text-slate-400 text-center">Chưa có cán bộ phụ thuộc</td></tr>';
-
-            } catch (err) { console.error("Lỗi Render Admin:", err); }
+            alert("📢 Đã phát thông báo loa phường!");
         }
 
-        function switchView(viewName) {
-            const views = ['overview', 'residents', 'finances', 'news_docs', 'announcements', 'sos'];
-            views.forEach(v => {
-                const el = document.getElementById(`view-${v}`);
-                const nav = document.getElementById(`nav-${v}`);
+        function handleCreateNews(e) {
+            e.preventDefault();
+            const news = {
+                title: document.getElementById('news-title').value.trim(),
+                category: document.getElementById('news-category').value,
+                content: document.getElementById('news-content').value.trim(),
+                link: document.getElementById('news-link').value.trim() || null,
+                date: new Date().toLocaleDateString('vi-VN')
+            };
+
+            dbRef.child('news_docs').push(news);
+            e.target.reset();
+            alert("🎉 Đã đăng tin tức / chỉ thị thành công!");
+        }
+
+        function renderNewsAnnAdmin() {
+            const annList = Object.entries(dbData.announcements || {}).map(([k, v]) => ({ _key: k, type: 'ANN', ...v }));
+            const newsList = Object.entries(dbData.news_docs || {}).map(([k, v]) => ({ _key: k, type: 'NEWS', ...v }));
+            const combined = [...annList, ...newsList].reverse();
+
+            const container = document.getElementById('admin-news-ann-list');
+            if (combined.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">Chưa có thông báo hoặc tin tức nào.</p>`;
+                return;
+            }
+
+            container.innerHTML = combined.map(item => `
+                <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-start text-xs">
+                    <div>
+                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${item.type === 'ANN' ? 'bg-red-100 text-red-700' : 'bg-purple-100 text-purple-700'}">
+                            ${item.type === 'ANN' ? '📢 Loa Phường' : '📰 Tin Tức'}
+                        </span>
+                        <h5 class="font-bold text-slate-800 mt-1">${item.title}</h5>
+                        <p class="text-xs text-slate-600 line-clamp-1">${item.content}</p>
+                    </div>
+                    <button onclick="deleteNewsOrAnn('${item.type}', '${item._key}')" class="text-red-500 hover:underline text-[11px] shrink-0"><i class="fas fa-trash"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function deleteNewsOrAnn(type, key) {
+            if (confirm("Xóa bài đăng này?")) {
+                const path = type === 'ANN' ? 'announcements/' : 'news_docs/';
+                dbRef.child(path + key).remove();
+            }
+        }
+
+        // 6. TẠM TRÚ / TẠM VẮNG & PHẢN ÁNH
+        function renderTTTVAdmin() {
+            const list = Object.entries(dbData.tamtru_tamvang || {}).reverse();
+            const container = document.getElementById('tttv-admin-list');
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">Chưa có khai báo tạm trú / tạm vắng nào.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(([key, t]) => `
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 text-xs">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">${t.type}</span>
+                        <span class="text-[10px] text-slate-400">${t.createdAt || ''}</span>
+                    </div>
+                    <div class="font-bold text-slate-800">${t.name} (Hộ: ${t.houseCode}) - CCCD: ${t.cccd} - SĐT: ${t.phone}</div>
+                    <div class="text-slate-600">Nơi đi/đến: <b>${t.location}</b> | Từ ${t.startDate} đến ${t.endDate}</div>
+                    <div class="text-slate-500">Lý do: <i>${t.reason}</i></div>
+                    <div class="flex justify-between items-center pt-1 border-t">
+                        <span class="font-bold text-[10px] ${t.status === 'Đã duyệt' ? 'text-emerald-600' : 'text-amber-600'}">Trạng thái: ${t.status}</span>
+                        <div class="space-x-1">
+                            <button onclick="updateTTTVStatus('${key}', 'Đã duyệt')" class="bg-emerald-600 text-white font-bold px-2 py-1 rounded text-[10px]">Duyệt</button>
+                            <button onclick="deleteTTTV('${key}')" class="bg-red-100 text-red-600 font-bold px-2 py-1 rounded text-[10px]">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateTTTVStatus(key, status) {
+            dbRef.child('tamtru_tamvang/' + key + '/status').set(status);
+        }
+        function deleteTTTV(key) {
+            if (confirm("Xóa đơn này?")) dbRef.child('tamtru_tamvang/' + key).remove();
+        }
+
+        function renderFeedbacksAdmin() {
+            const list = Object.entries(dbData.feedbacks || {}).reverse();
+            const container = document.getElementById('feedbacks-admin-list');
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">Chưa có phản ánh nào từ người dân.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(([key, f]) => `
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 text-xs">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-slate-800">${f.name} - SĐT: ${f.phone}</span>
+                        <span class="text-[10px] text-slate-400">${f.time || ''}</span>
+                    </div>
+                    <p class="text-slate-700 bg-white p-2 rounded-lg border">${f.content}</p>
+                    ${f.image ? `<a href="${f.image}" target="_blank" class="text-blue-600 text-[10px] underline"><i class="fas fa-image"></i> Xem hình ảnh đính kèm</a>` : ''}
+                    <div class="flex justify-between items-center pt-1 border-t">
+                        <span class="font-bold text-[10px] ${f.status === 'Đã xử lý' ? 'text-emerald-600' : 'text-amber-600'}">Trạng thái: ${f.status}</span>
+                        <div class="space-x-1">
+                            <button onclick="updateFeedbackStatus('${key}', 'Đã xử lý')" class="bg-emerald-600 text-white font-bold px-2 py-1 rounded text-[10px]">Đánh dấu Đã Xử Lý</button>
+                            <button onclick="deleteFeedback('${key}')" class="bg-red-100 text-red-600 font-bold px-2 py-1 rounded text-[10px]">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateFeedbackStatus(key, status) {
+            dbRef.child('feedbacks/' + key + '/status').set(status);
+        }
+        function deleteFeedback(key) {
+            if (confirm("Xóa phản ánh này?")) dbRef.child('feedbacks/' + key).remove();
+        }
+
+        // CHUYỂN TAB TRÊN TRANG ADMIN
+        function switchAdminTab(tabName) {
+            const tabs = ['residents', 'campaigns', 'finances', 'announcements', 'tttv', 'feedbacks'];
+            tabs.forEach(t => {
+                const el = document.getElementById(`admin-view-${t}`);
+                const btn = document.getElementById(`tab-btn-${t}`);
                 if (el) el.classList.add('hidden');
-                if (nav) nav.classList.remove('active-menu');
+                if (btn) {
+                    btn.classList.remove('active');
+                    btn.classList.add('text-slate-600');
+                }
             });
 
-            const targetEl = document.getElementById(`view-${viewName}`);
-            const targetNav = document.getElementById(`nav-${viewName}`);
+            const targetEl = document.getElementById(`admin-view-${tabName}`);
+            const targetBtn = document.getElementById(`tab-btn-${tabName}`);
             if (targetEl) targetEl.classList.remove('hidden');
-            if (targetNav) targetNav.classList.add('active-menu');
-
-            const titles = {
-                overview: 'Bảng Điều Khiển Trung Tâm',
-                residents: 'Quản Lý Nhân Khẩu & Diện Tích Ruộng',
-                finances: 'Sổ Thu - Chi Quỹ Xóm & Cấu Hình Chuyển Khoản',
-                news_docs: 'Quản Lý Tin Tức & Văn Bản Pháp Luật',
-                announcements: 'Trạm Phát Loa Phường & Thông Báo',
-                sos: 'Tiếp Nhận Phản Ánh & SOS Khẩn Cấp'
-            };
-            const titleElem = document.getElementById('main-view-title');
-            if (titleElem) titleElem.innerText = titles[viewName] || 'Quản Lý Xóm Số';
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+                targetBtn.classList.remove('text-slate-600');
+            }
         }
-
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
     </script>
 </body>
 </html>
