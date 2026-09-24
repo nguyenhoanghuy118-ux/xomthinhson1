@@ -234,13 +234,13 @@
   <script>
     // --- CẤU HÌNH FIREBASE REALTIME DATABASE ---
     const firebaseConfig = {
-      apiKey: "AIzaSyYourApiKeyHere",
-      authDomain: "xomso-demo.firebaseapp.com",
-      databaseURL: "https://xomso-demo-default-rtdb.firebaseio.com",
-      projectId: "xomso-demo",
-      storageBucket: "xomso-demo.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:abc123def456"
+      apiKey: "AIzaSyAC7mztrDAHldUlUz7eSp0eBNeLLoA_ISQ",
+      authDomain: "xom-so.firebaseapp.com",
+      databaseURL: "https://xom-so-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "xom-so",
+      storageBucket: "xom-so.firebasestorage.app",
+      messagingSenderId: "589384780300",
+      appId: "1:589384780300:web:3927d2d260d9d1bf683c29"
     };
 
     if (!firebase.apps.length) {
@@ -412,7 +412,6 @@
         const accountName = encodeURIComponent(bank.accountName || '');
         const cleanMemo = encodeURIComponent(memo);
 
-        // Tạo đường dẫn mã QR động qua VietQR API
         const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${amount}&addInfo=${cleanMemo}&accountName=${accountName}`;
 
         const qrImg = document.getElementById('vietqr-img');
