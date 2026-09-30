@@ -19,7 +19,7 @@
 </head>
 <body class="text-slate-100 min-h-screen">
 
-    <!-- MODAL ĐĂNG NHẬP BAN CÁN BỘ CŨ -->
+    <!-- MODAL ĐĂNG NHẬP BAN CÁN BỘ -->
     <div id="admin-login-overlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
         <div class="bg-white text-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 text-center space-y-4">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-inner">
@@ -76,7 +76,7 @@
                     <i class="fas fa-passport w-4"></i> Tạm Trú / Tạm Vắng
                 </button>
                 <button onclick="switchAdminNav('feedbacks')" id="nav-feedbacks" class="admin-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition text-slate-400 hover:bg-slate-800">
-                    <i class="fas fa-comment-dots w-4"></i> Ý Kiến Phản Ánh
+                    <i class="fas fa-comment-dots w-4"></i> Tiếp Nhận Phản Ánh
                 </button>
                 <button onclick="switchAdminNav('expenses')" id="nav-expenses" class="admin-nav-item w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition text-slate-400 hover:bg-slate-800">
                     <i class="fas fa-file-invoice-dollar w-4"></i> Quản Lý Sổ Chi
@@ -96,11 +96,12 @@
         <!-- NỘI DUNG ADMIN MAIN -->
         <main class="flex-1 p-6 space-y-6 overflow-x-hidden">
 
+            <!-- TAB 1: HỘ DÂN -->
             <section id="section-residents" class="space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800">
                     <div>
                         <h2 class="text-base font-bold text-white"><i class="fas fa-address-book text-emerald-500 mr-2"></i> Danh Sách Hộ Gia Đình Xóm Thịnh Sơn 1</h2>
-                        <p class="text-xs text-slate-400">Quản lý đầy đủ CCCD, Số nhân khẩu, SĐT, Địa chỉ & Diện tích đất canh tác</p>
+                        <p class="text-xs text-slate-400">Quản lý CCCD, Số nhân khẩu, SĐT & Diện tích đất canh tác</p>
                     </div>
                     <button onclick="openResidentModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-md">
                         <i class="fas fa-plus"></i> Thêm Hộ Dân Mới
@@ -115,7 +116,7 @@
                                 <th class="p-3">Số CCCD</th>
                                 <th class="p-3">Số Điện Thoại</th>
                                 <th class="p-3">Nhân Khẩu</th>
-                                <th class="p-3">Địa Chỉ / Xóm</th>
+                                <th class="p-3">Địa Chỉ</th>
                                 <th class="p-3 text-emerald-400">Diện Tích Ruộng</th>
                                 <th class="p-3 text-right">Thao Tác</th>
                             </tr>
@@ -125,6 +126,7 @@
                 </div>
             </section>
 
+            <!-- TAB 2: ĐỢT THU QUỸ -->
             <section id="section-campaigns" class="hidden space-y-4">
                 <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
                     <h2 class="text-base font-bold text-white"><i class="fas fa-hand-holding-dollar text-emerald-500 mr-2"></i> Tạo Đợt Thu Quỹ / Phí Thủy Lợi Ruộng</h2>
@@ -135,6 +137,7 @@
                 <div id="admin-campaigns-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </section>
 
+            <!-- TAB 3: THÔNG BÁO -->
             <section id="section-announcements" class="hidden space-y-4">
                 <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
                     <h2 class="text-base font-bold text-white mb-2"><i class="fas fa-bullhorn text-amber-500 mr-2"></i> Phát Loa Phường & Thông Báo Khẩn</h2>
@@ -150,6 +153,7 @@
                 </div>
             </section>
 
+            <!-- TAB 4: TẠM TRÚ TẠM VẮNG -->
             <section id="section-tttv" class="hidden space-y-4">
                 <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
                     <h2 class="text-base font-bold text-white mb-2"><i class="fas fa-passport text-purple-500 mr-2"></i> Danh Sách Khai Báo Tạm Trú / Tạm Vắng</h2>
@@ -157,13 +161,15 @@
                 </div>
             </section>
 
+            <!-- TAB 5: PHẢN ÁNH & Ý KIẾN (ĐÃ NÂNG CẤP THÊM TRẠNG THÁI & NGƯỜI XỬ LÝ) -->
             <section id="section-feedbacks" class="hidden space-y-4">
                 <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
-                    <h2 class="text-base font-bold text-white mb-2"><i class="fas fa-comment-dots text-red-500 mr-2"></i> Tiếp Nhận Phản Ánh & Yêu Cầu SOS</h2>
-                    <div id="admin-feedbacks-list" class="space-y-2 text-xs"></div>
+                    <h2 class="text-base font-bold text-white mb-2"><i class="fas fa-comment-dots text-red-500 mr-2"></i> Tiếp Nhận Phản Ánh & SOS (Phân Công Xử Lý)</h2>
+                    <div id="admin-feedbacks-list" class="space-y-3 text-xs"></div>
                 </div>
             </section>
 
+            <!-- TAB 6: SỔ CHI TIÊU -->
             <section id="section-expenses" class="hidden space-y-4">
                 <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
                     <h2 class="text-base font-bold text-white mb-2"><i class="fas fa-file-invoice-dollar text-blue-500 mr-2"></i> Quản Lý Sổ Chi Tiêu Quỹ</h2>
@@ -177,12 +183,13 @@
                 </div>
             </section>
 
+            <!-- TAB 7: CẤU HÌNH NGÂN HÀNG -->
             <section id="section-settings" class="hidden space-y-4">
                 <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 max-w-lg">
                     <h2 class="text-base font-bold text-white mb-3"><i class="fas fa-qrcode text-emerald-500 mr-2"></i> Cấu Hình Ngân Hàng Nhận Tiền VietQR</h2>
                     <form onsubmit="handleSaveBank(event)" class="space-y-3 text-xs">
                         <div>
-                            <label class="block text-slate-400 mb-1">Mã Ngân Hàng (VD: MB, VCB, BIDV, TCB...)</label>
+                            <label class="block text-slate-400 mb-1">Mã Ngân Hàng (MB, VCB, BIDV, TCB...)</label>
                             <input type="text" id="bank-id" required placeholder="MB" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold">
                         </div>
                         <div>
@@ -251,7 +258,6 @@
                 <div class="bg-emerald-950/40 border border-emerald-800/60 p-3 rounded-2xl">
                     <label class="block text-emerald-400 font-bold mb-1">🌾 Diện Tích Đất Ruộng Canh Tác (m²)</label>
                     <input type="number" id="res-land" placeholder="Nhập m² (VD: 1000 m² = 2 sào Trung Bộ)" class="w-full bg-slate-900 border border-emerald-700 rounded-xl px-3 py-2 font-bold text-emerald-300">
-                    <p class="text-[10px] text-slate-400 mt-1">Dùng để tự tính Phí Thủy Lợi Ruộng cho các hộ làm nông nghiệp ($500m^2 = 1\text{ sào}$).</p>
                 </div>
 
                 <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
@@ -269,7 +275,7 @@
             <form onsubmit="handleSaveCampaign(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block text-slate-400 mb-1">Tên Đợt Thu *</label>
-                    <input type="text" id="camp-title" required placeholder="Quỹ Xóm 2026 hoặc Phí Thủy Lợi Vụ Xuân" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2">
+                    <input type="text" id="camp-title" required placeholder="Quỹ Xóm 2026..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2">
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Loại Hình Thu *</label>
@@ -284,7 +290,7 @@
                 </div>
                 <div id="box-amount-land" class="hidden">
                     <label class="block text-amber-400 mb-1">Đơn giá Thủy Lợi trên 1 m² ruộng (đ/m²) *</label>
-                    <input type="number" id="camp-rate-m2" placeholder="50 (VD: 50đ/m² = 25.000đ/sào)" class="w-full bg-slate-800 border border-amber-600 rounded-xl px-3 py-2 font-bold">
+                    <input type="number" id="camp-rate-m2" placeholder="50" class="w-full bg-slate-800 border border-amber-600 rounded-xl px-3 py-2 font-bold">
                 </div>
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="closeCampaignModal()" class="bg-slate-800 text-slate-300 font-bold px-4 py-2 rounded-xl">Hủy</button>
@@ -294,7 +300,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT CHÍNH XÁC & HOÀN THIỆN -->
+    <!-- SCRIPT CHÍNH XÁC & ĐÃ SỬA -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAC7mztrDAHldUlUz7eSp0eBNeLLoA_ISQ",
@@ -311,7 +317,6 @@
 
         let dbData = { residents: {}, announcements: {}, feedbacks: {}, settings: {}, campaigns: {}, payments: {}, expenses: {}, news_docs: {}, tamtru_tamvang: {} };
 
-        // Lắng nghe thay đổi dữ liệu
         dbRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) dbData = data;
@@ -352,7 +357,7 @@
         }
 
         function renderAdminView() {
-            // Render Hộ dân
+            // 1. Render Hộ Dân
             const resEntries = Object.entries(dbData.residents || {});
             const tbody = document.getElementById('admin-residents-tbody');
             if (resEntries.length === 0) {
@@ -375,7 +380,7 @@
                 `).join('');
             }
 
-            // Render Đợt thu
+            // 2. Render Đợt thu
             const campList = Object.entries(dbData.campaigns || {});
             const campContainer = document.getElementById('admin-campaigns-list');
             campContainer.innerHTML = campList.length === 0 ? '<p class="text-slate-400 text-xs">Chưa có đợt thu nào.</p>' : campList.map(([key, c]) => `
@@ -386,7 +391,7 @@
                 </div>
             `).join('');
 
-            // Render Tạm trú Tạm vắng
+            // 3. Render Tạm Trú Tạm Vắng
             const tttvList = Object.entries(dbData.tamtru_tamvang || {}).reverse();
             const tttvContainer = document.getElementById('admin-tttv-list');
             tttvContainer.innerHTML = tttvList.length === 0 ? '<p class="text-slate-400 text-xs">Chưa có khai báo.</p>' : tttvList.map(([key, t]) => `
@@ -395,24 +400,59 @@
                         <span class="text-[10px] font-bold px-2 py-1 rounded bg-purple-900 text-purple-300">${t.type}</span>
                         <span class="text-xs text-slate-400">${t.createdAt}</span>
                     </div>
-                    <h4 class="font-bold text-white mt-2">${t.name} <span class="text-emerald-400 text-[10px]">(Mã Hộ: ${t.houseCode})</span></h4>
+                    <h4 class="font-bold text-white mt-2">${t.name} <span class="text-emerald-400 text-[10px]">(CCCD: ${t.cccd || '---'})</span></h4>
                     <p class="text-xs text-slate-400 mt-1">Từ <b>${t.startDate}</b> đến <b>${t.endDate}</b></p>
                     <p class="text-xs text-slate-400">Địa chỉ đến/đi: ${t.location}</p>
                     <p class="text-xs text-slate-400 mt-1 italic text-yellow-500">Lý do: ${t.reason}</p>
                 </div>
             `).join('');
 
-            // Render Phản ánh
+            // 4. Render Phản Ánh / SOS (Cập nhật giao diện phân công người xử lý & trạng thái)
             const fbList = Object.entries(dbData.feedbacks || {}).reverse();
             const fbContainer = document.getElementById('admin-feedbacks-list');
-            fbContainer.innerHTML = fbList.length === 0 ? '<p class="text-slate-400 text-xs">Chưa có phản ánh.</p>' : fbList.map(([key, f]) => `
-                <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
-                    <h4 class="font-bold text-white">${f.name} - SĐT: ${f.phone} <span class="text-[10px] bg-slate-600 px-2 py-0.5 rounded ml-2">${f.time}</span></h4>
-                    <p class="text-xs text-slate-300 mt-2 bg-slate-900 p-2 rounded-lg border border-slate-700">"${f.content}"</p>
-                </div>
-            `).join('');
+            fbContainer.innerHTML = fbList.length === 0 ? '<p class="text-slate-400 text-xs">Chưa có phản ánh nào.</p>' : fbList.map(([key, f]) => {
+                const currentStatus = f.status || "Chờ xử lý";
+                const currentHandler = f.handler || "Xóm trưởng";
+                let statusBg = "bg-amber-900/80 text-amber-300 border-amber-700";
+                if (currentStatus === "Đang xử lý") statusBg = "bg-blue-900/80 text-blue-300 border-blue-700";
+                if (currentStatus === "Đã xử lý") statusBg = "bg-emerald-900/80 text-emerald-300 border-emerald-700";
 
-            // Render Sổ chi
+                return `
+                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-white text-sm">${f.name || 'N/A'} - SĐT: ${f.phone || 'N/A'}</h4>
+                                <p class="text-[10px] text-slate-400">CCCD: <span class="font-mono text-emerald-400">${f.cccd || '---'}</span> | Ngày gửi: ${f.time || ''}</p>
+                            </div>
+                            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full border ${statusBg}">${currentStatus}</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/80 text-xs text-slate-200">
+                            "${f.content}"
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 mb-1">Cập nhật Trạng thái</label>
+                                <select id="fb-status-${key}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                                    <option value="Chờ xử lý" ${currentStatus === 'Chờ xử lý' ? 'selected' : ''}>⏳ Chờ xử lý</option>
+                                    <option value="Đang xử lý" ${currentStatus === 'Đang xử lý' ? 'selected' : ''}>🔄 Đang xử lý</option>
+                                    <option value="Đã xử lý" ${currentStatus === 'Đã xử lý' ? 'selected' : ''}>✅ Đã xử lý</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 mb-1">Cán bộ đảm nhận / Xử lý</label>
+                                <input type="text" id="fb-handler-${key}" value="${currentHandler}" placeholder="Tên cán bộ..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                            </div>
+                            <div class="flex items-end">
+                                <button onclick="updateFeedbackStatus('${key}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 rounded-lg text-xs transition">
+                                    <i class="fas fa-floppy-disk mr-1"></i> Lưu Xử Lý
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 5. Render Sổ Chi
             const expList = Object.entries(dbData.expenses || {}).reverse();
             const expContainer = document.getElementById('admin-expenses-list');
             expContainer.innerHTML = expList.length === 0 ? '<p class="text-slate-400 text-xs">Chưa có khoản chi.</p>' : expList.map(([key, e]) => `
@@ -425,7 +465,7 @@
                 </div>
             `).join('');
 
-            // Render Cấu hình Ngân hàng
+            // 6. Render VietQR Settings
             if (dbData.settings && dbData.settings.bankInfo) {
                 const b = dbData.settings.bankInfo;
                 document.getElementById('bank-id').value = b.bankId || '';
@@ -433,6 +473,18 @@
                 document.getElementById('bank-owner').value = b.accountOwner || '';
                 document.getElementById('show-finances-check').checked = dbData.settings.showFinances || false;
             }
+        }
+
+        // HÀM CẬP NHẬT TRẠNG THÁI & NGƯỜI XỬ LÝ PHẢN ÁNH
+        function updateFeedbackStatus(key) {
+            const newStatus = document.getElementById(`fb-status-${key}`).value;
+            const newHandler = document.getElementById(`fb-handler-${key}`).value.trim();
+
+            dbRef.child('feedbacks').child(key).update({
+                status: newStatus,
+                handler: newHandler || "Ban Cán Bộ"
+            });
+            alert("✅ Đã cập nhật trạng thái & cán bộ xử lý phản ánh!");
         }
 
         function openResidentModal() {
@@ -490,7 +542,7 @@
         }
 
         function deleteResident(key) {
-            if (confirm("⚠️ Bác có chắc chắn muốn xóa hộ dân này khỏi danh sách quản lý?")) {
+            if (confirm("⚠️ Bác có chắc chắn muốn xóa hộ dân này?")) {
                 dbRef.child('residents').child(key).remove();
             }
         }
@@ -504,7 +556,7 @@
             };
             const showFinances = document.getElementById('show-finances-check').checked;
             dbRef.child('settings').update({ bankInfo: bankInfo, showFinances: showFinances });
-            alert("✅ Đã cập nhật thông tin nhận tiền VietQR!");
+            alert("✅ Đã cập nhật ngân hàng VietQR!");
         }
 
         function openCampaignModal() { document.getElementById('modal-campaign').classList.remove('hidden'); }
