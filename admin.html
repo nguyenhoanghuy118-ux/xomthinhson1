@@ -19,7 +19,7 @@
 </head>
 <body class="text-slate-100 min-h-screen">
 
-    <!-- MODAL ĐĂNG NHẬP BAN CÁN BỘ CŨ (XỬ LÝ ĐĂNG NHẬP QUẢN TRỊ) -->
+    <!-- MODAL ĐĂNG NHẬP BAN CÁN BỘ CŨ -->
     <div id="admin-login-overlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
         <div class="bg-white text-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 text-center space-y-4">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-inner">
@@ -96,7 +96,6 @@
         <!-- NỘI DUNG ADMIN MAIN -->
         <main class="flex-1 p-6 space-y-6 overflow-x-hidden">
 
-            <!-- TAB 1: QUẢN LÝ HỘ DÂN (CÁC TRƯỜNG CŨ + DIỆN TÍCH RUỘNG) -->
             <section id="section-residents" class="space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800">
                     <div>
@@ -107,8 +106,6 @@
                         <i class="fas fa-plus"></i> Thêm Hộ Dân Mới
                     </button>
                 </div>
-
-                <!-- BẢNG DANH SÁCH HỘ DÂN -->
                 <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-800/80 text-slate-400 uppercase text-[10px] font-bold">
@@ -128,7 +125,6 @@
                 </div>
             </section>
 
-            <!-- TAB 2: THU QUỸ & THỦY LỢI -->
             <section id="section-campaigns" class="hidden space-y-4">
                 <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
                     <h2 class="text-base font-bold text-white"><i class="fas fa-hand-holding-dollar text-emerald-500 mr-2"></i> Tạo Đợt Thu Quỹ / Phí Thủy Lợi Ruộng</h2>
@@ -139,7 +135,6 @@
                 <div id="admin-campaigns-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </section>
 
-            <!-- TAB 3: PHÁT LOA -->
             <section id="section-announcements" class="hidden space-y-4">
                 <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
                     <h2 class="text-base font-bold text-white mb-2"><i class="fas fa-bullhorn text-amber-500 mr-2"></i> Phát Loa Phường & Thông Báo Khẩn</h2>
@@ -155,7 +150,6 @@
                 </div>
             </section>
 
-            <!-- TAB 4: TẠM TRÚ TẠM VẮNG -->
             <section id="section-tttv" class="hidden space-y-4">
                 <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
                     <h2 class="text-base font-bold text-white mb-2"><i class="fas fa-passport text-purple-500 mr-2"></i> Danh Sách Khai Báo Tạm Trú / Tạm Vắng</h2>
@@ -163,7 +157,6 @@
                 </div>
             </section>
 
-            <!-- TAB 5: PHẢN ÁNH -->
             <section id="section-feedbacks" class="hidden space-y-4">
                 <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
                     <h2 class="text-base font-bold text-white mb-2"><i class="fas fa-comment-dots text-red-500 mr-2"></i> Tiếp Nhận Phản Ánh & Yêu Cầu SOS</h2>
@@ -171,7 +164,6 @@
                 </div>
             </section>
 
-            <!-- TAB 6: SỔ CHI -->
             <section id="section-expenses" class="hidden space-y-4">
                 <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
                     <h2 class="text-base font-bold text-white mb-2"><i class="fas fa-file-invoice-dollar text-blue-500 mr-2"></i> Quản Lý Sổ Chi Tiêu Quỹ</h2>
@@ -185,7 +177,6 @@
                 </div>
             </section>
 
-            <!-- TAB 7: CAU HINH NGAN HANG -->
             <section id="section-settings" class="hidden space-y-4">
                 <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 max-w-lg">
                     <h2 class="text-base font-bold text-white mb-3"><i class="fas fa-qrcode text-emerald-500 mr-2"></i> Cấu Hình Ngân Hàng Nhận Tiền VietQR</h2>
@@ -216,7 +207,7 @@
         </main>
     </div>
 
-    <!-- MODAL THÊM / SỬA HỘ DÂN (GIỮ TRỌN VẸN CÁC TRƯỜNG CŨ + THÊM RUỘNG) -->
+    <!-- MODAL THÊM / SỬA HỘ DÂN -->
     <div id="modal-resident" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-lg rounded-3xl p-5 shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -226,7 +217,6 @@
 
             <form onsubmit="handleSaveResident(event)" class="space-y-3 text-xs">
                 <input type="hidden" id="res-edit-key">
-                
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-slate-400 font-bold mb-1">Mã Hộ *</label>
@@ -237,7 +227,6 @@
                         <input type="text" id="res-name" required placeholder="Nguyễn Văn A" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 font-bold">
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-slate-400 font-bold mb-1">Số CCCD / CMND *</label>
@@ -248,7 +237,6 @@
                         <input type="text" id="res-phone" placeholder="0987..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2">
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-slate-400 font-bold mb-1">Số Nhân Khẩu</label>
@@ -260,7 +248,6 @@
                     </div>
                 </div>
 
-                <!-- TRƯỜNG THÊM MỚI: DIỆN TÍCH RUỘNG -->
                 <div class="bg-emerald-950/40 border border-emerald-800/60 p-3 rounded-2xl">
                     <label class="block text-emerald-400 font-bold mb-1">🌾 Diện Tích Đất Ruộng Canh Tác (m²)</label>
                     <input type="number" id="res-land" placeholder="Nhập m² (VD: 1000 m² = 2 sào Trung Bộ)" class="w-full bg-slate-900 border border-emerald-700 rounded-xl px-3 py-2 font-bold text-emerald-300">
@@ -307,7 +294,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT QUẢN TRỊ -->
+    <!-- SCRIPT CHÍNH XÁC & HOÀN THIỆN -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAC7mztrDAHldUlUz7eSp0eBNeLLoA_ISQ",
@@ -324,18 +311,17 @@
 
         let dbData = { residents: {}, announcements: {}, feedbacks: {}, settings: {}, campaigns: {}, payments: {}, expenses: {}, news_docs: {}, tamtru_tamvang: {} };
 
+        // Lắng nghe thay đổi dữ liệu
         dbRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) dbData = data;
             renderAdminView();
         });
 
-        // XỬ LÝ ĐĂNG NHẬP ADMIN
         function handleAdminAuth(e) {
             e.preventDefault();
             const u = document.getElementById('admin-user').value.trim();
             const p = document.getElementById('admin-pass').value.trim();
-
             if (u === 'huynh' && p === 'xomthinhson1@37') {
                 document.getElementById('admin-login-overlay').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
@@ -355,7 +341,6 @@
             location.reload();
         }
 
-        // NAVIGATION ADMIN TABS
         function switchAdminNav(tabKey) {
             const tabs = ['residents', 'campaigns', 'announcements', 'tttv', 'feedbacks', 'expenses', 'settings'];
             tabs.forEach(t => {
@@ -366,33 +351,81 @@
             document.getElementById(`nav-${tabKey}`).classList.add('active');
         }
 
-        // RENDER GIAO DIỆN ADMIN
         function renderAdminView() {
-            // Render Hộ Dân
+            // Render Hộ dân
             const resEntries = Object.entries(dbData.residents || {});
             const tbody = document.getElementById('admin-residents-tbody');
-            
             if (resEntries.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-500">Chưa có hộ dân nào trong danh sách.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-500">Chưa có hộ dân nào.</td></tr>`;
             } else {
                 tbody.innerHTML = resEntries.map(([key, r]) => `
-                    <tr class="hover:bg-slate-800/50">
+                    <tr class="hover:bg-slate-800/50 border-b border-slate-800/50">
                         <td class="p-3 font-mono font-bold text-emerald-400">${r.code || '---'}</td>
                         <td class="p-3 font-bold text-white">${r.name || '---'}</td>
                         <td class="p-3 font-mono">${r.cccd || '---'}</td>
                         <td class="p-3">${r.phone || '---'}</td>
                         <td class="p-3">${r.members || 1} người</td>
                         <td class="p-3">${r.address || 'Xóm Thịnh Sơn 1'}</td>
-                        <td class="p-3 text-emerald-300 font-bold">${Number(r.landArea || 0).toLocaleString('vi-VN')} m² (${(Number(r.landArea || 0)/500).toFixed(1)} sào)</td>
+                        <td class="p-3 text-emerald-300 font-bold">${Number(r.landArea || 0).toLocaleString('vi-VN')} m²</td>
                         <td class="p-3 text-right space-x-1">
-                            <button onclick="editResident('${key}')" class="bg-blue-600/30 text-blue-400 border border-blue-500/30 hover:bg-blue-600 px-2 py-1 rounded-md text-[10px] font-bold"><i class="fas fa-pen"></i> Sửa</button>
-                            <button onclick="deleteResident('${key}')" class="bg-red-600/30 text-red-400 border border-red-500/30 hover:bg-red-600 px-2 py-1 rounded-md text-[10px] font-bold"><i class="fas fa-trash"></i> Xóa</button>
+                            <button onclick="editResident('${key}')" class="bg-blue-600/30 text-blue-400 hover:bg-blue-600 px-2 py-1 rounded-md text-[10px] font-bold"><i class="fas fa-pen"></i> Sửa</button>
+                            <button onclick="deleteResident('${key}')" class="bg-red-600/30 text-red-400 hover:bg-red-600 px-2 py-1 rounded-md text-[10px] font-bold"><i class="fas fa-trash"></i> Xóa</button>
                         </td>
                     </tr>
                 `).join('');
             }
 
-            // Render Cấu hình Ngân Hàng
+            // Render Đợt thu
+            const campList = Object.entries(dbData.campaigns || {});
+            const campContainer = document.getElementById('admin-campaigns-list');
+            campContainer.innerHTML = campList.length === 0 ? '<p class="text-slate-400 text-xs">Chưa có đợt thu nào.</p>' : campList.map(([key, c]) => `
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <h3 class="font-bold text-emerald-400 text-sm">${c.title}</h3>
+                    <p class="text-xs text-slate-300 mt-1">Loại: ${c.scope === 'THUY_LOI' ? 'Phí Thủy Lợi Ruộng' : 'Quỹ Xóm (Đồng đều)'}</p>
+                    <p class="text-xs text-slate-300">Tạo ngày: ${c.createdAt || '---'}</p>
+                </div>
+            `).join('');
+
+            // Render Tạm trú Tạm vắng
+            const tttvList = Object.entries(dbData.tamtru_tamvang || {}).reverse();
+            const tttvContainer = document.getElementById('admin-tttv-list');
+            tttvContainer.innerHTML = tttvList.length === 0 ? '<p class="text-slate-400 text-xs">Chưa có khai báo.</p>' : tttvList.map(([key, t]) => `
+                <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
+                    <div class="flex justify-between">
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-purple-900 text-purple-300">${t.type}</span>
+                        <span class="text-xs text-slate-400">${t.createdAt}</span>
+                    </div>
+                    <h4 class="font-bold text-white mt-2">${t.name} <span class="text-emerald-400 text-[10px]">(Mã Hộ: ${t.houseCode})</span></h4>
+                    <p class="text-xs text-slate-400 mt-1">Từ <b>${t.startDate}</b> đến <b>${t.endDate}</b></p>
+                    <p class="text-xs text-slate-400">Địa chỉ đến/đi: ${t.location}</p>
+                    <p class="text-xs text-slate-400 mt-1 italic text-yellow-500">Lý do: ${t.reason}</p>
+                </div>
+            `).join('');
+
+            // Render Phản ánh
+            const fbList = Object.entries(dbData.feedbacks || {}).reverse();
+            const fbContainer = document.getElementById('admin-feedbacks-list');
+            fbContainer.innerHTML = fbList.length === 0 ? '<p class="text-slate-400 text-xs">Chưa có phản ánh.</p>' : fbList.map(([key, f]) => `
+                <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
+                    <h4 class="font-bold text-white">${f.name} - SĐT: ${f.phone} <span class="text-[10px] bg-slate-600 px-2 py-0.5 rounded ml-2">${f.time}</span></h4>
+                    <p class="text-xs text-slate-300 mt-2 bg-slate-900 p-2 rounded-lg border border-slate-700">"${f.content}"</p>
+                </div>
+            `).join('');
+
+            // Render Sổ chi
+            const expList = Object.entries(dbData.expenses || {}).reverse();
+            const expContainer = document.getElementById('admin-expenses-list');
+            expContainer.innerHTML = expList.length === 0 ? '<p class="text-slate-400 text-xs">Chưa có khoản chi.</p>' : expList.map(([key, e]) => `
+                <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-white text-sm">${e.title} <span class="text-blue-400 text-[10px]">(${e.category})</span></p>
+                        <p class="text-xs text-slate-400">${e.date}</p>
+                    </div>
+                    <p class="font-black text-red-400">-${Number(e.amount).toLocaleString('vi-VN')} đ</p>
+                </div>
+            `).join('');
+
+            // Render Cấu hình Ngân hàng
             if (dbData.settings && dbData.settings.bankInfo) {
                 const b = dbData.settings.bankInfo;
                 document.getElementById('bank-id').value = b.bankId || '';
@@ -402,7 +435,6 @@
             }
         }
 
-        // XỬ LÝ HỘ DÂN MODAL
         function openResidentModal() {
             document.getElementById('modal-res-title').innerText = "Thêm Hộ Gia Đình Mới";
             document.getElementById('res-edit-key').value = "";
@@ -453,7 +485,6 @@
             } else {
                 dbRef.child('residents').push(obj);
             }
-
             closeResidentModal();
             alert("✅ Đã lưu thông tin hộ dân thành công!");
         }
@@ -464,7 +495,6 @@
             }
         }
 
-        // XỬ LÝ CẤU HÌNH NGÂN HÀNG VIETQR
         function handleSaveBank(e) {
             e.preventDefault();
             const bankInfo = {
@@ -473,22 +503,13 @@
                 accountOwner: document.getElementById('bank-owner').value.trim().toUpperCase()
             };
             const showFinances = document.getElementById('show-finances-check').checked;
-
-            dbRef.child('settings').update({
-                bankInfo: bankInfo,
-                showFinances: showFinances
-            });
-
+            dbRef.child('settings').update({ bankInfo: bankInfo, showFinances: showFinances });
             alert("✅ Đã cập nhật thông tin nhận tiền VietQR!");
         }
 
-        // TẠO ĐỢT THU & BÁO PHÁT LOA
-        function openCampaignModal() {
-            document.getElementById('modal-campaign').classList.remove('hidden');
-        }
-        function closeCampaignModal() {
-            document.getElementById('modal-campaign').classList.add('hidden');
-        }
+        function openCampaignModal() { document.getElementById('modal-campaign').classList.remove('hidden'); }
+        function closeCampaignModal() { document.getElementById('modal-campaign').classList.add('hidden'); }
+        
         function toggleCampaignMode() {
             const scope = document.getElementById('camp-scope').value;
             if (scope === 'THUY_LOI') {
@@ -530,7 +551,6 @@
                 houseAmounts: houseAmounts,
                 createdAt: new Date().toLocaleDateString('vi-VN')
             });
-
             closeCampaignModal();
             alert("✅ Đã tạo đợt thu thành công!");
         }
