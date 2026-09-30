@@ -21,7 +21,6 @@
 </head>
 <body class="text-slate-800 pb-16">
 
-    <!-- NAV BAR TRUYỀN THỐNG -->
     <header class="bg-emerald-700 text-white sticky top-0 z-50 shadow-md">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-2.5">
@@ -39,7 +38,6 @@
         </div>
     </header>
 
-    <!-- THÔNG BÁO KHẨN -->
     <div id="urgent-announcement-box" class="hidden bg-red-600 text-white px-4 py-2 text-xs font-semibold shadow-inner">
         <div class="max-w-4xl mx-auto flex items-center gap-2">
             <i class="fas fa-bell-ring animate-bounce"></i>
@@ -48,10 +46,7 @@
         </div>
     </div>
 
-    <!-- MAIN CONTAINER -->
     <main class="max-w-4xl mx-auto px-4 mt-4 space-y-5">
-
-        <!-- KHU VỰC TRA CỨU HỘ DÂN BẰNG CCCD -->
         <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 space-y-4">
             
             <div id="login-form-box" class="space-y-3">
@@ -70,17 +65,16 @@
                         <i class="fas fa-address-card absolute left-3.5 top-3 text-slate-400 text-xs"></i>
                         <input type="text" id="resident-cccd-input" required placeholder="Nhập số CCCD, Mã hộ (DL-TS1-...) hoặc Số điện thoại" class="w-full border border-slate-300 rounded-2xl pl-9 pr-3 py-2.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                     </div>
-                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 py-2.5 rounded-2xl shadow-md transition shrink-0 flex items-center justify-center gap-2">
+                    <button id="btn-login" type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 py-2.5 rounded-2xl shadow-md transition shrink-0 flex items-center justify-center gap-2">
                         <i class="fas fa-search"></i> Tra Cứu
                     </button>
                 </form>
 
                 <p id="login-error" class="hidden text-xs text-red-600 font-bold bg-red-50 p-2.5 rounded-xl border border-red-200">
-                    <i class="fas fa-exclamation-circle mr-1"></i> Không tìm thấy số CCCD này trong dữ liệu xóm. Vui lòng liên hệ Xóm trưởng.
+                    <i class="fas fa-exclamation-circle mr-1"></i> Không tìm thấy thông tin này trong dữ liệu xóm.
                 </p>
             </div>
 
-            <!-- KẾT QUẢ THÔNG TIN HỘ DÂN GIỮ NGUYÊN TRƯỜNG CŨ + THÊM RUỘNG -->
             <div id="household-result-box" class="hidden bg-emerald-50/80 border border-emerald-200/90 rounded-2xl p-4 space-y-4">
                 <div class="flex justify-between items-start border-b border-emerald-200/80 pb-3">
                     <div>
@@ -94,7 +88,6 @@
                     </button>
                 </div>
 
-                <!-- CHI TIẾT NHÂN KHẨU & DIỆN TÍCH RUỘNG -->
                 <div class="grid grid-cols-3 gap-2 bg-white p-3 rounded-xl border border-emerald-100 shadow-2xs text-center">
                     <div>
                         <p class="text-[10px] font-bold uppercase text-slate-400">Số nhân khẩu</p>
@@ -110,7 +103,6 @@
                     </div>
                 </div>
 
-                <!-- CÁC KHOẢN NỘP VÀ MÃ VIETQR -->
                 <div>
                     <h4 class="font-bold text-xs text-slate-800 mb-2 flex items-center gap-1.5">
                         <i class="fas fa-hand-holding-dollar text-emerald-600"></i> Các khoản thu & Phí Thủy Lợi cần nộp:
@@ -120,7 +112,6 @@
             </div>
         </section>
 
-        <!-- KHU VỰC CÁC TAB CÔNG KHAI -->
         <section class="space-y-4">
             <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs font-semibold">
                 <button onclick="switchTab('announcements')" id="tab-announcements" class="tab-btn active px-4 py-2 rounded-xl shrink-0 transition">
@@ -158,7 +149,7 @@
                         <label class="block font-semibold text-slate-600 mb-1">Loại Khai Báo *</label>
                         <select id="tttv-type" class="w-full border rounded-xl px-3 py-2 font-bold text-purple-700">
                             <option value="Tạm Trú">🏠 Đăng ký Tạm Trú (Người nơi khác đến ở)</option>
-                            <option value="Tạm Vắng">✈️ Đăng ký Tạm Vắng (Công dân xóm đi xa)</option>
+                            <option value="Tạm Vắng">✈️ Đăng ký Tạm Vắng (Công dân đi xa)</option>
                         </select>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
@@ -199,9 +190,7 @@
                         <label class="block font-semibold text-slate-600 mb-1">Lý do *</label>
                         <textarea id="tttv-reason" required rows="2" placeholder="Lý do đăng ký..." class="w-full border rounded-xl p-2.5"></textarea>
                     </div>
-                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition">
-                        Gửi Khai Báo
-                    </button>
+                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl transition">Gửi Khai Báo</button>
                 </form>
             </div>
 
@@ -225,9 +214,7 @@
                         <label class="block font-semibold text-slate-600 mb-1">Nội dung phản ánh *</label>
                         <textarea id="fb-content" required rows="3" placeholder="Mô tả sự cố..." class="w-full border rounded-xl p-2.5"></textarea>
                     </div>
-                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition">
-                        Gửi Phản Ánh
-                    </button>
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition">Gửi Phản Ánh</button>
                 </form>
             </div>
 
@@ -241,7 +228,6 @@
 
     </main>
 
-    <!-- MODAL VIETQR -->
     <div id="vietqr-modal" class="hidden fixed inset-0 bg-slate-900/70 flex items-center justify-center p-4 z-50">
         <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4 text-center">
             <div class="flex justify-between items-center border-b pb-2">
@@ -262,7 +248,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT XỬ LÝ -->
+    <!-- SCRIPT CHÍNH XÁC & TỐI ƯU -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAC7mztrDAHldUlUz7eSp0eBNeLLoA_ISQ",
@@ -277,50 +263,63 @@
         firebase.initializeApp(firebaseConfig);
         const dbRef = firebase.database().ref('xomso_data');
 
-        let dbData = { residents: {}, announcements: {}, feedbacks: {}, settings: {}, campaigns: {}, payments: {}, expenses: {}, news_docs: {} };
+        let dbData = { settings: {}, campaigns: {}, payments: {}, expenses: {}, announcements: {}, news_docs: {} };
         let currentResident = null;
 
-        dbRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) dbData = data;
-            renderPublicContent();
-            checkSavedResidentSession();
+        // TỐI ƯU HÓA: Chỉ listen các dữ liệu công khai (Không tải list Hộ Dân toàn xóm)
+        ['settings', 'campaigns', 'payments', 'expenses', 'announcements', 'news_docs'].forEach(path => {
+            dbRef.child(path).on('value', snap => {
+                dbData[path] = snap.val() || {};
+                renderPublicContent();
+                if (currentResident) renderResidentData(currentResident);
+            });
         });
 
-        function checkSavedResidentSession() {
+        window.onload = () => {
             const savedCccd = localStorage.getItem('xomso_resident_cccd');
             if (savedCccd) findAndLoginResident(savedCccd);
         }
 
         function handleResidentLogin(e) {
             e.preventDefault();
-            const inputVal = document.getElementById('resident-cccd-input').value.trim().toLowerCase();
-            findAndLoginResident(inputVal);
+            const btn = document.getElementById('btn-login');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
+            const inputVal = document.getElementById('resident-cccd-input').value.trim();
+            findAndLoginResident(inputVal, () => {
+                btn.innerHTML = '<i class="fas fa-search"></i> Tra Cứu';
+            });
         }
 
-        function findAndLoginResident(searchKey) {
+        function findAndLoginResident(searchKey, callback) {
             if (!searchKey) return;
             const errEl = document.getElementById('login-error');
             const keyLower = searchKey.toLowerCase();
 
-            const resEntries = Object.values(dbData.residents || {});
-            const found = resEntries.find(r => 
-                (r.cccd && r.cccd.toLowerCase() === keyLower) ||
-                (r.code && r.code.toLowerCase() === keyLower) ||
-                (r.phone && r.phone.toLowerCase() === keyLower)
-            );
+            // Fetch (get) dữ liệu hộ dân một lần duy nhất thay vì lắng nghe realtime (.on)
+            dbRef.child('residents').once('value').then(snapshot => {
+                const residents = snapshot.val() || {};
+                const resEntries = Object.values(residents);
+                const found = resEntries.find(r => 
+                    (r.cccd && r.cccd.toLowerCase() === keyLower) ||
+                    (r.code && r.code.toLowerCase() === keyLower) ||
+                    (r.phone && r.phone.toLowerCase() === keyLower)
+                );
 
-            if (found) {
-                errEl.classList.add('hidden');
-                currentResident = found;
-                if (found.cccd) localStorage.setItem('xomso_resident_cccd', found.cccd);
-                document.getElementById('login-form-box').classList.add('hidden');
-                renderResidentData(found);
-            } else {
-                errEl.classList.remove('hidden');
-                document.getElementById('household-result-box').classList.add('hidden');
-                document.getElementById('login-form-box').classList.remove('hidden');
-            }
+                if (found) {
+                    errEl.classList.add('hidden');
+                    currentResident = found;
+                    if (found.cccd) localStorage.setItem('xomso_resident_cccd', found.cccd);
+                    document.getElementById('login-form-box').classList.add('hidden');
+                    renderResidentData(found);
+                } else {
+                    errEl.classList.remove('hidden');
+                    document.getElementById('household-result-box').classList.add('hidden');
+                    document.getElementById('login-form-box').classList.remove('hidden');
+                }
+                if(callback) callback();
+            }).catch(e => {
+                if(callback) callback();
+            });
         }
 
         function renderResidentData(r) {
@@ -427,7 +426,7 @@
 
             const annContainer = document.getElementById('announcements-public-list');
             annContainer.innerHTML = anns.length === 0 ? `<p class="text-xs text-slate-400 py-4 text-center">Chưa có thông báo.</p>` : anns.map(a => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 space-y-1.5">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 space-y-1.5 shadow-sm">
                     <div class="flex justify-between items-center text-[10px] text-slate-400">
                         <span class="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">📢 Loa Phường</span>
                         <span>${a.date || ''}</span>
@@ -485,7 +484,7 @@
                 createdAt: new Date().toLocaleDateString('vi-VN')
             });
             e.target.reset();
-            alert("✅ Đã gửi khai báo tạm trú / tạm vắng!");
+            alert("✅ Đã gửi khai báo tạm trú / tạm vắng thành công!");
         }
 
         function handleFeedbackSubmit(e) {
@@ -498,7 +497,7 @@
                 time: new Date().toLocaleDateString('vi-VN')
             });
             e.target.reset();
-            alert("✅ Đã gửi phản ánh tới xóm!");
+            alert("✅ Đã gửi phản ánh tới Ban Cán Bộ xóm thành công!");
         }
 
         function switchTab(tabName) {
